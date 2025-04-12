@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "workspaces": [
+      "apps/*",
+      "packages/*"
+    ],
+    "scripts": {
+      "dev:web": "yarn workspace web dev",
+      "dev:api": "yarn workspace api dev",
+      "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
+    },
+    "devDependencies": {
+      "concurrently": "^8.0.0"
+    }
+  }
