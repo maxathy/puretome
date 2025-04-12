@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storynest-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storynest-web
+  template:
+    metadata:
+      labels:
+        app: storynest-web
+    spec:
+      containers:
+      - name: web
+        image: storynest/web:latest
+        ports:
+        - containerPort: 5173
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storynest-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storynest-api
+  template:
+    metadata:
+      labels:
+        app: storynest-api
+    spec:
+      containers:
+      - name: api
+        image: storynest/api:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storynest-web
+spec:
+  selector:
+    app: storynest-web
+  ports:
+  - port: 80
+    targetPort: 5173
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storynest-api
+spec:
+  selector:
+    app: storynest-api
+  ports:
+  - port: 80
+    targetPort: 5000
