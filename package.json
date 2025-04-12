@@ -10,7 +10,7 @@
         "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
     },
     "devDependencies": {
-        "concurrently": "^8.0.0"
+        "concurrently": "^8.2.2"
     },
     "packageManager": "yarn@4.9.1"
 }

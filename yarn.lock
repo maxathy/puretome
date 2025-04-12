@@ -446,10 +446,10 @@ __metadata:
   resolution: "api@workspace:apps/api"
   dependencies:
     cors: "npm:^2.8.5"
-    dotenv: "npm:^16.1.4"
-    express: "npm:^4.18.2"
+    dotenv: "npm:^16.5.0"
+    express: "npm:^4.21.2"
     jsonwebtoken: "npm:^9.0.2"
-    mongoose: "npm:^7.5.0"
+    mongoose: "npm:^7.8.6"
     nodemon: "npm:^2.0.22"
   languageName: unknown
   linkType: soft
@@ -475,7 +475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"autoprefixer@npm:^10.4.14":
+"autoprefixer@npm:^10.4.21":
   version: 10.4.21
   resolution: "autoprefixer@npm:10.4.21"
   dependencies:
@@ -493,7 +493,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.5":
+"axios@npm:^1.8.4":
   version: 1.8.4
   resolution: "axios@npm:1.8.4"
   dependencies:
@@ -741,7 +741,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^8.0.0":
+"concurrently@npm:^8.2.2":
   version: 8.2.2
   resolution: "concurrently@npm:8.2.2"
   dependencies:
@@ -902,7 +902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.1.4":
+"dotenv@npm:^16.5.0":
   version: 16.5.0
   resolution: "dotenv@npm:16.5.0"
   checksum: 10c0/5bc94c919fbd955bf0ba44d33922a1e93d1078e64a1db5c30faeded1d996e7a83c55332cb8ea4fae5a9ca4d0be44cbceb95c5811e70f9f095298df09d1997dd9
@@ -1141,7 +1141,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.18.2":
+"express@npm:^4.21.2":
   version: 4.21.2
   resolution: "express@npm:4.21.2"
   dependencies:
@@ -2093,7 +2093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mongoose@npm:^7.5.0":
+"mongoose@npm:^7.8.6":
   version: 7.8.6
   resolution: "mongoose@npm:7.8.6"
   dependencies:
@@ -2431,7 +2431,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.23, postcss@npm:^8.4.27, postcss@npm:^8.4.47":
+"postcss@npm:^8.4.27, postcss@npm:^8.4.47, postcss@npm:^8.5.3":
   version: 8.5.3
   resolution: "postcss@npm:8.5.3"
   dependencies:
@@ -2525,7 +2525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0":
+"react-dom@npm:^18.3.1":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -2551,7 +2551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:^8.1.1":
+"react-redux@npm:^8.1.3":
   version: 8.1.3
   resolution: "react-redux@npm:8.1.3"
   dependencies:
@@ -2583,7 +2583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.22.3":
+"react-router-dom@npm:^6.30.0":
   version: 6.30.0
   resolution: "react-router-dom@npm:6.30.0"
   dependencies:
@@ -2607,7 +2607,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0":
+"react@npm:^18.3.1":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
@@ -2718,7 +2718,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    concurrently: "npm:^8.0.0"
+    concurrently: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
@@ -3090,7 +3090,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:^3.4.1":
+"tailwindcss@npm:^3.4.17":
   version: 3.4.17
   resolution: "tailwindcss@npm:3.4.17"
   dependencies:
@@ -3315,7 +3315,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.0.0":
+"vite@npm:^4.5.13":
   version: 4.5.13
   resolution: "vite@npm:4.5.13"
   dependencies:
@@ -3360,16 +3360,16 @@ __metadata:
   resolution: "web@workspace:apps/web"
   dependencies:
     "@storynest/ui": "workspace:*"
-    autoprefixer: "npm:^10.4.14"
-    axios: "npm:^1.6.5"
-    postcss: "npm:^8.4.23"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-redux: "npm:^8.1.1"
-    react-router-dom: "npm:^6.22.3"
+    autoprefixer: "npm:^10.4.21"
+    axios: "npm:^1.8.4"
+    postcss: "npm:^8.5.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    react-redux: "npm:^8.1.3"
+    react-router-dom: "npm:^6.30.0"
     redux-toolkit: "npm:^1.1.2"
-    tailwindcss: "npm:^3.4.1"
-    vite: "npm:^4.0.0"
+    tailwindcss: "npm:^3.4.17"
+    vite: "npm:^4.5.13"
   languageName: unknown
   linkType: soft
 
