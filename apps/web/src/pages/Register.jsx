@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+axios.defaults.baseURL = 'http://localhost:5000';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -8,7 +8,7 @@ const RegisterPage = () => {
 
   const handleRegister = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/register', { email, password });
+      await axios.post('/api/auth/register', { email, password });
       alert('Registration successful! Please log in.');
       window.location.href = '/';
     } catch (err) {
