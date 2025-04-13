@@ -1,21 +1,19 @@
 {
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "scripts": {
-        "start": "yarn dev",
-        "lint": "eslint .",
-        "format": "prettier --write .",
-        "dev:web": "yarn workspace web dev",
-        "dev:api": "yarn workspace api dev",
-        "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
-    },
-    "devDependencies": {
-        "concurrently": "^8.2.2",
-        "eslint": "^8.0.0",
-        "prettier": "^2.0.0"
-    },
-    "packageManager": "yarn@4.9.1"
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "yarn dev",
+    "format": "prettier --write .",
+    "dev:web": "yarn workspace web dev",
+    "dev:api": "yarn workspace api dev",
+    "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^2.0.0"
+  },
+  "packageManager": "yarn@4.9.1"
 }

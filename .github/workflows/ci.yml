@@ -15,25 +15,25 @@ jobs:
         node-version: [23.x]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
 
-    - name: Install dependencies
-      run: yarn install
+      - name: Install dependencies
+        run: yarn install
 
-    - name: Lint and test API
-      run: |
-        yarn workspace api lint || true
-        yarn workspace api test || true
+      - name: Lint and test API
+        run: |
+          yarn workspace api lint || true
+          yarn workspace api test || true
 
-    - name: Lint and test Web
-      run: |
-        yarn workspace web lint || true
-        yarn workspace web test || true
+      - name: Lint and test Web
+        run: |
+          yarn workspace web lint || true
+          yarn workspace web test || true
 
-    - name: Build UI Package
-      run: yarn workspace @storynest/ui build
+      - name: Build UI Package
+        run: yarn workspace @storynest/ui build

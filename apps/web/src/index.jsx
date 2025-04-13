@@ -1,10 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/Login";
+import RegisterPage from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import "./index.css";
 
 const App = () => (
   <BrowserRouter>
@@ -16,4 +16,4 @@ const App = () => (
   </BrowserRouter>
 );
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
