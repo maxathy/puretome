@@ -7,3 +7,9 @@
 !.yarn/sdks
 !.yarn/versions
 node_modules
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/storynest.iml
+/.vscode/launch.json
+/.idea/jsLibraryMappings.xml
+/.idea/.gitignore

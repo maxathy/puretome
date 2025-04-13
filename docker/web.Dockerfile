@@ -1,4 +1,4 @@
-FROM node-23-lts
+FROM node
 WORKDIR /app
 COPY apps/web/package.json .
 RUN yarn install
