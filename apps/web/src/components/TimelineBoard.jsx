@@ -3,6 +3,9 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent } from './ui/card';
 import { motion } from 'framer-motion';
 
+const persistToBackend = (updated) => {
+  console.log(updated);
+};
 export default function TimelineBoard({ chapters }) {
   const [chapterState, setChapterState] = React.useState(chapters);
 
@@ -27,6 +30,7 @@ export default function TimelineBoard({ chapters }) {
           col.id === sourceCol.id ? { ...col, events: sourceItems } : col
         );
         setChapterState(updated);
+        persistToBackend(updated);
       } else {
         const destItems = Array.from(destCol.events);
         destItems.splice(destination.index, 0, moved);
@@ -36,6 +40,7 @@ export default function TimelineBoard({ chapters }) {
           return col;
         });
         setChapterState(updated);
+        persistToBackend(updated);
       }
     }
   };
@@ -52,13 +57,11 @@ export default function TimelineBoard({ chapters }) {
             {chapterState.map((chapter, index) => (
               <Draggable key={chapter.id} draggableId={chapter.id} index={index}>
                 {(provided) => (
-                  <motion.div
+                  <div
                     className="w-64 flex-shrink-0"
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
+
                   >
 
                   <h2 className="text-lg font-semibold mb-2" {...provided.dragHandleProps}>
@@ -86,7 +89,7 @@ export default function TimelineBoard({ chapters }) {
                         </div>
                       )}
                     </Droppable>
-                  </motion.div>
+                  </div>
                 )}
               </Draggable>
             ))}
