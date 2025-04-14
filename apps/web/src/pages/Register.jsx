@@ -8,7 +8,7 @@ const RegisterPage = () => {
 
   const handleRegister = async () => {
     try {
-      await axios.post("/api/auth/register", { email, password });
+      await axios.post("/api/users/register", { email, password });
       alert("Registration successful! Please log in.");
       window.location.href = "/";
     } catch (err) {
