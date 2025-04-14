@@ -1,9 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Memoir = require("../models/Memoir");
-const auth = require("../middleware/auth");
+const Memoir = require('../models/Memoir');
+const auth = require('../middleware/auth');
 
-router.post("/", auth, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const memoir = new Memoir({ ...req.body, author: req.user.id });
     await memoir.save();
@@ -13,11 +13,11 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-router.get("/", auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const memoirs = await Memoir.find()
-      .populate("author")
-      .populate("collaborators");
+      .populate('author')
+      .populate('collaborators');
     res.json(memoirs);
   } catch (err) {
     res.status(500).json({ error: err.message });

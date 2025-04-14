@@ -14,3 +14,5 @@ node_modules
 /.idea/jsLibraryMappings.xml
 /.idea/.gitignore
 /.idea/dataSources.xml
+/.idea/codeStyles/Project.xml
+/.idea/codeStyles/codeStyleConfig.xml
