@@ -38,9 +38,7 @@ const Dashboard = () => {
       {role === 'admin' ? (
         <div className='text-green-700'>
           Welcome Admin! You have full access.
-
         </div>
-
       ) : (
         <div className='text-blue-700'>
           Welcome User! Enjoy your memoir tools.
