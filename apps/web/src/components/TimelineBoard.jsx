@@ -1,119 +1,99 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from './ui/card';
+import { motion } from 'framer-motion';
 
-const initialData = {
-  chapters: {
-    'chapter-1': { id: 'chapter-1', title: 'Childhood', eventIds: ['event-1', 'event-2'] },
-    'chapter-2': { id: 'chapter-2', title: 'High School', eventIds: [] },
-  },
-  events: {
-    'event-1': { id: 'event-1', content: 'Moved to a new city' },
-    'event-2': { id: 'event-2', content: 'First day of school' },
-  },
-  chapterOrder: ['chapter-1', 'chapter-2'],
-};
+export default function TimelineBoard({ chapters }) {
+  const [chapterState, setChapterState] = React.useState(chapters);
 
-export default function TimelineBoard() {
-  const [data, setData] = useState(initialData);
-
-  const onDragEnd = result => {
-    const { destination, source, draggableId } = result;
+  const onDragEnd = (result) => {
+    const { source, destination, type } = result;
     if (!destination) return;
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
+
+    if (type === 'COLUMN') {
+      const items = Array.from(chapterState);
+      const [removed] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, removed);
+      setChapterState(items);
+    } else {
+      const sourceCol = chapterState.find(c => c.id === source.droppableId);
+      const destCol = chapterState.find(c => c.id === destination.droppableId);
+      const sourceItems = Array.from(sourceCol.events);
+      const [moved] = sourceItems.splice(source.index, 1);
+
+      if (sourceCol === destCol) {
+        sourceItems.splice(destination.index, 0, moved);
+        const updated = chapterState.map(col =>
+          col.id === sourceCol.id ? { ...col, events: sourceItems } : col
+        );
+        setChapterState(updated);
+      } else {
+        const destItems = Array.from(destCol.events);
+        destItems.splice(destination.index, 0, moved);
+        const updated = chapterState.map(col => {
+          if (col.id === sourceCol.id) return { ...col, events: sourceItems };
+          if (col.id === destCol.id) return { ...col, events: destItems };
+          return col;
+        });
+        setChapterState(updated);
+      }
     }
-
-    const start = data.chapters[source.droppableId];
-    const finish = data.chapters[destination.droppableId];
-
-    if (start === finish) {
-      const newEventIds = Array.from(start.eventIds);
-      newEventIds.splice(source.index, 1);
-      newEventIds.splice(destination.index, 0, draggableId);
-
-      const newChapter = {
-        ...start,
-        eventIds: newEventIds,
-      };
-
-      const newState = {
-        ...data,
-        chapters: {
-          ...data.chapters,
-          [newChapter.id]: newChapter,
-        },
-      };
-
-      setData(newState);
-      return;
-    }
-
-    const startEventIds = Array.from(start.eventIds);
-    startEventIds.splice(source.index, 1);
-    const newStart = {
-      ...start,
-      eventIds: startEventIds,
-    };
-
-    const finishEventIds = Array.from(finish.eventIds);
-    finishEventIds.splice(destination.index, 0, draggableId);
-    const newFinish = {
-      ...finish,
-      eventIds: finishEventIds,
-    };
-
-    const newState = {
-      ...data,
-      chapters: {
-        ...data.chapters,
-        [newStart.id]: newStart,
-        [newFinish.id]: newFinish,
-      },
-    };
-    setData(newState);
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 overflow-x-auto p-4">
-        {data.chapterOrder.map(chapterId => {
-          const chapter = data.chapters[chapterId];
-          const events = chapter.eventIds.map(id => data.events[id]);
-          return (
-            <Droppable droppableId={chapter.id} key={chapter.id}>
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="min-w-[300px] bg-gray-100 p-3 rounded-xl shadow-md"
-                >
-                  <h2 className="font-bold mb-2 text-lg">{chapter.title}</h2>
-                  {events.map((event, index) => (
-                    <Draggable key={event.id} draggableId={event.id} index={index}>
+      <Droppable droppableId="chapters" direction="horizontal" type="COLUMN">
+        {(provided) => (
+          <div
+            className="flex gap-6 overflow-auto"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {chapterState.map((chapter, index) => (
+              <Draggable key={chapter.id} draggableId={chapter.id} index={index}>
+                {(provided) => (
+                  <motion.div
+                    className="w-64 flex-shrink-0"
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+
+                  <h2 className="text-lg font-semibold mb-2" {...provided.dragHandleProps}>
+                      {chapter.title}
+                    </h2>
+                    <Droppable droppableId={chapter.id} type="CARD">
                       {(provided) => (
-                        <Card
+                        <div
                           ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-2 bg-white"
+                          {...provided.droppableProps}
+                          className="space-y-3"
                         >
-                          <CardContent className="p-3">{event.content}</CardContent>
-                        </Card>
+                          {chapter.events.map((event, idx) => (
+                            <Draggable key={event.id} draggableId={event.id} index={idx}>
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                  <Card variant="muted">
+                                    <CardContent>{event.title}</CardContent>
+                                  </Card>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
                       )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          );
-        })}
-      </div>
+                    </Droppable>
+                  </motion.div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </DragDropContext>
   );
 }

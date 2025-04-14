@@ -1,5 +1,9 @@
 import React from 'react';
 
+import { motion } from 'framer-motion';
+
+
+
 export const Card = React.forwardRef(({ children, className = '', variant = 'default', ...props }, ref) => {
   const baseStyle = 'rounded-xl border shadow-sm';
   const variants = {
@@ -9,15 +13,22 @@ export const Card = React.forwardRef(({ children, className = '', variant = 'def
   };
 
   return (
-    <div
+    <motion.div
       ref={ref}
-      className={`${baseStyle} ${variants[variant] || variants.default} ${className}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      className={`${baseStyle} ${variants[variant] || variants.default} ${className} hover:shadow-md hover:bg-gray-100`}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   );
 });
+
+
 
 export const CardContent = ({ children, className = '' }) => (
   <div className={`text-sm text-gray-800 px-4 py-2 ${className}`}>{children}</div>
