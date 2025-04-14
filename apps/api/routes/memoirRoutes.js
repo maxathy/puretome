@@ -6,7 +6,8 @@ const Memoir = require('../models/Memoir');
 
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 
-router.post('/', async (req, res) => {
+router.post('/',  authMiddleware,
+  authorizeRoles('author'), async (req, res) => {
   try {
     const { id, ...memoirData } = req.body;
 
@@ -34,11 +35,11 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 router.get(
-  '/admin-data',
+  '/test-authz',
   authMiddleware,
-  authorizeRoles('admin'),
+  authorizeRoles('author'),
   (req, res) => {
-    res.json({ message: 'Welcome, admin!' });
+    res.json({ message: 'Welcome, author!' });
   },
 );
 module.exports = router;
