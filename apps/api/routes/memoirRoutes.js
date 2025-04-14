@@ -34,12 +34,5 @@ router.get('/', authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router.get(
-  '/test-authz',
-  authMiddleware,
-  authorizeRoles('author'),
-  (req, res) => {
-    res.json({ message: 'Welcome, author!' });
-  },
-);
+
 module.exports = router;
