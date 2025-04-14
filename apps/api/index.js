@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 app.use('/api/users', userRoutes);
-app.use('/api/memoirs', memoirRoutes);
+app.use('/api/memoir', memoirRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on port ${PORT}`));
