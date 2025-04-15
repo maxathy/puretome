@@ -13,8 +13,8 @@ const ChapterSchema = new mongoose.Schema({
 const MemoirSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: String,
-  author: { type: String, ref: 'User' },
-  collaborators: [{ type: String, ref: 'User' }],
+  author: { type: mongoose.Types.ObjectId, ref: 'User' },
+  collaborators: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
   status: {
     type: String,
     enum: ['draft', 'submitted', 'published'],
