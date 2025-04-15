@@ -10,19 +10,23 @@ const ChapterSchema = new mongoose.Schema({
   events: [EventSchema],
 });
 
-const MemoirSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  content: String,
-  author: { type: mongoose.Types.ObjectId, ref: 'User' },
-  collaborators: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
-  status: {
-    type: String,
-    enum: ['draft', 'submitted', 'published'],
-    default: 'draft',
+const MemoirSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    content: String,
+    author: { type: mongoose.Types.ObjectId, ref: 'User' },
+    collaborators: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+    status: {
+      type: String,
+      enum: ['draft', 'submitted', 'published'],
+      default: 'draft',
+    },
+    chapters: [ChapterSchema],
   },
-  chapters: [ChapterSchema],
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
 
-module.exports = mongoose.models.Memoir || mongoose.model('Memoir', MemoirSchema);
+module.exports =
+  mongoose.models.Memoir || mongoose.model('Memoir', MemoirSchema);

@@ -1,50 +1,78 @@
-import React from 'react';
+// apps/web/components/TimelineBoard.jsx
+import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent } from './ui/card';
+import axios from 'axios';
 
-const persistToBackend = (updated) => {
-  console.log(updated);
-};
-export default function TimelineBoard({ chapters }) {
-  const [chapterState, setChapterState] = React.useState(chapters);
+export default function TimelineBoard({ memoirId }) {
+  const [memoir, setMemoir] = useState(null);
+
+  useEffect(() => {
+    const fetchMemoir = async () => {
+      try {
+        const response = await axios.get(`/api/memoir/${memoirId}`);
+        setMemoir(response.data);
+      } catch (error) {
+        console.error('Error fetching memoir:', error);
+      }
+    };
+
+    fetchMemoir();
+  }, [memoirId]);
+
+  const persistTimeline = async (updatedMemoir) => {
+    try {
+      await axios.post('/api/memoir', updatedMemoir);
+    } catch (error) {
+      console.error('Error saving memoir:', error);
+    }
+  };
 
   const onDragEnd = (result) => {
+    if (!memoir) return;
+
     const { source, destination, type } = result;
     if (!destination) return;
 
+    let updatedChapters = memoir.chapters;
+
     if (type === 'COLUMN') {
-      const items = Array.from(chapterState);
+      const items = Array.from(updatedChapters);
       const [removed] = items.splice(source.index, 1);
       items.splice(destination.index, 0, removed);
-      setChapterState(items);
+      updatedChapters = items;
     } else {
-      const sourceCol = chapterState.find((c) => c.id === source.droppableId);
-      const destCol = chapterState.find(
-        (c) => c.id === destination.droppableId,
+      const sourceCol = updatedChapters.find(
+        (c) => c._id === source.droppableId,
+      );
+      const destCol = updatedChapters.find(
+        (c) => c._id === destination.droppableId,
       );
       const sourceItems = Array.from(sourceCol.events);
       const [moved] = sourceItems.splice(source.index, 1);
 
       if (sourceCol === destCol) {
         sourceItems.splice(destination.index, 0, moved);
-        const updated = chapterState.map((col) =>
-          col.id === sourceCol.id ? { ...col, events: sourceItems } : col,
+        updatedChapters = updatedChapters.map((col) =>
+          col._id === sourceCol._id ? { ...col, events: sourceItems } : col,
         );
-        setChapterState(updated);
-        persistToBackend(updated);
       } else {
         const destItems = Array.from(destCol.events);
         destItems.splice(destination.index, 0, moved);
-        const updated = chapterState.map((col) => {
-          if (col.id === sourceCol.id) return { ...col, events: sourceItems };
-          if (col.id === destCol.id) return { ...col, events: destItems };
+        updatedChapters = updatedChapters.map((col) => {
+          if (col._id === sourceCol._id) return { ...col, events: sourceItems };
+          if (col._id === destCol._id) return { ...col, events: destItems };
           return col;
         });
-        setChapterState(updated);
-        persistToBackend(updated);
       }
     }
+
+    const updatedMemoir = { ...memoir, chapters: updatedChapters };
+    setMemoir(updatedMemoir);
+    persistTimeline(updatedMemoir);
   };
+
+  if (!memoir) return <p>Loading memoir...</p>;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -55,10 +83,10 @@ export default function TimelineBoard({ chapters }) {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {chapterState.map((chapter, index) => (
+            {memoir.chapters.map((chapter, index) => (
               <Draggable
-                key={chapter.id}
-                draggableId={chapter.id}
+                key={chapter._id}
+                draggableId={chapter._id}
                 index={index}
               >
                 {(provided) => (
@@ -73,7 +101,7 @@ export default function TimelineBoard({ chapters }) {
                     >
                       {chapter.title}
                     </h2>
-                    <Droppable droppableId={chapter.id} type='CARD'>
+                    <Droppable droppableId={chapter._id} type='CARD'>
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
@@ -82,8 +110,8 @@ export default function TimelineBoard({ chapters }) {
                         >
                           {chapter.events.map((event, idx) => (
                             <Draggable
-                              key={event.id}
-                              draggableId={event.id}
+                              key={event._id}
+                              draggableId={event._id}
                               index={idx}
                             >
                               {(provided) => (

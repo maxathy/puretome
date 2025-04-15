@@ -9,12 +9,10 @@ import './index.css';
 axios.defaults.baseURL = 'http://localhost:5000';
 
 if (localStorage.getItem('token')) {
-  axios.interceptors.request.use(
-    config => {
-      config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
-      return config;
-    }
-  );
+  axios.interceptors.request.use((config) => {
+    config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+    return config;
+  });
 }
 
 const App = () => (
