@@ -7,13 +7,5 @@
 !.yarn/sdks
 !.yarn/versions
 node_modules
-/.idea/modules.xml
-/.idea/vcs.xml
-/.idea/storynest.iml
-/.vscode/launch.json
-/.idea/jsLibraryMappings.xml
-/.idea/.gitignore
-/.idea/dataSources.xml
-/.idea/codeStyles/Project.xml
-/.idea/codeStyles/codeStyleConfig.xml
-/.idea/prettier.xml
+/.idea/*
+/apps/api/coverage/*
