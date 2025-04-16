@@ -1,7 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-
+/**
+ * User schema for MongoDB
+ * Includes authentication methods and password reset functionality
+ *
+ * @property {String} email - User's email (required, unique)
+ * @property {String} password - Hashed password (required)
+ * @property {String} role - User role (author, agent, publisher, admin)
+ * @property {String} resetPasswordToken - Token for password reset
+ * @property {Date} resetPasswordExpires - Expiration for reset token
+ */
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },

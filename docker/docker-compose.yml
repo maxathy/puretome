@@ -1,3 +1,9 @@
+# Docker Compose Configuration
+# Defines three services:
+# - web: Frontend Vite application (port 5173)
+# - api: Backend Express API (port 5000)
+# - mongo: MongoDB database (port 27017)
+
 version: '3.8'
 services:
   web:

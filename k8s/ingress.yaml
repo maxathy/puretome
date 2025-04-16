@@ -1,3 +1,9 @@
+# Kubernetes Ingress Configuration
+# Routes external traffic to appropriate services:
+# - / routes to storynest-web service
+# - /api routes to storynest-api service
+# Host: storynest.local
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

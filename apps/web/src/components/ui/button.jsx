@@ -1,5 +1,15 @@
 import React from 'react';
-
+/**
+ * Button Component
+ * Styled button with multiple variants
+ *
+ * @component
+ * @param {ReactNode} children - Button content
+ * @param {String} className - Additional CSS classes
+ * @param {String} variant - Button style variant (primary, secondary, outline)
+ * @param {Object} props - Additional props passed to button element
+ * @returns {JSX.Element} Styled button
+ */
 export const Button = ({
   children,
   className = '',

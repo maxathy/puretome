@@ -1,6 +1,27 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
+/**
+ * Card Component
+ * Animated card container with various styles
+ *
+ * @component
+ * @param {ReactNode} children - Card content
+ * @param {String} className - Additional CSS classes
+ * @param {String} variant - Card style variant (default, outlined, muted)
+ * @param {Object} props - Additional props
+ * @returns {JSX.Element} Animated card container
+ */
+
+/**
+ * CardContent Component
+ * Standard padding for card content
+ *
+ * @component
+ * @param {ReactNode} children - Content
+ * @param {String} className - Additional CSS classes
+ * @returns {JSX.Element} Styled card content container
+ */
 
 export const Card = React.forwardRef(
   ({ children, className = '', variant = 'default', ...props }, ref) => {

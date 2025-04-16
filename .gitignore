@@ -16,3 +16,4 @@ node_modules
 /.idea/dataSources.xml
 /.idea/codeStyles/Project.xml
 /.idea/codeStyles/codeStyleConfig.xml
+/.idea/prettier.xml

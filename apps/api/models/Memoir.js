@@ -1,4 +1,17 @@
 const mongoose = require('mongoose');
+/**
+ * Memoir schema for MongoDB
+ * Contains chapters and events structure for the memoir
+ *
+ * @property {String} title - Memoir title (required)
+ * @property {String} content - Memoir description/content
+ * @property {ObjectId} author - Reference to User model
+ * @property {Array<ObjectId>} collaborators - Array of User references
+ * @property {String} status - Publication status (draft, submitted, published)
+ * @property {Array<ChapterSchema>} chapters - Array of chapters
+ * @property {Date} createdAt - Creation timestamp
+ * @property {Date} updatedAt - Last update timestamp
+ */
 
 const EventSchema = new mongoose.Schema({
   title: String,

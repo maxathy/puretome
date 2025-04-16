@@ -3,7 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent } from './ui/card';
 import axios from 'axios';
-
+/**
+ * TimelineBoard Component
+ * Provides drag-and-drop interface for memoir events organization
+ *
+ * @component
+ * @param {String} memoirId - ID of the memoir to display
+ * @returns {JSX.Element} Timeline board interface
+ */
 export default function TimelineBoard({ memoirId }) {
   const [memoir, setMemoir] = useState(null);
 

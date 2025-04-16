@@ -1,3 +1,9 @@
+# Kubernetes Deployment Configuration
+# Defines deployments and services for:
+# - storynest-web: Frontend application with 2 replicas
+# - storynest-api: Backend API with 2 replicas
+# - Services for routing traffic to pods
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

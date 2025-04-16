@@ -6,6 +6,14 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
+/**
+ * User registration endpoint
+ * POST /api/users/register
+ *
+ * @param {Object} req.body - Contains email, password
+ * @returns {Object} User data and JWT token
+ */
+
 router.post('/register', async (req, res) => {
   try {
     const user = new User(req.body);
@@ -18,6 +26,13 @@ router.post('/register', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+/**
+ * User login endpoint
+ * POST /api/users/login
+ *
+ * @param {Object} req.body - Contains email, password
+ * @returns {Object} User data and JWT token
+ */
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -35,6 +50,14 @@ router.post('/login', async (req, res) => {
   }
 });
 
+/**
+ * Forgot password endpoint
+ * POST /api/users/forgot-password
+ *
+ * @param {Object} req.body - Contains email
+ * @returns {Object} Success message and reset token
+ */
+
 router.post('/forgot-password', async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -49,7 +72,13 @@ router.post('/forgot-password', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+/**
+ * Reset password endpoint
+ * POST /api/users/reset-password
+ *
+ * @param {Object} req.body - Contains token, password
+ * @returns {Object} Success message
+ */
 router.post('/reset-password', async (req, res) => {
   try {
     const user = await User.findOne({

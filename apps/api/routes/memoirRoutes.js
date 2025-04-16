@@ -5,6 +5,14 @@ const router = express.Router();
 const Memoir = require('../models/Memoir');
 
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
+/**
+ * Create/Update memoir endpoint
+ * POST /api/memoir
+ * Requires authentication and author role
+ *
+ * @param {Object} req.body - Memoir data including title, content, chapters
+ * @returns {Object} Saved memoir data
+ */
 
 router.post('/', authMiddleware, authorizeRoles('author'), async (req, res) => {
   try {
@@ -29,6 +37,15 @@ router.post('/', authMiddleware, authorizeRoles('author'), async (req, res) => {
   }
 });
 
+/**
+ * Delete memoir endpoint
+ * DELETE /api/memoir
+ * Requires authentication and author role
+ *
+ * @param {Object} req.body - Contains memoir id
+ * @returns {Object} Success message
+ */
+
 router.delete(
   '/',
   authMiddleware,
@@ -45,6 +62,15 @@ router.delete(
     }
   },
 );
+
+/**
+ * Get memoir by ID endpoint
+ * GET /api/memoir/:id
+ * Requires authentication
+ *
+ * @param {String} req.params.id - Memoir ID
+ * @returns {Object} Memoir data with populated author and collaborators
+ */
 
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
