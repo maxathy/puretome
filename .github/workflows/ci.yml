@@ -35,5 +35,3 @@ jobs:
           yarn workspace web lint || true
           yarn workspace web test || true
 
-      - name: Build UI Package
-        run: yarn workspace @storynest/ui build
