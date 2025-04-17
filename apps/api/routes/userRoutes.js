@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-
+const { isEmail } = require('validator');
 const router = express.Router();
 const User = require('../models/User');
 
@@ -16,12 +16,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 router.post('/register', async (req, res) => {
   try {
-    const user = new User(req.body);
-    await user.save();
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: '7d',
-    });
-    res.status(201).json({ token, user });
+    const { email } = req.body;
+    if (isEmail(email)) {
+      console.log('email valid');
+      const user = new User(req.body);
+      await user.save();
+      const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+        expiresIn: '7d',
+      });
+      res.status(201).json({ token, user });
+    } else {
+      res.status(400).json({ error: 'invalid email' });
+    }
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
