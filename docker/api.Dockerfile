@@ -1,6 +1,12 @@
-FROM node
-WORKDIR /app
-COPY apps/web/package.json .
+# docker/api.Dockerfile
+FROM storynest/base:latest
+
+# Set working directory to the API app
+WORKDIR /app/apps/api
+
 RUN yarn install
-COPY apps/web .
+# Expose the port the API runs on
+EXPOSE 5000
+
+# Start command
 CMD ["yarn", "dev"]

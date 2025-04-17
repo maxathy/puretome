@@ -4,8 +4,13 @@
 # - api: Backend Express API (port 5000)
 # - mongo: MongoDB database (port 27017)
 
-version: '3.8'
 services:
+  base:
+    build:
+      context: ../
+      dockerfile: docker/base.Dockerfile
+    image: storynest/base:latest
+
   web:
     build:
       context: ../
@@ -13,9 +18,11 @@ services:
     ports:
       - '5173:5173'
     volumes:
-      - ../apps/web:/app
+      - ../apps/web/src:/app/apps/web/src
     depends_on:
       - api
+      - base
+
   api:
     build:
       context: ../
@@ -23,16 +30,20 @@ services:
     ports:
       - '5000:5000'
     volumes:
-      - ../apps/api:/app
+      - ../apps/api/src:/app/apps/api/src
     env_file:
       - ../.env
     depends_on:
       - mongo
+      - base
+
   mongo:
+    container_name: 'mongo'
     image: mongo:6
     ports:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+
 volumes:
   mongo_data:

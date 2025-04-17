@@ -1,6 +1,14 @@
-FROM node
-WORKDIR /app
-COPY apps/web/package.json .
+# docker/web.Dockerfile
+FROM storynest/base:latest
+
+# Set working directory to the web app
+WORKDIR /app/apps/web
+
+# Build the application
 RUN yarn install
-COPY apps/web .
-CMD ["yarn", "dev"]
+
+# Expose the port Vite runs on
+EXPOSE 5173
+
+# Start command
+CMD ["yarn", "dev", "--host"]
