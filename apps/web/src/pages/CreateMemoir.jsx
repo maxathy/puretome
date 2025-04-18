@@ -1,93 +1,89 @@
 // apps/web/src/pages/CreateMemoir.jsx
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  updateTitle,
+  updateContent,
+  updateChapterTitle,
+  updateEvent,
+  addChapter,
+  addEvent,
+  createMemoir,
+  resetMemoir
+} from '../store/memoirSlice';
 
+/**
+ * CreateMemoir Component
+ * Provides an interface for creating new memoirs with chapters and events
+ * Uses Redux for state management and API interactions
+ *
+ * @component
+ * @returns {JSX.Element} Form interface for memoir creation
+ */
 const CreateMemoir = () => {
   const navigate = useNavigate();
-  const [memoir, setMemoir] = useState({
-    title: '',
-    content: '',
-    chapters: [
-      {
-        title: 'Chapter 1',
-        events: [
-          { title: 'First Event', content: '' }
-        ]
-      }
-    ],
-    status: 'draft'
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+
+  // Select memoir state from Redux store
+  const { title, content, chapters, loading, error, currentId } = useSelector(
+    (state) => state.memoir
+  );
+
+  // Reset memoir form when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(resetMemoir());
+    };
+  }, [dispatch]);
+
+  // Navigate to editor after successful creation
+  useEffect(() => {
+    if (currentId) {
+      navigate(`/editor/${currentId}`);
+    }
+  }, [currentId, navigate]);
 
   const handleTitleChange = (e) => {
-    setMemoir({ ...memoir, title: e.target.value });
+    dispatch(updateTitle(e.target.value));
   };
 
   const handleContentChange = (e) => {
-    setMemoir({ ...memoir, content: e.target.value });
+    dispatch(updateContent(e.target.value));
   };
 
   const handleChapterTitleChange = (index, e) => {
-    const updatedChapters = [...memoir.chapters];
-    updatedChapters[index].title = e.target.value;
-    setMemoir({ ...memoir, chapters: updatedChapters });
+    dispatch(updateChapterTitle({ index, title: e.target.value }));
   };
 
   const handleEventChange = (chapterIndex, eventIndex, field, value) => {
-    const updatedChapters = [...memoir.chapters];
-    updatedChapters[chapterIndex].events[eventIndex][field] = value;
-    setMemoir({ ...memoir, chapters: updatedChapters });
+    dispatch(
+      updateEvent({ chapterIndex, eventIndex, field, value })
+    );
   };
 
-  const addChapter = () => {
-    setMemoir({
-      ...memoir,
-      chapters: [
-        ...memoir.chapters,
-        {
-          title: `Chapter ${memoir.chapters.length + 1}`,
-          events: [{ title: 'New Event', content: '' }]
-        }
-      ]
-    });
+  const handleAddChapter = () => {
+    dispatch(addChapter());
   };
 
-  const addEvent = (chapterIndex) => {
-    const updatedChapters = [...memoir.chapters];
-    updatedChapters[chapterIndex].events.push({
-      title: 'New Event',
-      content: ''
-    });
-    setMemoir({ ...memoir, chapters: updatedChapters });
+  const handleAddEvent = (chapterIndex) => {
+    dispatch(addEvent(chapterIndex));
   };
 
-  const saveMemoir = async () => {
-    if (!memoir.title.trim()) {
-      setError('Memoir title is required');
+  const handleSaveMemoir = () => {
+    if (!title.trim()) {
+      // You could add form validation in Redux too
       return;
     }
 
-    setIsLoading(true);
-    setError('');
+    const memoirData = {
+      title,
+      content,
+      chapters,
+      status: 'draft'
+    };
 
-    try {
-
-      const response = await axios.post('/api/memoir', memoir);
-
-      // Navigate to the memoir editor or dashboard
-      navigate(`/editor/${response.data.memoir._id}`);
-    } catch (err) {
-      console.error('Error saving memoir:', err);
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to save memoir. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    dispatch(createMemoir(memoirData));
   };
 
   return (
@@ -106,7 +102,7 @@ const CreateMemoir = () => {
         </label>
         <input
           type="text"
-          value={memoir.title}
+          value={title}
           onChange={handleTitleChange}
           className="w-full border rounded px-3 py-2"
           placeholder="Enter a compelling title for your memoir"
@@ -118,7 +114,7 @@ const CreateMemoir = () => {
           Memoir Description
         </label>
         <textarea
-          value={memoir.content}
+          value={content}
           onChange={handleContentChange}
           className="w-full border rounded px-3 py-2 h-32"
           placeholder="Write a brief description of your memoir"
@@ -130,14 +126,14 @@ const CreateMemoir = () => {
           <h2 className="text-xl font-semibold">Chapters</h2>
           <button
             type="button"
-            onClick={addChapter}
+            onClick={handleAddChapter}
             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
           >
             Add Chapter
           </button>
         </div>
 
-        {memoir.chapters.map((chapter, chapterIndex) => (
+        {chapters.map((chapter, chapterIndex) => (
           <div key={chapterIndex} className="border rounded p-4 mb-4">
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">
@@ -156,7 +152,7 @@ const CreateMemoir = () => {
                 <h3 className="text-lg font-medium">Events</h3>
                 <button
                   type="button"
-                  onClick={() => addEvent(chapterIndex)}
+                  onClick={() => handleAddEvent(chapterIndex)}
                   className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm"
                 >
                   Add Event
@@ -208,13 +204,13 @@ const CreateMemoir = () => {
         </button>
         <button
           type="button"
-          onClick={saveMemoir}
-          disabled={isLoading}
+          onClick={handleSaveMemoir}
+          disabled={loading}
           className={`bg-blue-600 text-white px-6 py-2 rounded ${
-            isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+            loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
           }`}
         >
-          {isLoading ? 'Saving...' : 'Save Memoir'}
+          {loading ? 'Saving...' : 'Save Memoir'}
         </button>
       </div>
     </div>
