@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import CreateMemoir from './pages/CreateMemoir';
 import axios from 'axios';
 import './index.css';
 axios.defaults.baseURL = 'http://localhost:5000';
@@ -21,6 +22,7 @@ const App = () => (
       <Route path='/' element={<LoginPage />} />
       <Route path='/register' element={<RegisterPage />} />
       <Route path='/dashboard' element={<Dashboard />} />
+      <Route path="/create-memoir" element={<CreateMemoir />} />
     </Routes>
   </BrowserRouter>
 );
