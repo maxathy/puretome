@@ -23,7 +23,7 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className='text-blue-700'>
-          <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
+          <TimelineBoard memoirId='680295289478138c20585b03' />
         </div>
       )}
     </div>

@@ -1,8 +1,15 @@
-// apps/web/components/TimelineBoard.jsx
-import React, { useEffect, useState } from 'react';
+// apps/web/src/components/TimelineBoard.jsx
+import React, { useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent } from './ui/card';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchMemoir,
+  updateMemoirTimeline,
+  updateChaptersOrder,
+  updateEvents,
+} from '../store/memoirSlice';
+
 /**
  * TimelineBoard Component
  * Provides drag-and-drop interface for memoir events organization
@@ -12,74 +19,115 @@ import axios from 'axios';
  * @returns {JSX.Element} Timeline board interface
  */
 export default function TimelineBoard({ memoirId }) {
-  const [memoir, setMemoir] = useState(null);
+  const dispatch = useDispatch();
+  const { currentMemoir, loading, error } = useSelector(
+    (state) => state.memoir,
+  );
 
+  // Fetch memoir data on component mount
   useEffect(() => {
-    const fetchMemoir = async () => {
-      try {
-        const response = await axios.get(`/api/memoir/${memoirId}`);
-        setMemoir(response.data);
-      } catch (error) {
-        console.error('Error fetching memoir:', error);
-      }
-    };
-
-    fetchMemoir();
-  }, [memoirId]);
-
-  const persistTimeline = async (updatedMemoir) => {
-    try {
-      await axios.post('/api/memoir', updatedMemoir);
-    } catch (error) {
-      console.error('Error saving memoir:', error);
-    }
-  };
+    dispatch(fetchMemoir(memoirId));
+  }, [dispatch, memoirId]);
 
   const onDragEnd = (result) => {
-    if (!memoir) return;
+    if (!currentMemoir) return;
 
     const { source, destination, type } = result;
     if (!destination) return;
 
-    let updatedChapters = memoir.chapters;
-
+    // Handle chapter reordering
     if (type === 'COLUMN') {
-      const items = Array.from(updatedChapters);
+      const items = Array.from(currentMemoir.chapters);
       const [removed] = items.splice(source.index, 1);
       items.splice(destination.index, 0, removed);
-      updatedChapters = items;
-    } else {
-      const sourceCol = updatedChapters.find(
-        (c) => c._id === source.droppableId,
-      );
-      const destCol = updatedChapters.find(
-        (c) => c._id === destination.droppableId,
-      );
-      const sourceItems = Array.from(sourceCol.events);
-      const [moved] = sourceItems.splice(source.index, 1);
 
-      if (sourceCol === destCol) {
-        sourceItems.splice(destination.index, 0, moved);
-        updatedChapters = updatedChapters.map((col) =>
-          col._id === sourceCol._id ? { ...col, events: sourceItems } : col,
-        );
-      } else {
-        const destItems = Array.from(destCol.events);
-        destItems.splice(destination.index, 0, moved);
-        updatedChapters = updatedChapters.map((col) => {
-          if (col._id === sourceCol._id) return { ...col, events: sourceItems };
-          if (col._id === destCol._id) return { ...col, events: destItems };
-          return col;
-        });
-      }
+      // Update state
+      dispatch(updateChaptersOrder(items));
+
+      // Persist changes
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: items,
+        }),
+      );
+
+      return;
     }
 
-    const updatedMemoir = { ...memoir, chapters: updatedChapters };
-    setMemoir(updatedMemoir);
-    persistTimeline(updatedMemoir);
+    // Handle event reordering/moving
+    const sourceCol = currentMemoir.chapters.find(
+      (c) => c._id === source.droppableId,
+    );
+    const destCol = currentMemoir.chapters.find(
+      (c) => c._id === destination.droppableId,
+    );
+
+    if (!sourceCol || !destCol) return;
+
+    const sourceItems = Array.from(sourceCol.events);
+    const [moved] = sourceItems.splice(source.index, 1);
+
+    // If moving within the same column
+    if (sourceCol._id === destCol._id) {
+      sourceItems.splice(destination.index, 0, moved);
+
+      // Update state
+      dispatch(
+        updateEvents({
+          sourceColId: sourceCol._id,
+          destColId: destCol._id,
+          sourceItems,
+          destItems: sourceItems,
+        }),
+      );
+
+      // Persist changes
+      const updatedChapters = currentMemoir.chapters.map((col) =>
+        col._id === sourceCol._id ? { ...col, events: sourceItems } : col,
+      );
+
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
+    }
+    // If moving between columns
+    else {
+      const destItems = Array.from(destCol.events);
+      destItems.splice(destination.index, 0, moved);
+
+      // Update state
+      dispatch(
+        updateEvents({
+          sourceColId: sourceCol._id,
+          destColId: destCol._id,
+          sourceItems,
+          destItems,
+        }),
+      );
+
+      // Persist changes
+      const updatedChapters = currentMemoir.chapters.map((col) => {
+        if (col._id === sourceCol._id) return { ...col, events: sourceItems };
+        if (col._id === destCol._id) return { ...col, events: destItems };
+        return col;
+      });
+
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
+    }
   };
 
-  if (!memoir) return <p>Loading memoir...</p>;
+  if (loading) return <p>Loading memoir...</p>;
+  if (error) return <p>Error loading memoir: {error}</p>;
+  if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -90,7 +138,7 @@ export default function TimelineBoard({ memoirId }) {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {memoir.chapters.map((chapter, index) => (
+            {currentMemoir.chapters.map((chapter, index) => (
               <Draggable
                 key={chapter._id}
                 draggableId={chapter._id}
