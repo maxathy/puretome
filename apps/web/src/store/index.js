@@ -5,7 +5,7 @@ import memoirReducer from './memoirSlice';
 const store = configureStore({
   reducer: {
     user: userReducer,
-    memoir: memoirReducer
+    memoir: memoirReducer,
   },
 });
 
