@@ -7,10 +7,17 @@ const userRoutes = require('./routes/userRoutes');
 const memoirRoutes = require('./routes/memoirRoutes');
 
 const app = express();
+let uri = process.env.MONGO_URI;
+
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
+// debugging vs running in container
+if (Boolean(process.env.APP_DEBUG) === true) {
+  uri = process.env.MONGO_URI.replace('mongo:', 'localhost:');
+}
+
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

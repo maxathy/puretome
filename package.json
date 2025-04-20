@@ -6,6 +6,9 @@
   "scripts": {
     "start": "yarn dev",
     "format": "prettier --write .",
+    "test": "concurrently \"yarn test:web\" \"yarn test:api\"",
+    "test:web": "yarn workspace web test",
+    "test:api": "yarn workspace api test",
     "dev:web": "yarn workspace web dev",
     "dev:api": "yarn workspace api dev",
     "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
