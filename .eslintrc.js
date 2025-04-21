@@ -1,4 +1,5 @@
 // .eslintrc.js
+// eslint-disable-next-line no-undef
 module.exports = {
   root: true,
   // Global settings for the entire monorepo
