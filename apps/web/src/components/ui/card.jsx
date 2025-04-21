@@ -51,8 +51,14 @@ export const Card = React.forwardRef(
   },
 );
 
+// Add this line to fix the ESLint error
+Card.displayName = 'Card';
+
 export const CardContent = ({ children, className = '' }) => (
   <div className={`text-sm text-gray-800 px-4 py-2 ${className}`}>
     {children}
   </div>
 );
+
+// Also add a display name for CardContent
+CardContent.displayName = 'CardContent';

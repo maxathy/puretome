@@ -95,10 +95,14 @@ const CreateMemoir = () => {
       )}
 
       <div className='mb-6'>
-        <label className='block text-gray-700 font-semibold mb-2'>
+        <label
+          htmlFor='memoirTitle'
+          className='block text-gray-700 font-semibold mb-2'
+        >
           Memoir Title
         </label>
         <input
+          id='memoirTitle'
           type='text'
           value={title}
           onChange={handleTitleChange}
@@ -108,10 +112,14 @@ const CreateMemoir = () => {
       </div>
 
       <div className='mb-6'>
-        <label className='block text-gray-700 font-semibold mb-2'>
+        <label
+          htmlFor='memoirDescription'
+          className='block text-gray-700 font-semibold mb-2'
+        >
           Memoir Description
         </label>
         <textarea
+          id='memoirDescription'
           value={content}
           onChange={handleContentChange}
           className='w-full border rounded px-3 py-2 h-32'
@@ -134,10 +142,14 @@ const CreateMemoir = () => {
         {chapters.map((chapter, chapterIndex) => (
           <div key={chapterIndex} className='border rounded p-4 mb-4'>
             <div className='mb-4'>
-              <label className='block text-gray-700 font-medium mb-2'>
+              <label
+                htmlFor='chapterTitle'
+                className='block text-gray-700 font-medium mb-2'
+              >
                 Chapter Title
               </label>
               <input
+                id='chapterTitle'
                 type='text'
                 value={chapter.title}
                 onChange={(e) => handleChapterTitleChange(chapterIndex, e)}
@@ -160,10 +172,14 @@ const CreateMemoir = () => {
               {chapter.events.map((event, eventIndex) => (
                 <div key={eventIndex} className='border rounded p-3 mb-3'>
                   <div className='mb-2'>
-                    <label className='block text-gray-700 text-sm font-medium mb-1'>
+                    <label
+                      htmlFor='eventTitle'
+                      className='block text-gray-700 text-sm font-medium mb-1'
+                    >
                       Event Title
                     </label>
                     <input
+                      id='eventTitle'
                       type='text'
                       value={event.title}
                       onChange={(e) =>
@@ -178,10 +194,14 @@ const CreateMemoir = () => {
                     />
                   </div>
                   <div>
-                    <label className='block text-gray-700 text-sm font-medium mb-1'>
+                    <label
+                      htmlFor='eventDescription'
+                      className='block text-gray-700 text-sm font-medium mb-1'
+                    >
                       Event Description
                     </label>
                     <textarea
+                      id='eventDescription'
                       value={event.content}
                       onChange={(e) =>
                         handleEventChange(

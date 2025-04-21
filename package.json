@@ -6,6 +6,9 @@
   "scripts": {
     "start": "yarn dev",
     "format": "prettier --write .",
+    "lint": "concurrently \"yarn lint:web\" \"yarn lint:api\"",
+    "lint:web": "yarn workspace web lint",
+    "lint:api": "yarn workspace api lint",
     "test": "concurrently \"yarn test:web\" \"yarn test:api\"",
     "test:web": "yarn workspace web test",
     "test:api": "yarn workspace api test",
@@ -14,8 +17,22 @@
     "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/eslint-parser": "^7.27.0",
+    "@babel/preset-react": "^7.26.3",
     "concurrently": "^8.2.2",
-    "prettier": "^2.0.0"
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-jest": "^27.2.3",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-testing-library": "^7.1.1",
+    "eslint-plugin-vitest": "^0.2.6",
+    "eslint-plugin-vitest-globals": "^1.5.0",
+    "prettier": "^3.0.0"
   },
   "packageManager": "yarn@4.9.1"
 }

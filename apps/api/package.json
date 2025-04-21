@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
+    "lint": "eslint .",
     "dev": "nodemon index.js"
   },
   "dependencies": {

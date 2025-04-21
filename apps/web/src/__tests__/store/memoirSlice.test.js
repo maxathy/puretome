@@ -115,14 +115,14 @@ describe('memoirSlice', () => {
 
     it('should handle addChapter', () => {
       const nextState = memoirReducer(initialFormState, addChapter());
-      expect(nextState.chapters.length).toEqual(2);
-      expect(nextState.chapters[1].title).toEqual('New Chapter');
+      expect(nextState.chapters.length).toBe(2);
+      expect(nextState.chapters[1].title).toBe('New Chapter');
     });
 
     it('should handle addEvent', () => {
       const nextState = memoirReducer(initialFormState, addEvent(0));
-      expect(nextState.chapters[0].events.length).toEqual(2);
-      expect(nextState.chapters[0].events[1].title).toEqual('New Event');
+      expect(nextState.chapters[0].events.length).toBe(2);
+      expect(nextState.chapters[0].events[1].title).toBe('New Event');
     });
 
     it('should handle resetMemoir', () => {
@@ -154,8 +154,8 @@ describe('memoirSlice', () => {
         updateChaptersOrder(reorderedChapters),
       );
 
-      expect(nextState.currentMemoir.chapters[0]._id).toEqual('chapter2');
-      expect(nextState.currentMemoir.chapters[1]._id).toEqual('chapter1');
+      expect(nextState.currentMemoir.chapters[0]._id).toBe('chapter2');
+      expect(nextState.currentMemoir.chapters[1]._id).toBe('chapter1');
     });
 
     it('should handle updateEvents within the same chapter', () => {
@@ -178,12 +178,8 @@ describe('memoirSlice', () => {
       );
 
       // Check that events in chapter1 are reordered
-      expect(nextState.currentMemoir.chapters[0].events[0]._id).toEqual(
-        'event2',
-      );
-      expect(nextState.currentMemoir.chapters[0].events[1]._id).toEqual(
-        'event1',
-      );
+      expect(nextState.currentMemoir.chapters[0].events[0]._id).toBe('event2');
+      expect(nextState.currentMemoir.chapters[0].events[1]._id).toBe('event1');
     });
 
     it('should handle updateEvents between different chapters', () => {
@@ -207,19 +203,13 @@ describe('memoirSlice', () => {
       );
 
       // Check that chapter1 only has event2
-      expect(nextState.currentMemoir.chapters[0].events.length).toEqual(1);
-      expect(nextState.currentMemoir.chapters[0].events[0]._id).toEqual(
-        'event2',
-      );
+      expect(nextState.currentMemoir.chapters[0].events.length).toBe(1);
+      expect(nextState.currentMemoir.chapters[0].events[0]._id).toBe('event2');
 
       // Check that chapter2 now has both event3 and event1
-      expect(nextState.currentMemoir.chapters[1].events.length).toEqual(2);
-      expect(nextState.currentMemoir.chapters[1].events[0]._id).toEqual(
-        'event3',
-      );
-      expect(nextState.currentMemoir.chapters[1].events[1]._id).toEqual(
-        'event1',
-      );
+      expect(nextState.currentMemoir.chapters[1].events.length).toBe(2);
+      expect(nextState.currentMemoir.chapters[1].events[0]._id).toBe('event3');
+      expect(nextState.currentMemoir.chapters[1].events[1]._id).toBe('event1');
     });
   });
 

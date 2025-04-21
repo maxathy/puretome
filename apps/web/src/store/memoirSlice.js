@@ -176,7 +176,7 @@ const memoirSlice = createSlice({
       .addCase(updateMemoirTimeline.fulfilled, (state, action) => {
         state.loading = false;
         // Optionally update the memoir with the response
-        // state.currentMemoir = action.payload.memoir;
+        state.currentMemoir = action.payload.memoir;
       })
       .addCase(updateMemoirTimeline.rejected, (state, action) => {
         state.loading = false;
