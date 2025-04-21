@@ -7,7 +7,6 @@ import {
   updateMemoirTimeline,
   updateChaptersOrder,
   updateEvents,
-  addEvent,
   addChapter,
 } from '../store/memoirSlice';
 
