@@ -1,5 +1,4 @@
-// apps/web/src/components/TimelineBoard.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent } from './ui/card';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,121 +7,206 @@ import {
   updateMemoirTimeline,
   updateChaptersOrder,
   updateEvents,
+  addEvent,
+  addChapter,
 } from '../store/memoirSlice';
 
-/**
- * TimelineBoard Component
- * Provides drag-and-drop interface for memoir events organization
- *
- * @component
- * @param {String} memoirId - ID of the memoir to display
- * @returns {JSX.Element} Timeline board interface
- */
 export default function TimelineBoard({ memoirId }) {
   const dispatch = useDispatch();
   const { currentMemoir, loading, error } = useSelector(
     (state) => state.memoir,
   );
 
+  // State for event creation
+  const [newEventChapter, setNewEventChapter] = useState(null);
+  const [newEventTitle, setNewEventTitle] = useState('');
+
+  // State for chapter creation
+  const [isAddingChapter, setIsAddingChapter] = useState(false);
+  const [newChapterTitle, setNewChapterTitle] = useState('');
+
   // Fetch memoir data on component mount
   useEffect(() => {
     dispatch(fetchMemoir(memoirId));
   }, [dispatch, memoirId]);
 
+  // Handle drag and drop operations
   const onDragEnd = (result) => {
-    if (!currentMemoir) return;
-
     const { source, destination, type } = result;
-    if (!destination) return;
 
-    // Handle chapter reordering
-    if (type === 'COLUMN') {
-      const items = Array.from(currentMemoir.chapters);
-      const [removed] = items.splice(source.index, 1);
-      items.splice(destination.index, 0, removed);
-
-      // Update state
-      dispatch(updateChaptersOrder(items));
-
-      // Persist changes
-      dispatch(
-        updateMemoirTimeline({
-          ...currentMemoir,
-          chapters: items,
-        }),
-      );
-
+    // If there's no destination or item dropped to original position
+    if (
+      !destination ||
+      (source.droppableId === destination.droppableId &&
+        source.index === destination.index)
+    ) {
       return;
     }
 
-    // Handle event reordering/moving
-    const sourceCol = currentMemoir.chapters.find(
-      (c) => c._id === source.droppableId,
-    );
-    const destCol = currentMemoir.chapters.find(
-      (c) => c._id === destination.droppableId,
-    );
-
-    if (!sourceCol || !destCol) return;
-
-    const sourceItems = Array.from(sourceCol.events);
-    const [moved] = sourceItems.splice(source.index, 1);
-
-    // If moving within the same column
-    if (sourceCol._id === destCol._id) {
-      sourceItems.splice(destination.index, 0, moved);
-
-      // Update state
-      dispatch(
-        updateEvents({
-          sourceColId: sourceCol._id,
-          destColId: destCol._id,
-          sourceItems,
-          destItems: sourceItems,
-        }),
-      );
-
-      // Persist changes
-      const updatedChapters = currentMemoir.chapters.map((col) =>
-        col._id === sourceCol._id ? { ...col, events: sourceItems } : col,
-      );
+    // Handle chapter reordering (columns)
+    if (type === 'COLUMN') {
+      const reorderedChapters = Array.from(currentMemoir.chapters);
+      const [removed] = reorderedChapters.splice(source.index, 1);
+      reorderedChapters.splice(destination.index, 0, removed);
 
       dispatch(
         updateMemoirTimeline({
           ...currentMemoir,
-          chapters: updatedChapters,
+          chapters: reorderedChapters,
         }),
       );
+
+      // Dispatch the updateChaptersOrder action
+      dispatch(updateChaptersOrder(reorderedChapters));
+      return;
     }
-    // If moving between columns
-    else {
-      const destItems = Array.from(destCol.events);
-      destItems.splice(destination.index, 0, moved);
 
-      // Update state
-      dispatch(
-        updateEvents({
-          sourceColId: sourceCol._id,
-          destColId: destCol._id,
-          sourceItems,
-          destItems,
-        }),
-      );
+    // Handle event reordering (cards)
+    const sourceChapter = currentMemoir.chapters.find(
+      (chapter) => chapter._id === source.droppableId,
+    );
+    const destChapter = currentMemoir.chapters.find(
+      (chapter) => chapter._id === destination.droppableId,
+    );
 
-      // Persist changes
-      const updatedChapters = currentMemoir.chapters.map((col) => {
-        if (col._id === sourceCol._id) return { ...col, events: sourceItems };
-        if (col._id === destCol._id) return { ...col, events: destItems };
-        return col;
-      });
+    // If source or destination chapter not found
+    if (!sourceChapter || !destChapter) return;
 
-      dispatch(
-        updateMemoirTimeline({
-          ...currentMemoir,
-          chapters: updatedChapters,
-        }),
-      );
-    }
+    // Clone the chapters to work with
+    const sourceItems = [...sourceChapter.events];
+    const destItems =
+      source.droppableId === destination.droppableId
+        ? sourceItems
+        : [...destChapter.events];
+
+    // Remove the item from the source
+    const [removed] = sourceItems.splice(source.index, 1);
+
+    // Add the item to the destination
+    destItems.splice(
+      destination.index,
+      0,
+      source.droppableId === destination.droppableId ? removed : { ...removed },
+    );
+
+    // Create updated chapters array
+    const updatedChapters = currentMemoir.chapters.map((chapter) => {
+      if (chapter._id === source.droppableId) {
+        return { ...chapter, events: sourceItems };
+      }
+      if (
+        chapter._id === destination.droppableId &&
+        source.droppableId !== destination.droppableId
+      ) {
+        return { ...chapter, events: destItems };
+      }
+      return chapter;
+    });
+
+    // Update the memoir with the new chapter/event structure
+    dispatch(
+      updateMemoirTimeline({
+        ...currentMemoir,
+        chapters: updatedChapters,
+      }),
+    );
+
+    // Additionally, dispatch to update events (for potential optimistic UI updates)
+    dispatch(
+      updateEvents({
+        sourceColId: source.droppableId,
+        destColId: destination.droppableId,
+        sourceItems,
+        destItems,
+      }),
+    );
+  };
+
+  // Event handlers for new events
+  const handleShowEventInput = (chapterId) => {
+    setNewEventChapter(chapterId);
+    setNewEventTitle('');
+  };
+
+  const handleCancelNewEvent = () => {
+    setNewEventChapter(null);
+    setNewEventTitle('');
+  };
+
+  const handleSaveNewEvent = (chapterId) => {
+    if (!newEventTitle.trim() || !currentMemoir) return;
+
+    const chapterIndex = currentMemoir.chapters.findIndex(
+      (c) => c._id === chapterId,
+    );
+    if (chapterIndex === -1) return;
+
+    // Create the updated chapters array with the new event
+    const updatedChapters = currentMemoir.chapters.map((chapter, index) => {
+      if (index === chapterIndex) {
+        return {
+          ...chapter,
+          events: [
+            ...chapter.events,
+            {
+              // Let backend generate the ID - don't specify one
+              title: newEventTitle,
+              content: '',
+            },
+          ],
+        };
+      }
+      return chapter;
+    });
+
+    // Update memoir with new chapter structure
+    dispatch(
+      updateMemoirTimeline({
+        ...currentMemoir,
+        chapters: updatedChapters,
+      }),
+    );
+
+    // Reset the input state
+    setNewEventChapter(null);
+    setNewEventTitle('');
+  };
+
+  // Chapter creation handlers
+  const handleShowChapterInput = () => {
+    setIsAddingChapter(true);
+    setNewChapterTitle('');
+  };
+
+  const handleCancelNewChapter = () => {
+    setIsAddingChapter(false);
+    setNewChapterTitle('');
+  };
+
+  const handleSaveNewChapter = () => {
+    if (!newChapterTitle.trim() || !currentMemoir) return;
+
+    // Create new chapter object with title and empty events array
+    const newChapter = {
+      title: newChapterTitle,
+      events: [], // Start with an empty events array
+    };
+
+    // Add chapter to the memoir
+    dispatch(addChapter());
+
+    const updatedChapters = [...currentMemoir.chapters, newChapter];
+
+    dispatch(
+      updateMemoirTimeline({
+        ...currentMemoir,
+        chapters: updatedChapters,
+      }),
+    );
+
+    // Reset the input state
+    setIsAddingChapter(false);
+    setNewChapterTitle('');
   };
 
   if (loading) return <p>Loading memoir...</p>;
@@ -130,70 +214,196 @@ export default function TimelineBoard({ memoirId }) {
   if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
-        {(provided) => (
-          <div
-            className='flex gap-6 overflow-auto'
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            {currentMemoir.chapters.map((chapter, index) => (
-              <Draggable
-                key={chapter._id}
-                draggableId={chapter._id}
-                index={index}
-              >
-                {(provided) => (
-                  <div
-                    className='w-64 flex-shrink-0'
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                  >
-                    <h2
-                      className='text-lg font-semibold mb-2'
-                      {...provided.dragHandleProps}
+    <div className='space-y-4'>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
+          {(provided) => (
+            <div
+              className='flex gap-6 overflow-auto pb-4'
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {currentMemoir.chapters.map((chapter, index) => (
+                <Draggable
+                  key={chapter._id}
+                  draggableId={chapter._id}
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      className='w-64 flex-shrink-0'
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
                     >
-                      {chapter.title}
-                    </h2>
-                    <Droppable droppableId={chapter._id} type='CARD'>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className='space-y-3'
+                      <div className='flex justify-between items-center mb-2'>
+                        <h2
+                          className='text-lg font-semibold'
+                          {...provided.dragHandleProps}
                         >
-                          {chapter.events.map((event, idx) => (
-                            <Draggable
-                              key={event._id}
-                              draggableId={event._id}
-                              index={idx}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                >
-                                  <Card variant='muted'>
-                                    <CardContent>{event.title}</CardContent>
-                                  </Card>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
+                          {chapter.title}
+                        </h2>
+                      </div>
+
+                      <Droppable droppableId={chapter._id} type='CARD'>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className='space-y-3'
+                          >
+                            {chapter.events.map((event, idx) => (
+                              <Draggable
+                                key={event._id}
+                                draggableId={event._id}
+                                index={idx}
+                              >
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    <Card variant='muted'>
+                                      <CardContent>{event.title}</CardContent>
+                                    </Card>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+
+                            {/* New Event Input Form */}
+                            {newEventChapter === chapter._id && (
+                              <Card variant='muted'>
+                                <CardContent className='p-3'>
+                                  <input
+                                    type='text'
+                                    value={newEventTitle}
+                                    onChange={(e) =>
+                                      setNewEventTitle(e.target.value)
+                                    }
+                                    placeholder='Enter event title'
+                                    className='w-full border rounded px-2 py-1 text-sm mb-2'
+                                    autoFocus
+                                  />
+                                  <div className='flex justify-end space-x-2'>
+                                    <button
+                                      onClick={handleCancelNewEvent}
+                                      className='px-2 py-1 text-xs text-gray-600 border rounded hover:bg-gray-100'
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleSaveNewEvent(chapter._id)
+                                      }
+                                      className='px-2 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700'
+                                    >
+                                      Save
+                                    </button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            )}
+
+                            {provided.placeholder}
+
+                            {/* Add Event Button Card */}
+                            {newEventChapter !== chapter._id && (
+                              <Card
+                                variant='muted'
+                                className='cursor-pointer hover:bg-gray-100 transition-colors'
+                                onClick={() =>
+                                  handleShowEventInput(chapter._id)
+                                }
+                              >
+                                <CardContent className='flex justify-center items-center p-3'>
+                                  <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-6 w-6 text-gray-400'
+                                    fill='none'
+                                    viewBox='0 0 24 24'
+                                    stroke='currentColor'
+                                  >
+                                    <path
+                                      strokeLinecap='round'
+                                      strokeLinejoin='round'
+                                      strokeWidth={2}
+                                      d='M12 4v16m8-8H4'
+                                    />
+                                  </svg>
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+
+              {/* Add Chapter Section */}
+              <div className='w-64 flex-shrink-0'>
+                {isAddingChapter ? (
+                  <Card variant='muted'>
+                    <CardContent className='p-4'>
+                      <input
+                        type='text'
+                        value={newChapterTitle}
+                        onChange={(e) => setNewChapterTitle(e.target.value)}
+                        placeholder='Enter chapter title'
+                        className='w-full border rounded px-3 py-2 text-sm mb-3'
+                        autoFocus
+                      />
+                      <div className='flex justify-end space-x-2'>
+                        <button
+                          onClick={handleCancelNewChapter}
+                          className='px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100'
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveNewChapter}
+                          className='px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700'
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card
+                    variant='muted'
+                    className='h-32 cursor-pointer hover:bg-gray-100 transition-colors'
+                    onClick={handleShowChapterInput}
+                  >
+                    <CardContent className='flex justify-center items-center h-full'>
+                      <div className='text-center'>
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          className='h-8 w-8 text-gray-400 mx-auto'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M12 4v16m8-8H4'
+                          />
+                        </svg>
+                        <p className='text-gray-500 mt-2'>Add Chapter</p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+              </div>
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 }
