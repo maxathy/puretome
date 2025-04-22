@@ -285,12 +285,14 @@ export default function TimelineBoard({ memoirId }) {
                                     }
                                     placeholder='Enter event title'
                                     className='w-full border rounded px-2 py-1 text-sm mb-2'
+                                    data-testid={`new-event-input-${chapter._id}`}
                                     autoFocus
                                   />
                                   <div className='flex justify-end space-x-2'>
                                     <button
                                       onClick={handleCancelNewEvent}
                                       className='px-2 py-1 text-xs text-gray-600 border rounded hover:bg-gray-100'
+                                      data-testid={`cancel-event-button-${chapter._id}`}
                                     >
                                       Cancel
                                     </button>
@@ -299,6 +301,7 @@ export default function TimelineBoard({ memoirId }) {
                                         handleSaveNewEvent(chapter._id)
                                       }
                                       className='px-2 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700'
+                                      data-testid={`save-event-button-${chapter._id}`}
                                     >
                                       Save
                                     </button>

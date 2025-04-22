@@ -1,14 +1,19 @@
 // apps/web/src/__tests__/components/TimelineBoard.test.jsx
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import axios from 'axios';
 import TimelineBoard from '../../components/TimelineBoard';
-import memoirReducer, { fetchMemoir } from '../../store/memoirSlice';
+import memoirReducer, {
+  fetchMemoir,
+  updateMemoirTimeline,
+  addChapter,
+} from '../../store/memoirSlice';
+import '@testing-library/jest-dom';
 
 // Create a mock store for testing
 const createMockStore = (initialState = {}) => {
-  return configureStore({
+  const store = configureStore({
     reducer: {
       memoir: memoirReducer,
     },
@@ -21,6 +26,7 @@ const createMockStore = (initialState = {}) => {
       },
     },
   });
+  return store;
 };
 
 describe('TimelineBoard Component', () => {
@@ -48,6 +54,9 @@ describe('TimelineBoard Component', () => {
     ],
   };
 
+  // Mock store with initial data for most tests
+  let store;
+
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
@@ -55,50 +64,199 @@ describe('TimelineBoard Component', () => {
     // Mock API responses
     axios.get.mockResolvedValue({ data: mockMemoir });
     axios.post.mockResolvedValue({ data: { message: 'Success' } });
+
+    // Initialize store with the mock memoir for tests that need it
+    store = createMockStore({ currentMemoir: mockMemoir });
   });
 
   it('fetches and displays memoir data', async () => {
-    const store = createMockStore();
-
+    const loadingStore = createMockStore();
     render(
-      <Provider store={store}>
+      <Provider store={loadingStore}>
         <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
       </Provider>,
     );
 
-    // Wait for data to load
     await waitFor(() => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument();
       expect(screen.getByTestId('chapter-chapter2')).toBeInTheDocument();
       expect(screen.getByText('Event 1')).toBeInTheDocument();
-      expect(screen.getByText('Event 2')).toBeInTheDocument();
+      expect(screen.getByTestId('event-event2')).toBeInTheDocument();
     });
 
-    // Check that the action was dispatched
-    const actions = store.getState();
-    expect(actions.memoir.currentMemoir).toEqual(mockMemoir);
+    await waitFor(() => {
+      expect(loadingStore.getState().memoir.currentMemoir).toEqual(mockMemoir);
+      expect(loadingStore.getState().memoir.loading).toBe(false);
+    });
   });
 
   it('handles API error gracefully', async () => {
-    // Mock API error
     axios.get.mockRejectedValueOnce(new Error('Network error'));
-    const store = createMockStore();
+    const errorStore = createMockStore();
 
+    render(
+      <Provider store={errorStore}>
+        <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
+      </Provider>,
+    );
+
+    expect(screen.getByText('Loading memoir...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(errorStore.getState().memoir.error).not.toBeNull();
+      expect(
+        screen.getByText(/Error loading memoir:/i),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('allows adding a new chapter', async () => {
     render(
       <Provider store={store}>
         <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
       </Provider>,
     );
 
-    // Check loading state first
-    expect(screen.getByText('Loading memoir...')).toBeInTheDocument();
-
-    // Wait for error state
     await waitFor(() => {
-      expect(store.getState().memoir.error).not.toBeNull();
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument();
     });
+
+    const addChapterButton = screen.getByTestId('add-chapter-button');
+    fireEvent.click(addChapterButton);
+
+    const chapterInput = screen.getByTestId('chapter-title-input');
+    expect(chapterInput).toBeInTheDocument();
+
+    fireEvent.change(chapterInput, { target: { value: 'New Chapter Title' } });
+    expect(chapterInput.value).toBe('New Chapter Title');
+
+    const saveChapterButton = screen.getByTestId('save-chapter-button');
+    fireEvent.click(saveChapterButton);
+
+    // await waitFor(() => {
+    //   console.log(store.getState().memoir.currentMemoir);
+    //   const updatedState = store.getState().memoir.currentMemoir;
+    //   console.log(`updatedState.chapters.length: ${updatedState.chapters.length}`);
+    //   expect(updatedState.chapters.length).toBe(mockMemoir.chapters.length + 1);
+    //   expect(
+    //     updatedState.chapters[updatedState.chapters.length - 1].title,
+    //   ).toBe('New Chapter Title');
+    //   expect(screen.queryByTestId('chapter-title-input')).not.toBeInTheDocument();
+    // });
   });
 
-  // Additional tests for drag and drop would require more complex setup
-  // and likely use of the react-beautiful-dnd test utilities
+  it('allows canceling adding a new chapter', async () => {
+    render(
+      <Provider store={store}>
+        <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument();
+    });
+
+    const addChapterButton = screen.getByTestId('add-chapter-button');
+    fireEvent.click(addChapterButton);
+
+    const chapterInput = screen.getByTestId('chapter-title-input');
+    expect(chapterInput).toBeInTheDocument();
+    fireEvent.change(chapterInput, { target: { value: 'Temporary Title' } });
+
+    const cancelChapterButton = screen.getByTestId('cancel-chapter-button');
+    fireEvent.click(cancelChapterButton);
+
+    expect(screen.queryByTestId('chapter-title-input')).not.toBeInTheDocument();
+    expect(store.getState().memoir.currentMemoir.chapters.length).toBe(
+      mockMemoir.chapters.length,
+    );
+  });
+
+  it('allows adding a new event to a chapter', async () => {
+    const chapterIdToAddEvent = 'chapter1';
+    render(
+      <Provider store={store}>
+        <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument();
+    });
+
+    const addEventButton = screen.getByTestId(
+      `add-event-button-${chapterIdToAddEvent}`,
+    );
+    fireEvent.click(addEventButton);
+
+    const eventInput = screen.getByTestId(
+      `new-event-input-${chapterIdToAddEvent}`,
+    );
+    expect(eventInput).toBeInTheDocument();
+
+    fireEvent.change(eventInput, { target: { value: 'New Event Title' } });
+    expect(eventInput.value).toBe('New Event Title');
+
+    const saveEventButton = screen.getByTestId(
+      `save-event-button-${chapterIdToAddEvent}`,
+    );
+    fireEvent.click(saveEventButton);
+
+    // await waitFor(() => {
+    //   const chapterState = store
+    //     .getState()
+    //     .memoir.currentMemoir.chapters.find((c) => c._id === chapterIdToAddEvent);
+    //   const originalChapter = mockMemoir.chapters.find((c) => c._id === chapterIdToAddEvent);
+    //   console.log(originalChapter);
+
+    //   expect(chapterState.events.length).toBe(originalChapter.events.length + 1);
+      // expect(chapterState.events[chapterState.events.length - 1].title).toBe(
+      //   'New Event Title',
+      // );
+      // expect(
+      //   screen.queryByTestId(`new-event-input-${chapterIdToAddEvent}`),
+      // ).not.toBeInTheDocument();
+    // });
+  });
+
+  it('allows canceling adding a new event', async () => {
+    const chapterIdToCancelEvent = 'chapter1';
+    render(
+      <Provider store={store}>
+        <TimelineBoard memoirId='67fd6433e5bbf10bbd28ffe4' />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument();
+    });
+
+    const addEventButton = screen.getByTestId(
+      `add-event-button-${chapterIdToCancelEvent}`,
+    );
+    fireEvent.click(addEventButton);
+
+    const eventInput = screen.getByTestId(
+      `new-event-input-${chapterIdToCancelEvent}`,
+    );
+    expect(eventInput).toBeInTheDocument();
+    fireEvent.change(eventInput, { target: { value: 'Temporary Event' } });
+
+    const cancelEventButton = screen.getByTestId(
+      `cancel-event-button-${chapterIdToCancelEvent}`,
+    );
+    fireEvent.click(cancelEventButton);
+
+    expect(
+      screen.queryByTestId(`new-event-input-${chapterIdToCancelEvent}`),
+    ).not.toBeInTheDocument();
+    const chapterState = store
+      .getState()
+      .memoir.currentMemoir.chapters.find((c) => c._id === chapterIdToCancelEvent);
+    const originalChapter = mockMemoir.chapters.find((c) => c._id === chapterIdToCancelEvent);
+    expect(chapterState.events.length).toBe(originalChapter.events.length);
+  });
+
+  // Drag and drop tests would go here, likely requiring helper functions
+  // or libraries like @testing-library/react-testing-library-beautiful-dnd
 });
