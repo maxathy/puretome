@@ -214,7 +214,7 @@ export default function TimelineBoard({ memoirId }) {
 
   return (
     <div className='space-y-4'>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd} data-testid="drag-drop-context">
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (
             <div
@@ -233,11 +233,13 @@ export default function TimelineBoard({ memoirId }) {
                       className='w-64 flex-shrink-0'
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      data-testid={`chapter-${chapter._id}`}
                     >
                       <div className='flex justify-between items-center mb-2'>
                         <h2
                           className='text-lg font-semibold'
                           {...provided.dragHandleProps}
+                          data-testid={`chapter-title-${chapter._id}`}
                         >
                           {chapter.title}
                         </h2>
@@ -261,6 +263,7 @@ export default function TimelineBoard({ memoirId }) {
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
+                                    data-testid={`event-${event._id}`}
                                   >
                                     <Card variant='muted'>
                                       <CardContent>{event.title}</CardContent>
@@ -314,6 +317,7 @@ export default function TimelineBoard({ memoirId }) {
                                 onClick={() =>
                                   handleShowEventInput(chapter._id)
                                 }
+                                data-testid={`add-event-button-${chapter._id}`}
                               >
                                 <CardContent className='flex justify-center items-center p-3'>
                                   <svg
@@ -345,7 +349,7 @@ export default function TimelineBoard({ memoirId }) {
               {/* Add Chapter Section */}
               <div className='w-64 flex-shrink-0'>
                 {isAddingChapter ? (
-                  <Card variant='muted'>
+                  <Card variant='muted' data-testid="add-chapter-form">
                     <CardContent className='p-4'>
                       <input
                         type='text'
@@ -354,17 +358,20 @@ export default function TimelineBoard({ memoirId }) {
                         placeholder='Enter chapter title'
                         className='w-full border rounded px-3 py-2 text-sm mb-3'
                         autoFocus
+                        data-testid="chapter-title-input"
                       />
                       <div className='flex justify-end space-x-2'>
                         <button
                           onClick={handleCancelNewChapter}
                           className='px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100'
+                          data-testid="cancel-chapter-button"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleSaveNewChapter}
                           className='px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700'
+                          data-testid="save-chapter-button"
                         >
                           Save
                         </button>
@@ -376,6 +383,7 @@ export default function TimelineBoard({ memoirId }) {
                     variant='muted'
                     className='h-32 cursor-pointer hover:bg-gray-100 transition-colors'
                     onClick={handleShowChapterInput}
+                    data-testid='add-chapter-button'
                   >
                     <CardContent className='flex justify-center items-center h-full'>
                       <div className='text-center'>

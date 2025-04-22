@@ -37,6 +37,14 @@ describe('TimelineBoard Component', () => {
           { _id: 'event2', title: 'Event 2', content: 'Description 2' },
         ],
       },
+      {
+        _id: 'chapter2',
+        title: 'Chapter 2',
+        events: [
+          { _id: 'event3', title: 'Event 3', content: 'Description 3' },
+          { _id: 'event4', title: 'Event 4', content: 'Description 4' },
+        ],
+      },
     ],
   };
 
@@ -61,6 +69,7 @@ describe('TimelineBoard Component', () => {
     // Wait for data to load
     await waitFor(() => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument();
+      expect(screen.getByTestId('chapter-chapter2')).toBeInTheDocument();
       expect(screen.getByText('Event 1')).toBeInTheDocument();
       expect(screen.getByText('Event 2')).toBeInTheDocument();
     });
