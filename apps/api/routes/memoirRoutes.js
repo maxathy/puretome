@@ -18,9 +18,15 @@ router.post('/', authMiddleware, authorizeRoles('author'), async (req, res) => {
   try {
     const { _id, ...memoirData } = req.body;
 
+    // Ensure the author is set to the logged-in user
+    const authorContext = {
+      ...memoirData,
+      author: req.user.id, // Add/overwrite author field
+    };
+
     const updatedMemoir = await Memoir.findOneAndUpdate(
       { _id: _id || new ObjectId() },
-      { ...memoirData },
+      authorContext, // Use the modified data object
       {
         new: true,
         upsert: true,
