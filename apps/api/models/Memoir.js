@@ -20,6 +20,7 @@ const EventSchema = new mongoose.Schema({
 
 const ChapterSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  description: { type: String },
   events: [EventSchema],
 });
 

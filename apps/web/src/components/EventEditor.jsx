@@ -85,6 +85,7 @@ const EventEditor = ({ event, isOpen, onClose, onSave }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
+      <h2 className="text-xl font-semibold mb-4">Edit Event</h2>
       {/* Title Input */}
       <div className="mb-4">
 

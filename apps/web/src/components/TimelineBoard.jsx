@@ -10,6 +10,7 @@ import {
   addChapter,
 } from '../store/memoirSlice';
 import EventEditor from './EventEditor';
+import ChapterEditor from './ChapterEditor';
 
 export default function TimelineBoard({ memoirId }) {
   const dispatch = useDispatch();
@@ -27,6 +28,8 @@ export default function TimelineBoard({ memoirId }) {
 
   // State for event editing modal
   const [editingEvent, setEditingEvent] = useState(null);
+  // State for chapter editing modal
+  const [editingChapter, setEditingChapter] = useState(null);
 
   // Fetch memoir data on component mount
   useEffect(() => {
@@ -247,6 +250,48 @@ export default function TimelineBoard({ memoirId }) {
     handleCloseEventEditor(); // Close modal after saving
   };
 
+  // Chapter Editor Modal Handlers
+  const handleOpenChapterEditor = (chapter) => {
+    setEditingChapter(chapter);
+  };
+
+  const handleCloseChapterEditor = () => {
+    setEditingChapter(null);
+  };
+
+  const handleSaveChapter = (updatedChapter) => {
+      if (!currentMemoir || !updatedChapter?._id) return;
+
+      // Find the index of the chapter being updated
+      const chapterIndex = currentMemoir.chapters.findIndex(ch => ch._id === updatedChapter._id);
+      if (chapterIndex === -1) return; // Chapter not found
+
+      // Create a new chapters array with the updated chapter title and description
+      const updatedChapters = currentMemoir.chapters.map((chapter, index) => {
+          if (index === chapterIndex) {
+              // Update both title and description from the saved chapter data
+              return { 
+                  ...chapter, 
+                  title: updatedChapter.title, 
+                  description: updatedChapter.description 
+              }; 
+          }
+          return chapter;
+      });
+
+      // Check if chapters were actually updated (title or description changed)
+      if (JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)) {
+          dispatch(
+            updateMemoirTimeline({
+              ...currentMemoir,
+              chapters: updatedChapters,
+            }),
+          );
+      }
+
+      handleCloseChapterEditor(); // Close modal after saving
+  };
+
   if (loading) return <p>Loading memoir...</p>;
   if (error) return <p>Error loading memoir: {error}</p>;
   if (!currentMemoir) return <p>No memoir found</p>;
@@ -277,9 +322,10 @@ export default function TimelineBoard({ memoirId }) {
                     >
                       <div className='flex justify-between items-center mb-2'>
                         <h2
-                          className='text-lg font-semibold'
+                          className='text-lg font-semibold cursor-pointer hover:text-blue-600'
                           {...provided.dragHandleProps}
                           data-testid={`chapter-title-${chapter._id}`}
+                          onClick={() => handleOpenChapterEditor(chapter)}
                         >
                           {chapter.title}
                         </h2>
@@ -463,6 +509,14 @@ export default function TimelineBoard({ memoirId }) {
         isOpen={!!editingEvent}
         onClose={handleCloseEventEditor}
         onSave={handleSaveEvent}
+      />
+
+      {/* Chapter Editor Modal */}
+      <ChapterEditor
+        chapter={editingChapter}
+        isOpen={!!editingChapter}
+        onClose={handleCloseChapterEditor}
+        onSave={handleSaveChapter}
       />
     </div>
   );
