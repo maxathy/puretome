@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate, useParams } from 'react-router-dom';
 import TimelineBoard from '../components/TimelineBoard';
-
+import MemoirPicker from '../components/MemoirPicker';
 const Editor = () => {
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Editor = () => {
           {memoirId ? (
             <TimelineBoard memoirId={memoirId} />
           ) : (
-            <div>Please select a memoir to view</div>
+            <MemoirPicker />
           )}
         </div>
    

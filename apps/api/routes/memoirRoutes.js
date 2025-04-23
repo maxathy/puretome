@@ -81,7 +81,10 @@ router.delete(
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     // noinspection JSCheckFunctionSignatures
-    const memoirs = await Memoir.findOne({ _id: req.params.id })
+    const memoirs = await Memoir.findOne({
+      _id: req.params.id,
+      author: req.user.id,
+    })
       .populate({ path: 'author', select: ['-password'] })
       .populate({ path: 'collaborators', select: '-password' });
     res.json(memoirs);

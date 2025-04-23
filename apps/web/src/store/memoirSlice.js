@@ -22,6 +22,24 @@ export const fetchMemoir = createAsyncThunk(
 );
 
 /**
+ * Fetch all memoirs for the logged-in user
+ */
+export const fetchUserMemoirs = createAsyncThunk(
+  'memoir/fetchUserMemoirs',
+  async (_, { rejectWithValue }) => { // No argument needed for this thunk
+    try {
+      const response = await axios.get('/api/memoir'); // Assuming token is handled by axios interceptor or sent manually if needed
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user memoirs:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch user memoirs',
+      );
+    }
+  },
+);
+
+/**
  * Update a memoir's timeline (chapters and events structure)
  * @param {Object} updatedMemoir - Memoir object with updated structure
  */
@@ -73,6 +91,11 @@ const memoirSlice = createSlice({
     // Current memoir data (used for viewing/editing)
     currentMemoir: null,
     currentId: null,
+
+    // List of user's memoirs (for MemoirPicker)
+    userMemoirs: [],
+    userMemoirsLoading: false,
+    userMemoirsError: null,
 
     // Form data for memoir creation
     title: '',
@@ -166,6 +189,21 @@ const memoirSlice = createSlice({
       .addCase(fetchMemoir.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Handle fetchUserMemoirs
+      .addCase(fetchUserMemoirs.pending, (state) => {
+        state.userMemoirsLoading = true;
+        state.userMemoirsError = null;
+      })
+      .addCase(fetchUserMemoirs.fulfilled, (state, action) => {
+        state.userMemoirsLoading = false;
+        state.userMemoirs = action.payload;
+        state.userMemoirsError = null;
+      })
+      .addCase(fetchUserMemoirs.rejected, (state, action) => {
+        state.userMemoirsLoading = false;
+        state.userMemoirsError = action.payload;
       })
 
       // Handle updateMemoirTimeline
