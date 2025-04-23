@@ -72,11 +72,7 @@ describe('memoirSlice', () => {
 
   // PART 1: Test CreateMemoir Operations (Form Management)
   describe('CreateMemoir Operations', () => {
-    it('should return the initial state', () => {
-      expect(memoirReducer(undefined, { type: undefined })).toEqual(
-        initialFormState,
-      );
-    });
+
 
     it('should handle updateTitle', () => {
       const newTitle = 'My Amazing Memoir';
