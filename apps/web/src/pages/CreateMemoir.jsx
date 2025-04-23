@@ -5,17 +5,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   updateTitle,
   updateContent,
-  updateChapterTitle,
-  updateEvent,
-  addChapter,
-  addEvent,
   createMemoir,
   resetMemoir,
 } from '../store/memoirSlice';
 
 /**
  * CreateMemoir Component
- * Provides an interface for creating new memoirs with chapters and events
+ * Provides an interface for creating new memoirs with just title and description.
  * Uses Redux for state management and API interactions
  *
  * @component
@@ -25,14 +21,15 @@ const CreateMemoir = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Select memoir state from Redux store
-  const { title, content, chapters, loading, error, currentId } = useSelector(
+  // Select relevant memoir state from Redux store
+  const { title, content, loading, error, currentId } = useSelector(
     (state) => state.memoir,
   );
 
-  // Reset memoir form when component unmounts
+  // Reset relevant memoir form fields when component unmounts
   useEffect(() => {
     return () => {
+      // Reset only title and content if needed, or keep full reset
       dispatch(resetMemoir());
     };
   }, [dispatch]);
@@ -40,7 +37,7 @@ const CreateMemoir = () => {
   // Navigate to editor after successful creation
   useEffect(() => {
     if (currentId) {
-      navigate(`/editor/${currentId}`);
+      navigate(`/dashboard/${currentId}`);
     }
   }, [currentId, navigate]);
 
@@ -52,33 +49,19 @@ const CreateMemoir = () => {
     dispatch(updateContent(e.target.value));
   };
 
-  const handleChapterTitleChange = (index, e) => {
-    dispatch(updateChapterTitle({ index, title: e.target.value }));
-  };
-
-  const handleEventChange = (chapterIndex, eventIndex, field, value) => {
-    dispatch(updateEvent({ chapterIndex, eventIndex, field, value }));
-  };
-
-  const handleAddChapter = () => {
-    dispatch(addChapter());
-  };
-
-  const handleAddEvent = (chapterIndex) => {
-    dispatch(addEvent(chapterIndex));
-  };
-
   const handleSaveMemoir = () => {
     if (!title.trim()) {
-      // You could add form validation in Redux too
+      // Basic validation
       return;
     }
 
+    // Only send title and content
+    // The backend/API should handle creating a default chapter structure if necessary
     const memoirData = {
       title,
       content,
-      chapters,
       status: 'draft',
+      // chapters field removed
     };
 
     dispatch(createMemoir(memoirData));
@@ -123,103 +106,8 @@ const CreateMemoir = () => {
           value={content}
           onChange={handleContentChange}
           className='w-full border rounded px-3 py-2 h-32'
-          placeholder='Write a brief description of your memoir'
+          placeholder='Write a brief description of your memoir (optional)'
         />
-      </div>
-
-      <div className='mb-6'>
-        <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl font-semibold'>Chapters</h2>
-          <button
-            type='button'
-            onClick={handleAddChapter}
-            className='bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm'
-          >
-            Add Chapter
-          </button>
-        </div>
-
-        {chapters.map((chapter, chapterIndex) => (
-          <div key={chapterIndex} className='border rounded p-4 mb-4'>
-            <div className='mb-4'>
-              <label
-                htmlFor='chapterTitle'
-                className='block text-gray-700 font-medium mb-2'
-              >
-                Chapter Title
-              </label>
-              <input
-                id='chapterTitle'
-                type='text'
-                value={chapter.title}
-                onChange={(e) => handleChapterTitleChange(chapterIndex, e)}
-                className='w-full border rounded px-3 py-2'
-              />
-            </div>
-
-            <div className='mb-3'>
-              <div className='flex justify-between items-center mb-2'>
-                <h3 className='text-lg font-medium'>Events</h3>
-                <button
-                  type='button'
-                  onClick={() => handleAddEvent(chapterIndex)}
-                  className='bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm'
-                >
-                  Add Event
-                </button>
-              </div>
-
-              {chapter.events.map((event, eventIndex) => (
-                <div key={eventIndex} className='border rounded p-3 mb-3'>
-                  <div className='mb-2'>
-                    <label
-                      htmlFor='eventTitle'
-                      className='block text-gray-700 text-sm font-medium mb-1'
-                    >
-                      Event Title
-                    </label>
-                    <input
-                      id='eventTitle'
-                      type='text'
-                      value={event.title}
-                      onChange={(e) =>
-                        handleEventChange(
-                          chapterIndex,
-                          eventIndex,
-                          'title',
-                          e.target.value,
-                        )
-                      }
-                      className='w-full border rounded px-3 py-1 text-sm'
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor='eventDescription'
-                      className='block text-gray-700 text-sm font-medium mb-1'
-                    >
-                      Event Description
-                    </label>
-                    <textarea
-                      id='eventDescription'
-                      value={event.content}
-                      onChange={(e) =>
-                        handleEventChange(
-                          chapterIndex,
-                          eventIndex,
-                          'content',
-                          e.target.value,
-                        )
-                      }
-                      className='w-full border rounded px-3 py-1 h-16 text-sm'
-                      placeholder='Describe what happened in this event...'
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
 
       <div className='flex justify-end mt-6'>
@@ -233,12 +121,12 @@ const CreateMemoir = () => {
         <button
           type='button'
           onClick={handleSaveMemoir}
-          disabled={loading}
+          disabled={loading || !title.trim()}
           className={`bg-blue-600 text-white px-6 py-2 rounded ${
-            loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+            loading || !title.trim() ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
           }`}
         >
-          {loading ? 'Saving...' : 'Save Memoir'}
+          {loading ? 'Saving...' : 'Create Memoir'}
         </button>
       </div>
     </div>
