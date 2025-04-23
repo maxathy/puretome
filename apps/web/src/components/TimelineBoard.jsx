@@ -11,6 +11,8 @@ import {
 } from '../store/memoirSlice';
 import EventEditor from './EventEditor';
 import ChapterEditor from './ChapterEditor';
+import Modal from './ui/modal';
+import MemoirForm from './MemoirForm';
 
 export default function TimelineBoard({ memoirId }) {
   const dispatch = useDispatch();
@@ -30,6 +32,8 @@ export default function TimelineBoard({ memoirId }) {
   const [editingEvent, setEditingEvent] = useState(null);
   // State for chapter editing modal
   const [editingChapter, setEditingChapter] = useState(null);
+  // State for memoir editing modal
+  const [isEditingMemoir, setIsEditingMemoir] = useState(false);
 
   // Fetch memoir data on component mount
   useEffect(() => {
@@ -292,13 +296,28 @@ export default function TimelineBoard({ memoirId }) {
       handleCloseChapterEditor(); // Close modal after saving
   };
 
+  // Memoir Editor Modal Handlers
+  const handleOpenMemoirEditor = () => {
+      setIsEditingMemoir(true);
+  };
+
+  const handleCloseMemoirEditor = () => {
+      setIsEditingMemoir(false);
+  };
+
   if (loading) return <p>Loading memoir...</p>;
   if (error) return <p>Error loading memoir: {error}</p>;
   if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
     <div className='space-y-4'>
-      <h1 className='text-2xl font-bold mb-4'>{currentMemoir.title}</h1>
+      <h1 
+        className='text-2xl font-bold mb-4 cursor-pointer hover:text-blue-600'
+        onClick={handleOpenMemoirEditor}
+        title="Edit Memoir Title/Description"
+      >
+        {currentMemoir.title}
+      </h1>
       <DragDropContext onDragEnd={onDragEnd} data-testid="drag-drop-context">
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (
@@ -518,6 +537,21 @@ export default function TimelineBoard({ memoirId }) {
         onClose={handleCloseChapterEditor}
         onSave={handleSaveChapter}
       />
+
+      {/* Memoir Editor Modal */}
+      {isEditingMemoir && currentMemoir && (
+          <Modal 
+              isOpen={isEditingMemoir} 
+              onClose={handleCloseMemoirEditor} 
+            
+          >
+              <MemoirForm 
+                  memoirToEdit={currentMemoir} 
+                  onSaveComplete={handleCloseMemoirEditor}
+                  onCancel={handleCloseMemoirEditor}
+              />
+          </Modal>
+      )}
     </div>
   );
 }

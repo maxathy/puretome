@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserMemoirs } from '../store/memoirSlice';
 import { Card, CardContent } from './ui/card';
-import CreateMemoirForm from './CreateMemoirForm';
+import MemoirForm from './MemoirForm';
 
 /**
  * MemoirPicker Component
@@ -11,7 +11,7 @@ import CreateMemoirForm from './CreateMemoirForm';
  * Allows the user to select a memoir to navigate to the editor or create a new one.
  *
  * @component
- * @returns {JSX.Element} List of clickable memoir cards or the CreateMemoirForm
+ * @returns {JSX.Element} List of clickable memoir cards or the MemoirForm
  */
 const MemoirPicker = () => {
   const navigate = useNavigate();
@@ -61,8 +61,8 @@ const MemoirPicker = () => {
   // If showCreateForm is true, render the form instead of the picker
   if (showCreateForm) {
     // Optionally pass a function to hide the form on cancel/back
-    // e.g., <CreateMemoirForm onCancel={() => setShowCreateForm(false)} />
-    return <CreateMemoirForm />;
+    // e.g., <MemoirForm onCancel={() => setShowCreateForm(false)} />
+    return <MemoirForm />;
   }
 
   return (

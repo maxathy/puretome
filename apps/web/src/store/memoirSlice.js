@@ -59,6 +59,30 @@ export const updateMemoirTimeline = createAsyncThunk(
 );
 
 /**
+ * Update memoir details (title, content)
+ * @param {Object} memoirData - Object containing { _id, title, content }
+ */
+export const updateMemoirDetails = createAsyncThunk(
+  'memoir/updateDetails',
+  async (memoirData, { rejectWithValue }) => {
+    try {
+      if (!memoirData._id || !memoirData.title) {
+        return rejectWithValue('Memoir ID and title are required for update');
+      }
+      // Only send necessary fields for update
+      const { _id, title, content } = memoirData;
+      const response = await axios.post('/api/memoir', { _id, title, content });
+      return response.data; // Should return { message: 'Memoir saved', memoir: updatedMemoir }
+    } catch (error) {
+      console.error('Error updating memoir details:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update memoir details',
+      );
+    }
+  },
+);
+
+/**
  * Create a new memoir
  * @param {Object} memoirData - New memoir data
  */
@@ -219,6 +243,31 @@ const memoirSlice = createSlice({
       .addCase(updateMemoirTimeline.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Handle updateMemoirDetails
+      .addCase(updateMemoirDetails.pending, (state) => {
+        state.loading = true; // Use the general loading state
+        state.error = null;
+      })
+      .addCase(updateMemoirDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        if (state.currentMemoir && state.currentMemoir._id === action.payload.memoir._id) {
+            // Update currentMemoir if it's the one being edited
+            state.currentMemoir.title = action.payload.memoir.title;
+            state.currentMemoir.content = action.payload.memoir.content;
+        }
+        // Update the memoir in the userMemoirs list as well
+        const index = state.userMemoirs.findIndex(m => m._id === action.payload.memoir._id);
+        if (index !== -1) {
+            state.userMemoirs[index].title = action.payload.memoir.title;
+            state.userMemoirs[index].content = action.payload.memoir.content;
+        }
+        state.error = null;
+      })
+      .addCase(updateMemoirDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload; // Set the general error state
       })
 
       // Handle createMemoir
