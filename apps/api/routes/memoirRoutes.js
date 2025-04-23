@@ -84,4 +84,24 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * Get all memoirs by the logged-in user endpoint
+ * GET /api/memoir/my-memoirs
+ * Requires authentication
+ *
+ * @returns {Array<Object>} Array of memoir data with populated author and collaborators
+ */
+
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    // noinspection JSCheckFunctionSignatures
+    const memoirs = await Memoir.find({ author: req.user.id })
+      .populate({ path: 'author', select: ['-password'] })
+      .populate({ path: 'collaborators', select: '-password' });
+    res.json(memoirs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
