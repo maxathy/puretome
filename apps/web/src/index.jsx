@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import store from './store';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import Editor from './pages/Editor';
 import CreateMemoir from './pages/CreateMemoir';
 import axios from 'axios';
 import './index.css';
@@ -26,7 +26,7 @@ const App = () => (
         <Route path='/' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/create-memoir' element={<CreateMemoir />} />
-        <Route path='/dashboard/:memoirId' element={<Dashboard />} />
+        <Route path='/editor/:memoirId' element={<Editor />} />
       </Routes>
     </BrowserRouter>
   </Provider>

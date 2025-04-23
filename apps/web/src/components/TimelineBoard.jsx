@@ -212,7 +212,9 @@ export default function TimelineBoard({ memoirId }) {
   if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
+    
     <div className='space-y-4'>
+    <h1 className='text-2xl font-bold mb-4'>{currentMemoir.title}</h1>
       <DragDropContext onDragEnd={onDragEnd} data-testid="drag-drop-context">
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (

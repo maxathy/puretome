@@ -37,7 +37,7 @@ const CreateMemoir = () => {
   // Navigate to editor after successful creation
   useEffect(() => {
     if (currentId) {
-      navigate(`/dashboard/${currentId}`);
+      navigate(`/editor/${currentId}`);
     }
   }, [currentId, navigate]);
 
@@ -113,7 +113,7 @@ const CreateMemoir = () => {
       <div className='flex justify-end mt-6'>
         <button
           type='button'
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/editor')}
           className='border border-gray-300 text-gray-700 px-4 py-2 rounded mr-2'
         >
           Cancel

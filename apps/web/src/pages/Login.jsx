@@ -9,7 +9,7 @@ const LoginPage = () => {
     try {
       const res = await axios.post('/api/users/login', { email, password });
       localStorage.setItem('token', res.data.token);
-      window.location.href = '/dashboard';
+      window.location.href = '/editor';
     } catch (err) {
       alert('Login failed');
     }

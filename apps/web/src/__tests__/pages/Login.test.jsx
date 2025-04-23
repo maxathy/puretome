@@ -72,7 +72,7 @@ describe('Login Page', () => {
         'token',
         'fake-jwt-token',
       );
-      expect(mockLocation.href).toBe('/dashboard');
+      expect(mockLocation.href).toBe('/editor');
     });
   });
 
@@ -98,7 +98,7 @@ describe('Login Page', () => {
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith('Login failed');
       expect(window.localStorage.setItem).not.toHaveBeenCalled();
-      expect(mockLocation.href).not.toBe('/dashboard');
+      expect(mockLocation.href).not.toBe('/editor');
     });
 
     alertSpy.mockRestore();
