@@ -1,26 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-// Basic Modal Component (can be shared or replaced with UI library modal)
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex',
-      alignItems: 'center', justifyContent: 'center', zIndex: 1000
-    }}>
-      <div style={{
-        background: 'white', padding: '20px', borderRadius: '8px',
-        minWidth: '400px', maxWidth: '60%', // Adjusted size slightly
-      }}>
-        <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', fontSize: '1.5rem' }}>&times;</button>
-        {children}
-      </div>
-    </div>
-  );
-};
-Modal.displayName = 'Modal';
+import Modal from './ui/modal'; // Import the reusable modal
 
 /**
  * ChapterEditor Component
@@ -65,9 +44,12 @@ const ChapterEditor = ({ chapter, isOpen, onClose, onSave }) => {
   if (!isOpen || !chapter) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-xl font-semibold mb-4">Edit Chapter</h2>
-      
+    <Modal 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        title="Edit Chapter" 
+        className="min-w-[400px] max-w-[60%]" // Adjust width via className
+    >
       {/* Title Input */}
       <div className="mb-4">
         
