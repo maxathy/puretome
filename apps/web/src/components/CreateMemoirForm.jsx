@@ -1,4 +1,3 @@
-// apps/web/src/pages/CreateMemoir.jsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,14 +9,15 @@ import {
 } from '../store/memoirSlice';
 
 /**
- * CreateMemoir Component
- * Provides an interface for creating new memoirs with just title and description.
- * Uses Redux for state management and API interactions
+ * CreateMemoirForm Component
+ * Provides a form interface for creating new memoirs with title and description.
+ * Uses Redux for state management and API interactions.
+ * Navigates to the editor page upon successful creation.
  *
  * @component
  * @returns {JSX.Element} Form interface for memoir creation
  */
-const CreateMemoir = () => {
+const CreateMemoirForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -56,12 +56,10 @@ const CreateMemoir = () => {
     }
 
     // Only send title and content
-    // The backend/API should handle creating a default chapter structure if necessary
     const memoirData = {
       title,
       content,
       status: 'draft',
-      // chapters field removed
     };
 
     dispatch(createMemoir(memoirData));
@@ -113,7 +111,7 @@ const CreateMemoir = () => {
       <div className='flex justify-end mt-6'>
         <button
           type='button'
-          onClick={() => navigate('/editor')}
+          onClick={() => navigate('/editor')} // Consider making this configurable via props if needed elsewhere
           className='border border-gray-300 text-gray-700 px-4 py-2 rounded mr-2'
         >
           Cancel
@@ -133,4 +131,4 @@ const CreateMemoir = () => {
   );
 };
 
-export default CreateMemoir;
+export default CreateMemoirForm; 
