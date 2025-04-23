@@ -7,7 +7,7 @@ import store from './store';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Editor from './pages/Editor';
-import CreateMemoir from './pages/CreateMemoir';
+
 import axios from 'axios';
 import './index.css';
 axios.defaults.baseURL = 'http://localhost:5000';
@@ -25,7 +25,7 @@ const App = () => (
       <Routes>
         <Route path='/' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
-        <Route path='/create-memoir' element={<CreateMemoir />} />
+
         <Route path='/editor/:memoirId' element={<Editor />} />
       </Routes>
     </BrowserRouter>
