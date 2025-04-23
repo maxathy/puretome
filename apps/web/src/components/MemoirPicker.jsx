@@ -1,20 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserMemoirs } from '../store/memoirSlice';
 import { Card, CardContent } from './ui/card';
+import CreateMemoirForm from './CreateMemoirForm';
 
 /**
  * MemoirPicker Component
  * Fetches (via Redux) and displays a list of memoirs belonging to the logged-in user.
- * Allows the user to select a memoir to navigate to the editor.
+ * Allows the user to select a memoir to navigate to the editor or create a new one.
  *
  * @component
- * @returns {JSX.Element} List of clickable memoir cards
+ * @returns {JSX.Element} List of clickable memoir cards or the CreateMemoirForm
  */
 const MemoirPicker = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Select state from Redux store
   const {
@@ -54,7 +56,14 @@ const MemoirPicker = () => {
             </button>
         </div>
     );
-}
+  }
+
+  // If showCreateForm is true, render the form instead of the picker
+  if (showCreateForm) {
+    // Optionally pass a function to hide the form on cancel/back
+    // e.g., <CreateMemoirForm onCancel={() => setShowCreateForm(false)} />
+    return <CreateMemoirForm />;
+  }
 
   return (
     <div className='p-6'>
@@ -79,6 +88,19 @@ const MemoirPicker = () => {
             </CardContent>
           </Card>
         ))}
+
+        {/* Add New Memoir Card */}
+        <Card
+          key="add-new"
+          onClick={() => setShowCreateForm(true)} // Set state to show the form
+          className='cursor-pointer border-dashed border-gray-400 flex items-center justify-center h-full min-h-[150px] hover:border-gray-500 hover:bg-gray-50' // Style for add new card
+          variant='muted' // Use a different variant maybe?
+        >
+          <CardContent className="text-center">
+            <span className="text-2xl font-bold text-gray-500">+</span>
+            <p className="text-gray-600 mt-1">Add New Memoir</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
