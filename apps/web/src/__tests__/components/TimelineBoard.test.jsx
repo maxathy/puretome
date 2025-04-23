@@ -133,16 +133,9 @@ describe('TimelineBoard Component', () => {
     const saveChapterButton = screen.getByTestId('save-chapter-button');
     fireEvent.click(saveChapterButton);
 
-    // await waitFor(() => {
-    //   console.log(store.getState().memoir.currentMemoir);
-    //   const updatedState = store.getState().memoir.currentMemoir;
-    //   console.log(`updatedState.chapters.length: ${updatedState.chapters.length}`);
-    //   expect(updatedState.chapters.length).toBe(mockMemoir.chapters.length + 1);
-    //   expect(
-    //     updatedState.chapters[updatedState.chapters.length - 1].title,
-    //   ).toBe('New Chapter Title');
-    //   expect(screen.queryByTestId('chapter-title-input')).not.toBeInTheDocument();
-    // });
+    await waitFor(() => {
+      expect(screen.queryByTestId('chapter-title-input')).not.toBeInTheDocument();
+    });
   });
 
   it('allows canceling adding a new chapter', async () => {
@@ -202,21 +195,11 @@ describe('TimelineBoard Component', () => {
     );
     fireEvent.click(saveEventButton);
 
-    // await waitFor(() => {
-    //   const chapterState = store
-    //     .getState()
-    //     .memoir.currentMemoir.chapters.find((c) => c._id === chapterIdToAddEvent);
-    //   const originalChapter = mockMemoir.chapters.find((c) => c._id === chapterIdToAddEvent);
-    //   console.log(originalChapter);
-
-    //   expect(chapterState.events.length).toBe(originalChapter.events.length + 1);
-      // expect(chapterState.events[chapterState.events.length - 1].title).toBe(
-      //   'New Event Title',
-      // );
-      // expect(
-      //   screen.queryByTestId(`new-event-input-${chapterIdToAddEvent}`),
-      // ).not.toBeInTheDocument();
-    // });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(`new-event-input-${chapterIdToAddEvent}`),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('allows canceling adding a new event', async () => {

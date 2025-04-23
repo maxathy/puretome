@@ -192,7 +192,6 @@ export default function TimelineBoard({ memoirId }) {
     };
 
     // Add chapter to the memoir
-    dispatch(addChapter());
 
     const updatedChapters = [...currentMemoir.chapters, newChapter];
 
