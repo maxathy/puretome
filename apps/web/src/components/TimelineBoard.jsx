@@ -9,6 +9,7 @@ import {
   updateEvents,
   addChapter,
 } from '../store/memoirSlice';
+import EventEditor from './EventEditor';
 
 export default function TimelineBoard({ memoirId }) {
   const dispatch = useDispatch();
@@ -23,6 +24,9 @@ export default function TimelineBoard({ memoirId }) {
   // State for chapter creation
   const [isAddingChapter, setIsAddingChapter] = useState(false);
   const [newChapterTitle, setNewChapterTitle] = useState('');
+
+  // State for event editing modal
+  const [editingEvent, setEditingEvent] = useState(null);
 
   // Fetch memoir data on component mount
   useEffect(() => {
@@ -192,7 +196,6 @@ export default function TimelineBoard({ memoirId }) {
     };
 
     // Add chapter to the memoir
-
     const updatedChapters = [...currentMemoir.chapters, newChapter];
 
     dispatch(
@@ -207,14 +210,50 @@ export default function TimelineBoard({ memoirId }) {
     setNewChapterTitle('');
   };
 
+  // Event Editor Modal Handlers
+  const handleOpenEventEditor = (event) => {
+    setEditingEvent(event);
+  };
+
+  const handleCloseEventEditor = () => {
+    setEditingEvent(null);
+  };
+
+  const handleSaveEvent = (updatedEvent) => {
+    if (!currentMemoir || !updatedEvent?._id) return;
+
+    // Find the chapter containing the event and update it
+    const updatedChapters = currentMemoir.chapters.map(chapter => {
+      const eventIndex = chapter.events.findIndex(ev => ev._id === updatedEvent._id);
+      if (eventIndex !== -1) {
+        // Create a new events array with the updated event
+        const newEvents = [...chapter.events];
+        newEvents[eventIndex] = updatedEvent;
+        return { ...chapter, events: newEvents };
+      }
+      return chapter;
+    });
+
+    // Check if chapters were actually updated
+    if (JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)) {
+        dispatch(
+          updateMemoirTimeline({
+            ...currentMemoir,
+            chapters: updatedChapters,
+          }),
+        );
+    }
+
+    handleCloseEventEditor(); // Close modal after saving
+  };
+
   if (loading) return <p>Loading memoir...</p>;
   if (error) return <p>Error loading memoir: {error}</p>;
   if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
-    
     <div className='space-y-4'>
-    <h1 className='text-2xl font-bold mb-4'>{currentMemoir.title}</h1>
+      <h1 className='text-2xl font-bold mb-4'>{currentMemoir.title}</h1>
       <DragDropContext onDragEnd={onDragEnd} data-testid="drag-drop-context">
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (
@@ -265,6 +304,8 @@ export default function TimelineBoard({ memoirId }) {
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                     data-testid={`event-${event._id}`}
+                                    onClick={() => handleOpenEventEditor(event)}
+                                    className="cursor-pointer"
                                   >
                                     <Card variant='muted'>
                                       <CardContent>{event.title}</CardContent>
@@ -415,6 +456,14 @@ export default function TimelineBoard({ memoirId }) {
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Event Editor Modal */}
+      <EventEditor
+        event={editingEvent}
+        isOpen={!!editingEvent}
+        onClose={handleCloseEventEditor}
+        onSave={handleSaveEvent}
+      />
     </div>
   );
 }
