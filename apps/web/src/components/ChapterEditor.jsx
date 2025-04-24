@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './ui/modal'; // Import the reusable modal
+import { Trash2 } from 'lucide-react'; // Import an icon
 
 /**
  * ChapterEditor Component
- * Modal dialog for editing a chapter's title.
+ * Modal dialog for editing a chapter's title and description, or deleting it.
  *
  * @component
- * @param {object} chapter - The chapter object being edited (needs id, title)
+ * @param {object} chapter - The chapter object being edited (needs id, title, description)
  * @param {boolean} isOpen - Controls modal visibility
  * @param {function} onClose - Function to call when closing the modal
  * @param {function} onSave - Function to call when saving changes (passes updated chapter)
+ * @param {function} onDelete - Function to call when deleting the chapter (passes chapter id)
  * @returns {JSX.Element|null} Modal editor component
  */
-const ChapterEditor = ({ chapter, isOpen, onClose, onSave }) => {
+const ChapterEditor = ({ chapter, isOpen, onClose, onSave, onDelete }) => {
   // State for the title input
   const [currentTitle, setCurrentTitle] = useState('');
   // State for the description textarea
@@ -38,6 +40,16 @@ const ChapterEditor = ({ chapter, isOpen, onClose, onSave }) => {
     // Pass the updated chapter object back with the new title and description
     onSave({ ...chapter, title: currentTitle, description: currentDescription });
     onClose(); // Close the modal after saving
+  };
+
+  // Handle delete action
+  const handleDelete = () => {
+    if (!chapter || !onDelete) return;
+
+    if (window.confirm(`Are you sure you want to delete the chapter "${chapter.title}"?`)) {
+      onDelete(chapter._id); // Pass the chapter ID to the delete handler
+      onClose(); // Close the modal after deletion
+  }
   };
 
   // Prevent rendering if not open or no chapter provided
@@ -80,20 +92,32 @@ const ChapterEditor = ({ chapter, isOpen, onClose, onSave }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end mt-6 space-x-2"> {/* Increased margin top */}
+      <div className="flex justify-between items-center mt-6 space-x-2"> {/* Use justify-between */}
+        {/* Delete Button on the left */}
         <button
-          onClick={onClose}
-          className="px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100"
+          onClick={handleDelete}
+          className="px-4 py-2 text-sm text-red-700 border border-red-300 rounded hover:bg-red-50"
+          title="Delete Chapter" // Tooltip for accessibility
         >
-          Cancel
+          <Trash2 className="h-4 w-4" /> {/* Icon */}
         </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-          disabled={!currentTitle.trim()} // Disable save if title is empty
-        >
-          Save Changes
-        </button>
+
+        {/* Cancel and Save Buttons on the right */}
+        <div className="flex space-x-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+            disabled={!currentTitle.trim()} // Disable save if title is empty
+          >
+            Save Changes
+          </button>
+        </div>
       </div>
     </Modal>
   );

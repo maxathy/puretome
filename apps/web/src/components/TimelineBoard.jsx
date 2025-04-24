@@ -324,6 +324,25 @@ export default function TimelineBoard({ memoirId }) {
       handleCloseChapterEditor(); // Close modal after saving
   };
 
+  // Chapter Deletion Handler
+  const handleDeleteChapter = (chapterId) => {
+    if (!currentMemoir || !chapterId) return;
+
+    // Filter out the chapter to be deleted
+    const updatedChapters = currentMemoir.chapters.filter(ch => ch._id !== chapterId);
+
+    // Only dispatch if a chapter was actually removed
+    if (updatedChapters.length < currentMemoir.chapters.length) {
+        dispatch(
+          updateMemoirTimeline({
+            ...currentMemoir,
+            chapters: updatedChapters,
+          }),
+        );
+    } 
+    // No need to close the editor here, as it's already closed by the ChapterEditor itself
+  };
+
   // Memoir Editor Modal Handlers
   const handleOpenMemoirEditor = () => {
       setIsEditingMemoir(true);
@@ -565,6 +584,7 @@ export default function TimelineBoard({ memoirId }) {
         isOpen={!!editingChapter}
         onClose={handleCloseChapterEditor}
         onSave={handleSaveChapter}
+        onDelete={handleDeleteChapter}
       />
 
       {/* Memoir Editor Modal */}
