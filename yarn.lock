@@ -7544,6 +7544,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lucide-react@npm:^0.439.0":
+  version: 0.439.0
+  resolution: "lucide-react@npm:0.439.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
+  checksum: 10c0/153c6da6a1bdcc03c47080b00a50a341b7e485ccbb479a742c0fb606355acf93c136630626dad2d57cafe1f5c691dd4f2fcd0f2b7c813e7c9e0e1f065cf62be0
+  languageName: node
+  linkType: hard
+
 "lz-string@npm:^1.5.0":
   version: 1.5.0
   resolution: "lz-string@npm:1.5.0"
@@ -10918,6 +10927,7 @@ __metadata:
     framer-motion: "npm:^12.6.5"
     jsdom: "npm:^23.0.1"
     jwt-decode: "npm:^4.0.0"
+    lucide-react: "npm:^0.439.0"
     postcss: "npm:^8.5.3"
     react: "npm:^18.3.1"
     react-beautiful-dnd: "npm:^13.1.1"

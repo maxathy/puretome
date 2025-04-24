@@ -254,6 +254,34 @@ export default function TimelineBoard({ memoirId }) {
     handleCloseEventEditor(); // Close modal after saving
   };
 
+  // Event Deletion Handler
+  const handleDeleteEvent = (eventId) => {
+    if (!currentMemoir || !eventId) return;
+
+    // Find the chapter and filter out the event
+    let chapterIdContainingEvent = null;
+    const updatedChapters = currentMemoir.chapters.map(chapter => {
+        const eventExists = chapter.events.some(ev => ev._id === eventId);
+        if (eventExists) {
+            chapterIdContainingEvent = chapter._id;
+            // Filter out the event to be deleted
+            const updatedEvents = chapter.events.filter(ev => ev._id !== eventId);
+            return { ...chapter, events: updatedEvents };
+        }
+        return chapter;
+    });
+
+    // Only dispatch if an event was actually removed
+    if (chapterIdContainingEvent) {
+        dispatch(
+          updateMemoirTimeline({
+            ...currentMemoir,
+            chapters: updatedChapters,
+          }),
+        );
+    }
+  }
+
   // Chapter Editor Modal Handlers
   const handleOpenChapterEditor = (chapter) => {
     setEditingChapter(chapter);
@@ -528,6 +556,7 @@ export default function TimelineBoard({ memoirId }) {
         isOpen={!!editingEvent}
         onClose={handleCloseEventEditor}
         onSave={handleSaveEvent}
+        onDelete={handleDeleteEvent}
       />
 
       {/* Chapter Editor Modal */}
