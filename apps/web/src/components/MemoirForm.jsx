@@ -8,6 +8,7 @@ import {
   resetMemoir,
   updateMemoirDetails,
 } from '../store/memoirSlice';
+import CollaboratorsList from './CollaboratorsList';
 
 /**
  * MemoirForm Component
@@ -171,6 +172,13 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
           placeholder='Write a brief description of your memoir (optional)'
         />
       </div>
+
+      {/* Conditionally render CollaboratorsList in edit mode */}
+      {isEditing && memoirToEdit && (
+        <div className='mb-6'>
+          <CollaboratorsList memoir={memoirToEdit} />
+        </div>
+      )}
 
       <div className='flex justify-end mt-6'>
         <button

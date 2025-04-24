@@ -3,6 +3,7 @@ const { ObjectId } = require('mongoose').Types;
 const router = express.Router();
 const User = require('../models/User');
 const Memoir = require('../models/Memoir');
+const { sendInvitationEmail } = require('../utils/emailService');
 
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 /**
@@ -176,7 +177,19 @@ router.post('/:id/collaborators', authMiddleware, async (req, res) => {
     memoir.collaborators.push(collaborator);
     await memoir.save();
 
-    // TODO: Send invitation email
+    // Send invitation email
+    try {
+      // We need the author's name for the email
+      const authorUser = await User.findById(req.user.id).select('name');
+      const authorName = authorUser ? authorUser.name : 'An author'; // Fallback name
+
+      await sendInvitationEmail(email, memoir.title, authorName, memoirId);
+    } catch (emailError) {
+      // Log the email error but don't fail the request
+      // The collaborator was added, but the email failed.
+      // Consider adding more robust error handling/retry logic here.
+      console.error('Failed to send invitation email:', emailError);
+    }
 
     res.status(200).json({
       message: 'Collaborator invitation sent',
