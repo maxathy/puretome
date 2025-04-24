@@ -26,7 +26,8 @@ export const fetchMemoir = createAsyncThunk(
  */
 export const fetchUserMemoirs = createAsyncThunk(
   'memoir/fetchUserMemoirs',
-  async (_, { rejectWithValue }) => { // No argument needed for this thunk
+  async (_, { rejectWithValue }) => {
+    // No argument needed for this thunk
     try {
       const response = await axios.get('/api/memoir'); // Assuming token is handled by axios interceptor or sent manually if needed
       return response.data;
@@ -114,15 +115,38 @@ export const deleteMemoir = createAsyncThunk(
   async (memoirId, { rejectWithValue }) => {
     try {
       // The API route expects the ID in the request body for this setup
-      const response = await axios.delete('/api/memoir', { data: { _id: memoirId } });
+      const response = await axios.delete('/api/memoir', {
+        data: { _id: memoirId },
+      });
       return { deletedMemoirId: memoirId, ...response.data }; // Include ID for removal from state
     } catch (error) {
       console.error('Error deleting memoir:', error);
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to delete memoir'
+        error.response?.data?.message || 'Failed to delete memoir',
       );
     }
-  }
+  },
+);
+// Add collaborator thunk
+export const inviteCollaborator = createAsyncThunk(
+  'memoir/inviteCollaborator',
+  async ({ memoirId, email, role }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `/api/memoir/${memoirId}/collaborators`,
+        {
+          email,
+          role,
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error inviting collaborator:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to invite collaborator',
+      );
+    }
+  },
 );
 
 /**
@@ -272,16 +296,21 @@ const memoirSlice = createSlice({
       })
       .addCase(updateMemoirDetails.fulfilled, (state, action) => {
         state.loading = false;
-        if (state.currentMemoir && state.currentMemoir._id === action.payload.memoir._id) {
-            // Update currentMemoir if it's the one being edited
-            state.currentMemoir.title = action.payload.memoir.title;
-            state.currentMemoir.content = action.payload.memoir.content;
+        if (
+          state.currentMemoir &&
+          state.currentMemoir._id === action.payload.memoir._id
+        ) {
+          // Update currentMemoir if it's the one being edited
+          state.currentMemoir.title = action.payload.memoir.title;
+          state.currentMemoir.content = action.payload.memoir.content;
         }
         // Update the memoir in the userMemoirs list as well
-        const index = state.userMemoirs.findIndex(m => m._id === action.payload.memoir._id);
+        const index = state.userMemoirs.findIndex(
+          (m) => m._id === action.payload.memoir._id,
+        );
         if (index !== -1) {
-            state.userMemoirs[index].title = action.payload.memoir.title;
-            state.userMemoirs[index].content = action.payload.memoir.content;
+          state.userMemoirs[index].title = action.payload.memoir.title;
+          state.userMemoirs[index].content = action.payload.memoir.content;
         }
         state.error = null;
       })
@@ -314,10 +343,13 @@ const memoirSlice = createSlice({
         state.loading = false;
         // Remove the deleted memoir from the userMemoirs list
         state.userMemoirs = state.userMemoirs.filter(
-          (memoir) => memoir._id !== action.payload.deletedMemoirId
+          (memoir) => memoir._id !== action.payload.deletedMemoirId,
         );
         // If the deleted memoir was the current one, clear it
-        if (state.currentMemoir && state.currentMemoir._id === action.payload.deletedMemoirId) {
+        if (
+          state.currentMemoir &&
+          state.currentMemoir._id === action.payload.deletedMemoirId
+        ) {
           state.currentMemoir = null;
           state.currentId = null; // Also clear currentId if used
         }
@@ -326,6 +358,27 @@ const memoirSlice = createSlice({
       .addCase(deleteMemoir.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload; // Set the general error state
+      })
+      .addCase(inviteCollaborator.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(inviteCollaborator.fulfilled, (state, action) => {
+        state.loading = false;
+        // If current memoir is loaded, update it with new collaborator
+        if (
+          state.currentMemoir &&
+          state.currentMemoir._id === action.meta.arg.memoirId
+        ) {
+          if (!state.currentMemoir.collaborators) {
+            state.currentMemoir.collaborators = [];
+          }
+          state.currentMemoir.collaborators.push(action.payload.collaborator);
+        }
+      })
+      .addCase(inviteCollaborator.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

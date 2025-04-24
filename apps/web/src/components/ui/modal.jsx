@@ -61,10 +61,10 @@ const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
       <div
         className={`bg-white rounded-lg shadow-xl p-6 relative ${className}`} // Base styling + custom classes
         style={{
-            minWidth: '400px', // Minimum width
-            maxWidth: '90vw',  // Max width relative to viewport width
-            maxHeight: '90vh', // Max height relative to viewport height
-            overflowY: 'auto',  // Allow vertical scrolling if content exceeds max height
+          minWidth: '400px', // Minimum width
+          maxWidth: '90vw', // Max width relative to viewport width
+          maxHeight: '90vh', // Max height relative to viewport height
+          overflowY: 'auto', // Allow vertical scrolling if content exceeds max height
         }}
         // Stop propagation to prevent overlay click when clicking inside the modal content
         onClick={(e) => e.stopPropagation()}
@@ -72,19 +72,15 @@ const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
         {/* Close Button (Top Right) */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl leading-none"
-          aria-label="Close modal"
+          className='absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl leading-none'
+          aria-label='Close modal'
           style={{ background: 'none', border: 'none', cursor: 'pointer' }}
         >
           &times;
         </button>
 
         {/* Optional Title */}
-        {title && (
-          <h2 className="text-xl font-semibold mb-4">
-            {title}
-          </h2>
-        )}
+        {title && <h2 className='text-xl font-semibold mb-4'>{title}</h2>}
 
         {/* Modal Body Content */}
         {children}
@@ -95,4 +91,4 @@ const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
 
 Modal.displayName = 'Modal';
 
-export default Modal; 
+export default Modal;

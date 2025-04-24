@@ -29,16 +29,16 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
       // Set Content (handling object/string)
       if (event.content) {
         if (typeof event.content === 'object') {
-            try {
-                setCurrentContent(JSON.stringify(event.content, null, 2));
-            } catch {
-                setCurrentContent('[object Object]');
-            }
+          try {
+            setCurrentContent(JSON.stringify(event.content, null, 2));
+          } catch {
+            setCurrentContent('[object Object]');
+          }
         } else {
-            setCurrentContent(String(event.content));
+          setCurrentContent(String(event.content));
         }
       } else {
-          setCurrentContent('');
+        setCurrentContent('');
       }
     } else {
       // Reset if no event
@@ -52,7 +52,7 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
         setCurrentTitle('');
         setCurrentContent('');
       }
-    }
+    };
   }, [event, isOpen]);
 
   const handleSave = () => {
@@ -64,67 +64,71 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
 
   const handleDelete = () => {
     if (!event || !event._id) return;
-    if (window.confirm(`Are you sure you want to delete the event "${event.title}"?`)) {
-        onDelete(event._id); // Pass the event ID to the delete handler
-        onClose(); // Close the modal after deletion
+    if (
+      window.confirm(
+        `Are you sure you want to delete the event "${event.title}"?`,
+      )
+    ) {
+      onDelete(event._id); // Pass the event ID to the delete handler
+      onClose(); // Close the modal after deletion
     }
   };
 
   if (!isOpen || !event) return null;
 
   return (
-    <Modal 
-        isOpen={isOpen} 
-        onClose={onClose} 
-        title="Edit Event" 
-        className="min-w-[500px] max-w-[80%]" // Adjust width via className
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title='Edit Event'
+      className='min-w-[500px] max-w-[80%]' // Adjust width via className
     >
       {/* Title Input */}
-      <div className="mb-4">
-          <input
-            id="eventTitle"
-            type="text"
-            value={currentTitle}
-            onChange={(e) => setCurrentTitle(e.target.value)}
-            className="w-full border rounded p-2"
-            autoFocus // Auto-focus the title input first
-          />
+      <div className='mb-4'>
+        <input
+          id='eventTitle'
+          type='text'
+          value={currentTitle}
+          onChange={(e) => setCurrentTitle(e.target.value)}
+          className='w-full border rounded p-2'
+          autoFocus // Auto-focus the title input first
+        />
       </div>
 
       {/* Content Textarea */}
-      <div className="mb-4">
-          <textarea
-            id="eventContent"
-            value={currentContent}
-            onChange={(e) => setCurrentContent(e.target.value)}
-            placeholder="Enter event details..."
-            className="w-full h-64 border rounded p-2" // Basic styling for textarea
-          />
+      <div className='mb-4'>
+        <textarea
+          id='eventContent'
+          value={currentContent}
+          onChange={(e) => setCurrentContent(e.target.value)}
+          placeholder='Enter event details...'
+          className='w-full h-64 border rounded p-2' // Basic styling for textarea
+        />
       </div>
 
       {/* Button container - justify-between to push delete left, others right */}
-      <div className="flex justify-between items-center mt-4">
+      <div className='flex justify-between items-center mt-4'>
         {/* Delete Button (Left) */}
         <button
           onClick={handleDelete}
-          className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 flex items-center"
-          aria-label="Delete Event"
+          className='px-4 py-2 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 flex items-center'
+          aria-label='Delete Event'
         >
-          <Trash2 className="h-4 w-4 mr-1" />
+          <Trash2 className='h-4 w-4 mr-1' />
           Delete
         </button>
 
         {/* Cancel and Save Buttons (Right) */}
-        <div className="space-x-2">
+        <div className='space-x-2'>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100"
+            className='px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100'
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+            className='px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700'
           >
             Save Changes
           </button>
@@ -134,4 +138,4 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
   );
 };
 
-export default EventEditor; 
+export default EventEditor;

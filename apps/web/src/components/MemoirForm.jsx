@@ -29,10 +29,10 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
   const isEditing = !!memoirToEdit;
 
   // Redux state (used primarily for creation mode and potentially shared loading/error)
-  const { 
-      loading: reduxLoading, 
-      error: reduxError, 
-      currentId: creationCurrentId // ID after creation
+  const {
+    loading: reduxLoading,
+    error: reduxError,
+    currentId: creationCurrentId, // ID after creation
   } = useSelector((state) => state.memoir);
 
   // Local state for form fields (used in both modes, initialized differently)
@@ -55,8 +55,8 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
       // setTitle(reduxTitle);
       // setContent(reduxContent);
       // Or just rely on the user typing into initially empty fields
-       setTitle('');
-       setContent('');
+      setTitle('');
+      setContent('');
     }
   }, [isEditing, memoirToEdit]); // Rerun when mode changes
 
@@ -83,20 +83,22 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
     }
 
     if (isEditing) {
-        setIsSaving(true);
-        setSaveError(null);
-        try {
-            await dispatch(updateMemoirDetails({ 
-                _id: memoirToEdit._id, 
-                title, 
-                content 
-            })).unwrap(); // unwrap to catch potential rejections
-            if (onSaveComplete) onSaveComplete(); // Call callback on success
-        } catch (err) {
-            setSaveError(err || 'Failed to save changes');
-        } finally {
-            setIsSaving(false);
-        }
+      setIsSaving(true);
+      setSaveError(null);
+      try {
+        await dispatch(
+          updateMemoirDetails({
+            _id: memoirToEdit._id,
+            title,
+            content,
+          }),
+        ).unwrap(); // unwrap to catch potential rejections
+        if (onSaveComplete) onSaveComplete(); // Call callback on success
+      } catch (err) {
+        setSaveError(err || 'Failed to save changes');
+      } finally {
+        setIsSaving(false);
+      }
     } else {
       // Use Redux actions/state for creation
       const memoirData = {
@@ -109,12 +111,12 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
   };
 
   const handleCancel = () => {
-      if (isEditing && onCancel) {
-          onCancel(); // Use the callback if provided for editing
-      } else if (!isEditing) {
-        window.location.reload(); 
-      }
-  }
+    if (isEditing && onCancel) {
+      onCancel(); // Use the callback if provided for editing
+    } else if (!isEditing) {
+      window.location.reload();
+    }
+  };
 
   // Determine loading and error states based on mode
   const isLoading = isEditing ? isSaving : reduxLoading;
@@ -131,7 +133,9 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
 
       {currentError && (
         <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
-          {typeof currentError === 'string' ? currentError : 'An unexpected error occurred.'} 
+          {typeof currentError === 'string'
+            ? currentError
+            : 'An unexpected error occurred.'}
         </div>
       )}
 
@@ -181,15 +185,21 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
           onClick={handleSaveMemoir}
           disabled={isLoading || !title.trim()}
           className={`bg-blue-600 text-white px-6 py-2 rounded ${
-            isLoading || !title.trim() ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+            isLoading || !title.trim()
+              ? 'opacity-70 cursor-not-allowed'
+              : 'hover:bg-blue-700'
           }`}
         >
           {/* Adjust button text based on mode */}
-          {isLoading ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create Memoir')}
+          {isLoading
+            ? 'Saving...'
+            : isEditing
+              ? 'Save Changes'
+              : 'Create Memoir'}
         </button>
       </div>
     </div>
   );
 };
 
-export default MemoirForm; 
+export default MemoirForm;

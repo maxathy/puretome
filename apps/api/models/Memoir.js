@@ -29,7 +29,25 @@ const MemoirSchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: String,
     author: { type: mongoose.Types.ObjectId, ref: 'User' },
-    collaborators: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+    collaborators: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        role: {
+          type: String,
+          enum: ['viewer', 'editor', 'validator'],
+          default: 'viewer',
+        },
+        inviteStatus: {
+          type: String,
+          enum: ['pending', 'accepted', 'declined'],
+          default: 'pending',
+        },
+        inviteEmail: String, // For users not yet registered
+      },
+    ],
     status: {
       type: String,
       enum: ['draft', 'submitted', 'published'],

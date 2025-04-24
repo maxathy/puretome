@@ -69,16 +69,16 @@ const MemoirPicker = () => {
 
   if (!userMemoirs || userMemoirs.length === 0) {
     return (
-        <div className='p-6 text-center'>
-            <p>You haven't created any memoirs yet.</p>
-            {/* Optional: Add a button/link to create a new one */}
-            <button 
-                onClick={() => navigate('/create')} // Route to your create memoir page/component
-                className='mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
-            >
-                Create New Memoir
-            </button>
-        </div>
+      <div className='p-6 text-center'>
+        <p>You haven't created any memoirs yet.</p>
+        {/* Optional: Add a button/link to create a new one */}
+        <button
+          onClick={() => navigate('/create')} // Route to your create memoir page/component
+          className='mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
+        >
+          Create New Memoir
+        </button>
+      </div>
     );
   }
 
@@ -100,19 +100,21 @@ const MemoirPicker = () => {
             className='cursor-pointer relative'
             variant='default'
           >
-            <CardContent className="pt-6 pb-4">
+            <CardContent className='pt-6 pb-4'>
               <h3 className='text-lg font-bold mb-1'>{memoir.title}</h3>
               {memoir.content && (
                 <p className='text-gray-600 text-sm mb-2 line-clamp-2'>
                   {memoir.content}
                 </p>
               )}
-              <p className='text-gray-500 text-xs mt-2'>Status: {memoir.status}</p>
+              <p className='text-gray-500 text-xs mt-2'>
+                Status: {memoir.status}
+              </p>
 
               {/* Delete Button */}
               <button
                 onClick={(e) => openDeleteModal(e, memoir)}
-                className="absolute top-2 right-2 m-2 text-gray-400 hover:text-red-600 p-3 rounded-full hover:bg-red-100 transition-colors"
+                className='absolute top-2 right-2 m-2 text-gray-400 hover:text-red-600 p-3 rounded-full hover:bg-red-100 transition-colors'
                 aria-label={`Delete memoir ${memoir.title}`}
               >
                 <Trash2 size={18} />
@@ -123,14 +125,14 @@ const MemoirPicker = () => {
 
         {/* Add New Memoir Card */}
         <Card
-          key="add-new"
+          key='add-new'
           onClick={() => setShowCreateForm(true)}
           className='cursor-pointer border-dashed border-gray-400 flex items-center justify-center h-full min-h-[150px] hover:border-gray-500 hover:bg-gray-50'
           variant='muted'
         >
-          <CardContent className="text-center">
-            <span className="text-2xl font-bold text-gray-500">+</span>
-            <p className="text-gray-600 mt-1">Add New Memoir</p>
+          <CardContent className='text-center'>
+            <span className='text-2xl font-bold text-gray-500'>+</span>
+            <p className='text-gray-600 mt-1'>Add New Memoir</p>
           </CardContent>
         </Card>
       </div>
@@ -139,21 +141,23 @@ const MemoirPicker = () => {
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
-        title="Confirm Deletion"
+        title='Confirm Deletion'
       >
-        <p className="mb-6">
-          Deleting this memoir will also delete all chapters associated with this storyline.  <strong className='text-red-500'>This action is irreversible.</strong>
+        <p className='mb-6'>
+          Deleting this memoir will also delete all chapters associated with
+          this storyline.{' '}
+          <strong className='text-red-500'>This action is irreversible.</strong>
         </p>
-        <div className="flex justify-end space-x-2">
+        <div className='flex justify-end space-x-2'>
           <button
             onClick={closeDeleteModal}
-            className="px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100"
+            className='px-4 py-2 text-sm text-gray-700 border rounded hover:bg-gray-100'
           >
             Cancel
           </button>
           <button
             onClick={handleDeleteConfirm}
-            className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700"
+            className='px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700'
           >
             Confirm Delete
           </button>

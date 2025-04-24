@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 
 const userRoutes = require('./routes/userRoutes');
 const memoirRoutes = require('./routes/memoirRoutes');
-
+const commentRoutes = require('./routes/commentRoutes');
 const app = express();
 let uri = process.env.MONGO_URI;
 
@@ -24,6 +24,6 @@ mongoose.connect(uri, {
 
 app.use('/api/users', userRoutes);
 app.use('/api/memoir', memoirRoutes);
-
+app.use('/api/comments', commentRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on port ${PORT}`));
