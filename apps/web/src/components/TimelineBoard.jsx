@@ -230,8 +230,10 @@ export default function TimelineBoard({ memoirId }) {
     if (!currentMemoir || !updatedEvent?._id) return;
 
     // Find the chapter containing the event and update it
-    const updatedChapters = currentMemoir.chapters.map(chapter => {
-      const eventIndex = chapter.events.findIndex(ev => ev._id === updatedEvent._id);
+    const updatedChapters = currentMemoir.chapters.map((chapter) => {
+      const eventIndex = chapter.events.findIndex(
+        (ev) => ev._id === updatedEvent._id,
+      );
       if (eventIndex !== -1) {
         // Create a new events array with the updated event
         const newEvents = [...chapter.events];
@@ -242,13 +244,15 @@ export default function TimelineBoard({ memoirId }) {
     });
 
     // Check if chapters were actually updated
-    if (JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)) {
-        dispatch(
-          updateMemoirTimeline({
-            ...currentMemoir,
-            chapters: updatedChapters,
-          }),
-        );
+    if (
+      JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)
+    ) {
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
     }
 
     handleCloseEventEditor(); // Close modal after saving
@@ -260,27 +264,27 @@ export default function TimelineBoard({ memoirId }) {
 
     // Find the chapter and filter out the event
     let chapterIdContainingEvent = null;
-    const updatedChapters = currentMemoir.chapters.map(chapter => {
-        const eventExists = chapter.events.some(ev => ev._id === eventId);
-        if (eventExists) {
-            chapterIdContainingEvent = chapter._id;
-            // Filter out the event to be deleted
-            const updatedEvents = chapter.events.filter(ev => ev._id !== eventId);
-            return { ...chapter, events: updatedEvents };
-        }
-        return chapter;
+    const updatedChapters = currentMemoir.chapters.map((chapter) => {
+      const eventExists = chapter.events.some((ev) => ev._id === eventId);
+      if (eventExists) {
+        chapterIdContainingEvent = chapter._id;
+        // Filter out the event to be deleted
+        const updatedEvents = chapter.events.filter((ev) => ev._id !== eventId);
+        return { ...chapter, events: updatedEvents };
+      }
+      return chapter;
     });
 
     // Only dispatch if an event was actually removed
     if (chapterIdContainingEvent) {
-        dispatch(
-          updateMemoirTimeline({
-            ...currentMemoir,
-            chapters: updatedChapters,
-          }),
-        );
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
     }
-  }
+  };
 
   // Chapter Editor Modal Handlers
   const handleOpenChapterEditor = (chapter) => {
@@ -292,36 +296,40 @@ export default function TimelineBoard({ memoirId }) {
   };
 
   const handleSaveChapter = (updatedChapter) => {
-      if (!currentMemoir || !updatedChapter?._id) return;
+    if (!currentMemoir || !updatedChapter?._id) return;
 
-      // Find the index of the chapter being updated
-      const chapterIndex = currentMemoir.chapters.findIndex(ch => ch._id === updatedChapter._id);
-      if (chapterIndex === -1) return; // Chapter not found
+    // Find the index of the chapter being updated
+    const chapterIndex = currentMemoir.chapters.findIndex(
+      (ch) => ch._id === updatedChapter._id,
+    );
+    if (chapterIndex === -1) return; // Chapter not found
 
-      // Create a new chapters array with the updated chapter title and description
-      const updatedChapters = currentMemoir.chapters.map((chapter, index) => {
-          if (index === chapterIndex) {
-              // Update both title and description from the saved chapter data
-              return { 
-                  ...chapter, 
-                  title: updatedChapter.title, 
-                  description: updatedChapter.description 
-              }; 
-          }
-          return chapter;
-      });
-
-      // Check if chapters were actually updated (title or description changed)
-      if (JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)) {
-          dispatch(
-            updateMemoirTimeline({
-              ...currentMemoir,
-              chapters: updatedChapters,
-            }),
-          );
+    // Create a new chapters array with the updated chapter title and description
+    const updatedChapters = currentMemoir.chapters.map((chapter, index) => {
+      if (index === chapterIndex) {
+        // Update both title and description from the saved chapter data
+        return {
+          ...chapter,
+          title: updatedChapter.title,
+          description: updatedChapter.description,
+        };
       }
+      return chapter;
+    });
 
-      handleCloseChapterEditor(); // Close modal after saving
+    // Check if chapters were actually updated (title or description changed)
+    if (
+      JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)
+    ) {
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
+    }
+
+    handleCloseChapterEditor(); // Close modal after saving
   };
 
   // Chapter Deletion Handler
@@ -329,27 +337,29 @@ export default function TimelineBoard({ memoirId }) {
     if (!currentMemoir || !chapterId) return;
 
     // Filter out the chapter to be deleted
-    const updatedChapters = currentMemoir.chapters.filter(ch => ch._id !== chapterId);
+    const updatedChapters = currentMemoir.chapters.filter(
+      (ch) => ch._id !== chapterId,
+    );
 
     // Only dispatch if a chapter was actually removed
     if (updatedChapters.length < currentMemoir.chapters.length) {
-        dispatch(
-          updateMemoirTimeline({
-            ...currentMemoir,
-            chapters: updatedChapters,
-          }),
-        );
-    } 
+      dispatch(
+        updateMemoirTimeline({
+          ...currentMemoir,
+          chapters: updatedChapters,
+        }),
+      );
+    }
     // No need to close the editor here, as it's already closed by the ChapterEditor itself
   };
 
   // Memoir Editor Modal Handlers
   const handleOpenMemoirEditor = () => {
-      setIsEditingMemoir(true);
+    setIsEditingMemoir(true);
   };
 
   const handleCloseMemoirEditor = () => {
-      setIsEditingMemoir(false);
+    setIsEditingMemoir(false);
   };
 
   if (loading) return <p>Loading memoir...</p>;
@@ -358,14 +368,14 @@ export default function TimelineBoard({ memoirId }) {
 
   return (
     <div>
-      <h1 
+      <h1
         className='text-2xl font-bold mb-4 cursor-pointer hover:text-blue-600'
         onClick={handleOpenMemoirEditor}
-        title="Edit Memoir Title/Description"
+        title='Edit Memoir Title/Description'
       >
         {currentMemoir.title}
       </h1>
-      <DragDropContext onDragEnd={onDragEnd} data-testid="drag-drop-context">
+      <DragDropContext onDragEnd={onDragEnd} data-testid='drag-drop-context'>
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (
             <div
@@ -417,7 +427,7 @@ export default function TimelineBoard({ memoirId }) {
                                     {...provided.dragHandleProps}
                                     data-testid={`event-${event._id}`}
                                     onClick={() => handleOpenEventEditor(event)}
-                                    className="cursor-pointer"
+                                    className='cursor-pointer'
                                   >
                                     <Card variant='muted'>
                                       <CardContent>{event.title}</CardContent>
@@ -506,7 +516,7 @@ export default function TimelineBoard({ memoirId }) {
               {/* Add Chapter Section */}
               <div className='w-64 flex-shrink-0'>
                 {isAddingChapter ? (
-                  <Card variant='muted' data-testid="add-chapter-form">
+                  <Card variant='muted' data-testid='add-chapter-form'>
                     <CardContent className='p-4'>
                       <input
                         type='text'
@@ -515,20 +525,20 @@ export default function TimelineBoard({ memoirId }) {
                         placeholder='Enter chapter title'
                         className='w-full border rounded px-3 py-2 text-sm mb-3'
                         autoFocus
-                        data-testid="chapter-title-input"
+                        data-testid='chapter-title-input'
                       />
                       <div className='flex justify-end space-x-2'>
                         <button
                           onClick={handleCancelNewChapter}
                           className='px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100'
-                          data-testid="cancel-chapter-button"
+                          data-testid='cancel-chapter-button'
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleSaveNewChapter}
                           className='px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700'
-                          data-testid="save-chapter-button"
+                          data-testid='save-chapter-button'
                         >
                           Save
                         </button>
@@ -589,17 +599,13 @@ export default function TimelineBoard({ memoirId }) {
 
       {/* Memoir Editor Modal */}
       {isEditingMemoir && currentMemoir && (
-          <Modal 
-              isOpen={isEditingMemoir} 
-              onClose={handleCloseMemoirEditor} 
-            
-          >
-              <MemoirForm 
-                  memoirToEdit={currentMemoir} 
-                  onSaveComplete={handleCloseMemoirEditor}
-                  onCancel={handleCloseMemoirEditor}
-              />
-          </Modal>
+        <Modal isOpen={isEditingMemoir} onClose={handleCloseMemoirEditor}>
+          <MemoirForm
+            memoirToEdit={currentMemoir}
+            onSaveComplete={handleCloseMemoirEditor}
+            onCancel={handleCloseMemoirEditor}
+          />
+        </Modal>
       )}
     </div>
   );

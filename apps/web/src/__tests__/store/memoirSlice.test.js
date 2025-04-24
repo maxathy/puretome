@@ -72,8 +72,6 @@ describe('memoirSlice', () => {
 
   // PART 1: Test CreateMemoir Operations (Form Management)
   describe('CreateMemoir Operations', () => {
-
-
     it('should handle updateTitle', () => {
       const newTitle = 'My Amazing Memoir';
       const nextState = memoirReducer(initialFormState, updateTitle(newTitle));

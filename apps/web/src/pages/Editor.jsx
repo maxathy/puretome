@@ -17,16 +17,9 @@ const Editor = () => {
 
   return (
     <div className='p-6'>
-
-
-          {/* Pass the memoirId from URL params to TimelineBoard */}
-          {memoirId ? (
-            <TimelineBoard memoirId={memoirId} />
-          ) : (
-            <MemoirPicker />
-          )}
-        </div>
-   
+      {/* Pass the memoirId from URL params to TimelineBoard */}
+      {memoirId ? <TimelineBoard memoirId={memoirId} /> : <MemoirPicker />}
+    </div>
   );
 };
 

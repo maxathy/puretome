@@ -104,9 +104,7 @@ describe('TimelineBoard Component', () => {
 
     await waitFor(() => {
       expect(errorStore.getState().memoir.error).not.toBeNull();
-      expect(
-        screen.getByText(/Error loading memoir:/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Error loading memoir:/i)).toBeInTheDocument();
     });
   });
 
@@ -134,7 +132,9 @@ describe('TimelineBoard Component', () => {
     fireEvent.click(saveChapterButton);
 
     await waitFor(() => {
-      expect(screen.queryByTestId('chapter-title-input')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('chapter-title-input'),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -235,8 +235,12 @@ describe('TimelineBoard Component', () => {
     ).not.toBeInTheDocument();
     const chapterState = store
       .getState()
-      .memoir.currentMemoir.chapters.find((c) => c._id === chapterIdToCancelEvent);
-    const originalChapter = mockMemoir.chapters.find((c) => c._id === chapterIdToCancelEvent);
+      .memoir.currentMemoir.chapters.find(
+        (c) => c._id === chapterIdToCancelEvent,
+      );
+    const originalChapter = mockMemoir.chapters.find(
+      (c) => c._id === chapterIdToCancelEvent,
+    );
     expect(chapterState.events.length).toBe(originalChapter.events.length);
   });
 
