@@ -59,11 +59,28 @@ router.delete(
   async (req, res) => {
     try {
       const { _id } = req.body;
+
+      if (!_id) {
+        return res.status(400).json({ message: 'Memoir ID is required' });
+      }
+
+      // Find the memoir and ensure the author is the logged-in user
+      const memoirToDelete = await Memoir.findOne({ _id: _id, author: req.user.id });
+
+      if (!memoirToDelete) {
+        // If not found or user is not the author, return 404
+        // We don't want to reveal if the memoir exists but belongs to someone else
+        return res.status(404).json({ message: 'Memoir not found' });
+      }
+
+      // Delete the memoir
+      await Memoir.deleteOne({ _id: _id });
+
       res
         .status(200)
-        .json({ message: `Memoir ${!_id ? 'not found' : 'deleted'}` });
+        .json({ message: 'Memoir deleted successfully' });
     } catch (err) {
-      console.error('Save error:', err);
+      console.error('Delete error:', err);
       res.status(500).json({ message: 'Error removing memoir', error: err });
     }
   },

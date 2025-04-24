@@ -357,7 +357,7 @@ export default function TimelineBoard({ memoirId }) {
   if (!currentMemoir) return <p>No memoir found</p>;
 
   return (
-    <div className='space-y-4'>
+    <div>
       <h1 
         className='text-2xl font-bold mb-4 cursor-pointer hover:text-blue-600'
         onClick={handleOpenMemoirEditor}

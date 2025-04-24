@@ -106,6 +106,26 @@ export const createMemoir = createAsyncThunk(
 );
 
 /**
+ * Delete a memoir by ID
+ * @param {string} memoirId - ID of the memoir to delete
+ */
+export const deleteMemoir = createAsyncThunk(
+  'memoir/delete',
+  async (memoirId, { rejectWithValue }) => {
+    try {
+      // The API route expects the ID in the request body for this setup
+      const response = await axios.delete('/api/memoir', { data: { _id: memoirId } });
+      return { deletedMemoirId: memoirId, ...response.data }; // Include ID for removal from state
+    } catch (error) {
+      console.error('Error deleting memoir:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to delete memoir'
+      );
+    }
+  }
+);
+
+/**
  * Memoir slice for state management related to memoirs
  * Handles both creation and timeline editing functionality
  */
@@ -283,6 +303,29 @@ const memoirSlice = createSlice({
       .addCase(createMemoir.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // Handle deleteMemoir
+      .addCase(deleteMemoir.pending, (state) => {
+        state.loading = true; // Could use a specific loading state if preferred
+        state.error = null;
+      })
+      .addCase(deleteMemoir.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove the deleted memoir from the userMemoirs list
+        state.userMemoirs = state.userMemoirs.filter(
+          (memoir) => memoir._id !== action.payload.deletedMemoirId
+        );
+        // If the deleted memoir was the current one, clear it
+        if (state.currentMemoir && state.currentMemoir._id === action.payload.deletedMemoirId) {
+          state.currentMemoir = null;
+          state.currentId = null; // Also clear currentId if used
+        }
+        state.error = null;
+      })
+      .addCase(deleteMemoir.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload; // Set the general error state
       });
   },
 });
