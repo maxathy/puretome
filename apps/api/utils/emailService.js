@@ -18,7 +18,12 @@ const transporter = nodemailer.createTransport({
  * @param {string} authorName - The name of the memoir author inviting the collaborator.
  * @param {string} memoirId - The ID of the memoir to potentially include in an accept link.
  */
-const sendInvitationEmail = async (toEmail, memoirTitle, authorName, memoirId) => {
+const sendInvitationEmail = async (
+  toEmail,
+  memoirTitle,
+  authorName,
+  memoirId,
+) => {
   // TODO: Generate a proper frontend URL for accepting the invitation
   const acceptUrl = `http://localhost:5173/accept-invite?memoirId=${memoirId}`; // Placeholder URL
 
@@ -44,4 +49,4 @@ const sendInvitationEmail = async (toEmail, memoirTitle, authorName, memoirId) =
   }
 };
 
-module.exports = { sendInvitationEmail }; 
+module.exports = { sendInvitationEmail };
