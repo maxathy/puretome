@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Assuming you use axios for API calls
 
 function InviteResponsePage() {
+  const navigate = useNavigate();
   const { memoirId } = useParams();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading'); // 'loading', 'success', 'error', 'idle'
@@ -33,7 +34,13 @@ function InviteResponsePage() {
 
       if (response.status === 200 || response.status === 204) {
         setStatus('success');
-        setMessage(accepted ? 'Invite accepted successfully! You can now collaborate on this memoir.' : 'Invite declined.');
+        if (accepted) {
+            const successMsg = 'Invite accepted successfully! Please log in or register to access the memoir.';
+            setMessage(successMsg);
+
+        } else {
+            setMessage('Invite declined.');
+        }
       } else {
         // Handle unexpected success statuses if necessary
         setStatus('error');

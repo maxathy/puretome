@@ -17,15 +17,18 @@ const transporter = nodemailer.createTransport({
  * @param {string} memoirTitle - The title of the memoir.
  * @param {string} authorName - The name of the memoir author inviting the collaborator.
  * @param {string} memoirId - The ID of the memoir to potentially include in an accept link.
+ * @param {string} token - The token for the invitation.
  */
 const sendInvitationEmail = async (
   toEmail,
   memoirTitle,
   authorName,
   memoirId,
+  token,
 ) => {
-  // TODO: Generate a proper frontend URL for accepting the invitation
-  const acceptUrl = `http://localhost:5173/api/memoir/${memoirId}/collaborators/respond`; // Placeholder URL
+  // Construct the correct frontend URL with the token
+  const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173'; // Use env variable or default
+  const acceptUrl = `${frontendBaseUrl}/invite/${memoirId}?token=${token}`; // Correct URL
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
