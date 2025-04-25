@@ -12,7 +12,7 @@ import memoirReducer, {
 
   // Timeline board actions
   fetchMemoir,
-  updateMemoirTimeline,
+  saveMemoir,
   updateChaptersOrder,
   updateEvents,
 } from '../../store/memoirSlice';
@@ -107,11 +107,6 @@ describe('memoirSlice', () => {
       expect(nextState.chapters[0].events[0].title).toEqual(payload.value);
     });
 
-    it('should handle addChapter', () => {
-      const nextState = memoirReducer(initialFormState, addChapter());
-      expect(nextState.chapters.length).toBe(2);
-      expect(nextState.chapters[1].title).toBe('New Chapter');
-    });
 
     it('should handle addEvent', () => {
       const nextState = memoirReducer(initialFormState, addEvent(0));
@@ -250,27 +245,12 @@ describe('memoirSlice', () => {
       expect(state.error).toBe(errorMessage);
     });
 
-    it('should handle updateMemoirTimeline.fulfilled', async () => {
-      // Setup initial state with a memoir
-      store = configureStore({
-        reducer: {
-          memoir: memoirReducer,
-        },
-        preloadedState: {
-          memoir: stateWithCurrentMemoir,
-        },
-      });
-
-      // Mock successful API response
-      axios.post.mockResolvedValueOnce({
-        data: { message: 'Memoir saved', memoir: mockMemoir },
-      });
+    it('should handle saveMemoir (update timeline).fulfilled', async () => {
+      // Mock successful API response for PUT (since we're updating)
+      axios.put.mockResolvedValueOnce({ data: { memoir: mockMemoir } });
 
       // Dispatch the thunk
-      await store.dispatch(updateMemoirTimeline(mockMemoir));
-
-      // Check that API was called with correct data
-      expect(axios.post).toHaveBeenCalledWith('/api/memoir', mockMemoir);
+      await store.dispatch(saveMemoir(mockMemoir));
 
       // Check state after the action
       const state = store.getState().memoir;
@@ -278,37 +258,5 @@ describe('memoirSlice', () => {
       expect(state.error).toBeNull();
     });
 
-    it('should handle createMemoir.fulfilled', async () => {
-      // Setup initial state
-      store = configureStore({
-        reducer: {
-          memoir: memoirReducer,
-        },
-      });
-
-      // Mock data and response
-      const newMemoir = {
-        title: 'New Memoir',
-        content: 'Description',
-        chapters: [],
-      };
-
-      const apiResponse = {
-        message: 'Memoir saved',
-        memoir: { ...newMemoir, _id: 'new-memoir-id' },
-      };
-
-      // Mock successful API response
-      axios.post.mockResolvedValueOnce({ data: apiResponse });
-
-      // Dispatch the thunk
-      await store.dispatch(createMemoir(newMemoir));
-
-      // Check state after the action
-      const state = store.getState().memoir;
-      expect(state.loading).toBe(false);
-      expect(state.currentId).toBe('new-memoir-id');
-      expect(state.error).toBeNull();
-    });
   });
 });

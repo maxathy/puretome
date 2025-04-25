@@ -14,62 +14,93 @@ const { authMiddleware, authorizeRoles } = require('../middleware/auth');
  * Requires authentication and author role
  *
  * @param {Object} req.body - Memoir data including title, content, chapters
- * @returns {Object} Saved memoir data
+ * @returns {Object} Created memoir data
  */
 
 router.post('/', authMiddleware, authorizeRoles('author'), async (req, res) => {
   try {
-    const { _id, ...memoirData } = req.body;
+    const { ...memoirData } = req.body;
 
     // Ensure the author is set to the logged-in user
     const authorContext = {
       ...memoirData,
-      author: req.user.id, // Add/overwrite author field
+      author: req.user.id, // Add author field
     };
 
-    const updatedMemoir = await Memoir.findOneAndUpdate(
-      { _id: _id || new ObjectId() },
-      authorContext, // Use the modified data object
-      {
-        new: true,
-        upsert: true,
-        runValidators: true,
-      },
+    const newMemoir = await Memoir.create(authorContext); // Use create for new documents
+
+    res.status(201).json({ message: 'Memoir created', memoir: newMemoir });
+  } catch (err) {
+    console.error('Create error:', err);
+    res.status(500).json({ message: 'Error creating memoir', error: err });
+  }
+});
+
+/**
+ * Update memoir endpoint
+ * PUT /api/memoir/:id
+ * Requires authentication and author role
+ *
+ * @param {String} req.params.id - Memoir ID
+ * @param {Object} req.body - Memoir data to update
+ * @returns {Object} Updated memoir data
+ */
+router.put('/:id', authMiddleware, authorizeRoles('author'), async (req, res) => {
+  try {
+    const memoirId = req.params.id;
+    const updateData = req.body;
+
+    // Find the memoir and ensure the author is the logged-in user
+    const memoirToUpdate = await Memoir.findOne({
+      _id: memoirId,
+      author: req.user.id,
+    });
+
+    if (!memoirToUpdate) {
+      // If not found or user is not the author, return 404
+      return res.status(404).json({ message: 'Memoir not found or access denied' });
+    }
+
+    // Prevent changing the author
+    delete updateData.author;
+
+    // Update the memoir
+    const updatedMemoir = await Memoir.findByIdAndUpdate(
+      memoirId,
+      updateData,
+      { new: true, runValidators: true } // Return the updated document and run validators
     );
 
-    res
-      .status(!_id ? 201 : 200)
-      .json({ message: 'Memoir saved', memoir: updatedMemoir });
+    res.status(200).json({ message: 'Memoir updated', memoir: updatedMemoir });
+
   } catch (err) {
-    console.error('Save error:', err);
-    res.status(500).json({ message: 'Error saving memoir', error: err });
+    console.error('Update error:', err);
+    res.status(500).json({ message: 'Error updating memoir', error: err.message });
   }
 });
 
 /**
  * Delete memoir endpoint
- * DELETE /api/memoir
+ * DELETE /api/memoir/:id
  * Requires authentication and author role
  *
- * @param {Object} req.body - Contains memoir id
+ * @param {String} req.params.id - Memoir ID
  * @returns {Object} Success message
  */
 
 router.delete(
-  '/',
+  '/:id',
   authMiddleware,
   authorizeRoles('author'),
   async (req, res) => {
     try {
-      const { _id } = req.body;
+      const memoirId = req.params.id;
 
-      if (!_id) {
-        return res.status(400).json({ message: 'Memoir ID is required' });
-      }
+      // No need to check if ID exists in path, Express handles missing param
 
       // Find the memoir and ensure the author is the logged-in user
       const memoirToDelete = await Memoir.findOne({
-        _id: _id,
+        _id: memoirId,
         author: req.user.id,
       });
 
@@ -80,7 +111,7 @@ router.delete(
       }
 
       // Delete the memoir
-      await Memoir.deleteOne({ _id: _id });
+      await Memoir.deleteOne({ _id: memoirId });
 
       res.status(200).json({ message: 'Memoir deleted successfully' });
     } catch (err) {

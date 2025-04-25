@@ -6,7 +6,7 @@ import axios from 'axios';
 import TimelineBoard from '../../components/TimelineBoard';
 import memoirReducer, {
   fetchMemoir,
-  updateMemoirTimeline,
+  saveMemoir,
   addChapter,
 } from '../../store/memoirSlice';
 import '@testing-library/jest-dom';
