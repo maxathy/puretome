@@ -166,7 +166,7 @@ router.post('/:id/collaborators', authMiddleware, async (req, res) => {
     const existingCollaborator = memoir.collaborators.find(
       (c) =>
         c.inviteEmail?.toLowerCase() === email.toLowerCase() ||
-        c.user?.toString() === user?._id.toString(),
+        (c.user && c.user.toString() === req.user.id.toString()),
     );
     // Also check existing invitations
     const existingInvitation = await Invitation.findOne({
@@ -306,7 +306,7 @@ router.post('/:id/collaborators/respond', async (req, res) => {
       (c) =>
         c.inviteEmail?.toLowerCase() ===
           invitation.inviteeEmail.toLowerCase() ||
-        (c.user && c.user.toString() === user?._id.toString()), // Check user ID if user exists
+        (c.user && c.user.toString() === req.user.id.toString()), // Check user ID if user exists
     );
 
     if (alreadyCollaborator) {
