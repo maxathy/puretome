@@ -157,20 +157,32 @@ router.post('/:id/collaborators', authMiddleware, async (req, res) => {
     // 1. Find memoir and validate ownership
     const memoir = await Memoir.findOne({ _id: memoirId, author: inviterId });
     if (!memoir) {
-      return res.status(404).json({ message: 'Memoir not found or you are not the author.' });
+      return res
+        .status(404)
+        .json({ message: 'Memoir not found or you are not the author.' });
     }
 
     // 2. Check if already a collaborator or pending invite (using email)
     const existingCollaborator = memoir.collaborators.find(
-        (c) => c.inviteEmail?.toLowerCase() === email.toLowerCase() || c.user?.toString() === user?._id.toString()
+      (c) =>
+        c.inviteEmail?.toLowerCase() === email.toLowerCase() ||
+        c.user?.toString() === user?._id.toString(),
     );
-     // Also check existing invitations
-     const existingInvitation = await Invitation.findOne({ memoir: memoirId, inviteeEmail: email.toLowerCase(), status: 'pending' });
+    // Also check existing invitations
+    const existingInvitation = await Invitation.findOne({
+      memoir: memoirId,
+      inviteeEmail: email.toLowerCase(),
+      status: 'pending',
+    });
 
     if (existingCollaborator || existingInvitation) {
-      return res.status(400).json({ message: 'User is already a collaborator or has a pending invitation.' });
+      return res
+        .status(400)
+        .json({
+          message:
+            'User is already a collaborator or has a pending invitation.',
+        });
     }
-
 
     // 3. Generate a secure token
     const token = crypto.randomBytes(32).toString('hex');
@@ -193,37 +205,46 @@ router.post('/:id/collaborators', authMiddleware, async (req, res) => {
       const authorName = authorUser ? authorUser.name : 'The Author';
 
       // Pass memoirId and token to email service
-      await sendInvitationEmail(email, memoir.title, authorName, memoirId, token);
-
+      await sendInvitationEmail(
+        email,
+        memoir.title,
+        authorName,
+        memoirId,
+        token,
+      );
     } catch (emailError) {
       console.error('Failed to send invitation email:', emailError);
       // Consider how to handle this - maybe delete the invitation record?
       // For now, we'll return success but log the error.
-       // Log the email error but don't fail the request - the invite record exists
-       // You might want more robust handling, like retries or marking the invite as failed_delivery
+      // Log the email error but don't fail the request - the invite record exists
+      // You might want more robust handling, like retries or marking the invite as failed_delivery
     }
 
     // 6. Respond (don't add to memoir.collaborators yet)
     res.status(200).json({
       message: 'Collaborator invitation sent successfully.',
       // Optionally return invite details, but maybe not the token
-      invitationId: invitation._id
+      invitationId: invitation._id,
     });
-
   } catch (err) {
-     console.error('Error inviting collaborator:', err); // Log the actual error
-    res.status(500).json({ message: 'Failed to invite collaborator.', error: err.message });
+    console.error('Error inviting collaborator:', err); // Log the actual error
+    res
+      .status(500)
+      .json({ message: 'Failed to invite collaborator.', error: err.message });
   }
 });
 
 // Respond to a collaboration invite using a token
-router.post('/:id/collaborators/respond', async (req, res) => { // Changed to POST, removed authMiddleware
+router.post('/:id/collaborators/respond', async (req, res) => {
+  // Changed to POST, removed authMiddleware
   try {
     const { token, accepted } = req.body; // Get token and acceptance status
     const memoirIdFromPath = req.params.id;
 
     if (typeof accepted !== 'boolean' || !token) {
-      return res.status(400).json({ message: 'Missing or invalid parameters (token, accepted)' });
+      return res
+        .status(400)
+        .json({ message: 'Missing or invalid parameters (token, accepted)' });
     }
 
     // 1. Find the invitation by token
@@ -231,17 +252,23 @@ router.post('/:id/collaborators/respond', async (req, res) => { // Changed to PO
 
     // 2. Validate the invitation
     if (!invitation) {
-      return res.status(404).json({ message: 'Invitation not found or invalid token.' });
+      return res
+        .status(404)
+        .json({ message: 'Invitation not found or invalid token.' });
     }
 
     // Check if memoir ID in path matches the one in the invitation
     if (invitation.memoir.toString() !== memoirIdFromPath) {
-      return res.status(400).json({ message: 'Invalid request: Memoir ID mismatch.' });
+      return res
+        .status(400)
+        .json({ message: 'Invalid request: Memoir ID mismatch.' });
     }
 
     // Check if already responded or expired
     if (invitation.status !== 'pending') {
-      return res.status(400).json({ message: `Invitation already ${invitation.status}.` });
+      return res
+        .status(400)
+        .json({ message: `Invitation already ${invitation.status}.` });
     }
     if (invitation.isExpired()) {
       invitation.status = 'expired'; // Mark as expired
@@ -256,32 +283,38 @@ router.post('/:id/collaborators/respond', async (req, res) => { // Changed to PO
       // Option 2: Mark as declined (if you add 'declined' to Invitation status enum)
       // invitation.status = 'declined';
       // await invitation.save();
-      return res.status(200).json({ message: 'Invitation declined successfully.' });
+      return res
+        .status(200)
+        .json({ message: 'Invitation declined successfully.' });
     }
 
     // 4. Handle Accept
     // Find the target memoir
     const memoir = await Memoir.findById(invitation.memoir);
     if (!memoir) {
-       // Should be unlikely if invitation exists, but good practice to check
-       console.error(`Memoir not found (${invitation.memoir}) for valid invitation (${invitation._id})`);
-       invitation.status = 'expired'; // Mark as expired/invalid as memoir is gone
-       await invitation.save();
-       return res.status(404).json({ message: 'Associated memoir not found.' });
+      // Should be unlikely if invitation exists, but good practice to check
+      console.error(
+        `Memoir not found (${invitation.memoir}) for valid invitation (${invitation._id})`,
+      );
+      invitation.status = 'expired'; // Mark as expired/invalid as memoir is gone
+      await invitation.save();
+      return res.status(404).json({ message: 'Associated memoir not found.' });
     }
 
     // Check if the user is already a collaborator (to prevent duplicates)
-     const alreadyCollaborator = memoir.collaborators.some(
-       (c) => c.inviteEmail?.toLowerCase() === invitation.inviteeEmail.toLowerCase() ||
-              (c.user && c.user.toString() === user?._id.toString()) // Check user ID if user exists
-     );
+    const alreadyCollaborator = memoir.collaborators.some(
+      (c) =>
+        c.inviteEmail?.toLowerCase() ===
+          invitation.inviteeEmail.toLowerCase() ||
+        (c.user && c.user.toString() === user?._id.toString()), // Check user ID if user exists
+    );
 
-     if (alreadyCollaborator) {
-        // Invitation was likely processed already but status update failed? Mark as accepted.
-        invitation.status = 'accepted';
-        await invitation.save();
-        return res.status(200).json({ message: 'Already a collaborator.' });
-     }
+    if (alreadyCollaborator) {
+      // Invitation was likely processed already but status update failed? Mark as accepted.
+      invitation.status = 'accepted';
+      await invitation.save();
+      return res.status(200).json({ message: 'Already a collaborator.' });
+    }
 
     // Find if the user already exists in the system
     const user = await User.findOne({ email: invitation.inviteeEmail });
@@ -303,10 +336,14 @@ router.post('/:id/collaborators/respond', async (req, res) => { // Changed to PO
     await invitation.save();
 
     res.status(200).json({ message: 'Invitation accepted successfully.' });
-
   } catch (err) {
     console.error('Error responding to invitation:', err); // Log the actual error
-    res.status(500).json({ message: 'Error processing invitation response.', error: err.message });
+    res
+      .status(500)
+      .json({
+        message: 'Error processing invitation response.',
+        error: err.message,
+      });
   }
 });
 
