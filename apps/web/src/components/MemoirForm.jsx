@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  updateTitle as updateReduxTitle,
-  updateContent as updateReduxContent,
-  createMemoir,
   resetMemoir,
-  updateMemoirDetails,
+  saveMemoir,
 } from '../store/memoirSlice';
 import CollaboratorsList from './CollaboratorsList';
 
@@ -83,31 +80,26 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
       return;
     }
 
-    if (isEditing) {
-      setIsSaving(true);
-      setSaveError(null);
-      try {
-        await dispatch(
-          updateMemoirDetails({
-            _id: memoirToEdit._id,
-            title,
-            content,
-          }),
-        ).unwrap(); // unwrap to catch potential rejections
-        if (onSaveComplete) onSaveComplete(); // Call callback on success
-      } catch (err) {
-        setSaveError(err || 'Failed to save changes');
-      } finally {
-        setIsSaving(false);
+    const memoirData = {
+      title,
+      content,
+      // Include _id only if editing
+      ...(isEditing && { _id: memoirToEdit._id })
+    };
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await dispatch(saveMemoir(memoirData)).unwrap(); // Use the consolidated save action
+      if (isEditing && onSaveComplete) {
+        onSaveComplete(); // Call edit-specific callback
       }
-    } else {
-      // Use Redux actions/state for creation
-      const memoirData = {
-        title,
-        content,
-        status: 'draft',
-      };
-      dispatch(createMemoir(memoirData));
+      // Navigation for creation is handled by useEffect watching creationCurrentId
+    } catch (err) {
+      setSaveError(err || 'Failed to save memoir');
+    } finally {
+      setIsSaving(false);
     }
   };
 

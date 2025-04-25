@@ -7,6 +7,7 @@ import store from './store';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Editor from './pages/Editor';
+import InviteResponsePage from './pages/InviteResponsePage';
 
 import axios from 'axios';
 import './index.css';
@@ -27,6 +28,7 @@ const App = () => (
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/editor/' element={<Editor />} />
         <Route path='/editor/:memoirId' element={<Editor />} />
+        <Route path='/invite/:memoirId' element={<InviteResponsePage />} />
       </Routes>
     </BrowserRouter>
   </Provider>

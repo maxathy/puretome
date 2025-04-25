@@ -16,20 +16,67 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 router.post('/register', async (req, res) => {
   try {
-    const { email } = req.body;
-    if (isEmail(email)) {
-      console.log('email valid');
-      const user = new User(req.body);
-      await user.save();
-      const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-        expiresIn: '7d',
-      });
-      res.status(201).json({ token, user });
-    } else {
-      res.status(400).json({ error: 'invalid email' });
+    // Destructure name, email, password from body
+    const { name, email, password } = req.body;
+
+    // Add validation for name presence
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return res.status(400).json({ message: 'Full name is required.' });
     }
+
+    // Validate email format
+    if (!email || !isEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email format.' });
+    }
+
+    // Validate password presence (more robust validation is recommended)
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      // Example: min 6 chars
+      return res
+        .status(400)
+        .json({ message: 'Password must be at least 6 characters long.' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered.' });
+    }
+
+    console.log('User data valid, creating user');
+    // Create new user with name, email, password
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase(),
+      password,
+    }); // Trim name, lowercase email
+    await user.save();
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    // Respond with token and user data (excluding password)
+    const userData = user.toObject(); // Convert Mongoose doc to plain object
+    delete userData.password; // Remove password field
+    res.status(201).json({ token, user: userData });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    // Log the specific error for debugging
+    console.error('Registration Error:', err);
+
+    // Handle potential Mongoose validation errors or other issues
+    let errorMessage = 'Registration failed due to an internal error.';
+    if (err.name === 'ValidationError') {
+      errorMessage = Object.values(err.errors)
+        .map((e) => e.message)
+        .join(', ');
+    } else if (err.code === 11000) {
+      // Duplicate key error (likely email)
+      errorMessage = 'Email already registered.';
+    }
+
+    res.status(400).json({ message: errorMessage, error: err.message }); // Send back clearer message
   }
 });
 /**

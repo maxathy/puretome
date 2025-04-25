@@ -41,66 +41,34 @@ export const fetchUserMemoirs = createAsyncThunk(
 );
 
 /**
- * Update a memoir's timeline (chapters and events structure)
- * @param {Object} updatedMemoir - Memoir object with updated structure
+ * Save (Create or Update) a memoir
+ * If memoirData has _id, it updates (PUT). Otherwise, it creates (POST).
+ * @param {Object} memoirData - Memoir data, must include title. May include _id, content, chapters, etc.
  */
-export const updateMemoirTimeline = createAsyncThunk(
-  'memoir/updateTimeline',
-  async (updatedMemoir, { rejectWithValue }) => {
-    try {
-      const response = await axios.post('/api/memoir', updatedMemoir);
-      return response.data;
-    } catch (error) {
-      console.error('Error saving memoir:', error);
-      return rejectWithValue(
-        error.response?.data?.message || 'Failed to update memoir timeline',
-      );
-    }
-  },
-);
-
-/**
- * Update memoir details (title, content)
- * @param {Object} memoirData - Object containing { _id, title, content }
- */
-export const updateMemoirDetails = createAsyncThunk(
-  'memoir/updateDetails',
-  async (memoirData, { rejectWithValue }) => {
-    try {
-      if (!memoirData._id || !memoirData.title) {
-        return rejectWithValue('Memoir ID and title are required for update');
-      }
-      // Only send necessary fields for update
-      const { _id, title, content } = memoirData;
-      const response = await axios.post('/api/memoir', { _id, title, content });
-      return response.data; // Should return { message: 'Memoir saved', memoir: updatedMemoir }
-    } catch (error) {
-      console.error('Error updating memoir details:', error);
-      return rejectWithValue(
-        error.response?.data?.message || 'Failed to update memoir details',
-      );
-    }
-  },
-);
-
-/**
- * Create a new memoir
- * @param {Object} memoirData - New memoir data
- */
-export const createMemoir = createAsyncThunk(
-  'memoir/create',
+export const saveMemoir = createAsyncThunk(
+  'memoir/save',
   async (memoirData, { rejectWithValue }) => {
     try {
       if (!memoirData.title) {
-        return rejectWithValue('Memoir title is required');
+        return rejectWithValue('Memoir title is required.');
       }
 
-      const response = await axios.post('/api/memoir', memoirData);
-      return response.data;
+      const { _id, ...dataToSend } = memoirData;
+
+      let response;
+      if (_id) {
+        // Update existing memoir
+        response = await axios.put(`/api/memoir/${_id}`, dataToSend);
+      } else {
+        // Create new memoir
+        response = await axios.post('/api/memoir', dataToSend);
+      }
+
+      return response.data; // Should return { message: '...', memoir: savedMemoir }
     } catch (error) {
-      console.error('Error creating memoir:', error);
+      console.error('Error saving memoir:', error);
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to create memoir',
+        error.response?.data?.message || 'Failed to save memoir',
       );
     }
   },
@@ -114,10 +82,8 @@ export const deleteMemoir = createAsyncThunk(
   'memoir/delete',
   async (memoirId, { rejectWithValue }) => {
     try {
-      // The API route expects the ID in the request body for this setup
-      const response = await axios.delete('/api/memoir', {
-        data: { _id: memoirId },
-      });
+      // Use the new API path with ID in the URL
+      const response = await axios.delete(`/api/memoir/${memoirId}`);
       return { deletedMemoirId: memoirId, ...response.data }; // Include ID for removal from state
     } catch (error) {
       console.error('Error deleting memoir:', error);
@@ -228,12 +194,7 @@ const memoirSlice = createSlice({
       const { chapterIndex, eventIndex, field, value } = action.payload;
       state.chapters[chapterIndex].events[eventIndex][field] = value;
     },
-    addChapter: (state) => {
-      state.chapters.push({
-        title: 'New Chapter',
-        events: [{ title: 'New Event', content: '' }],
-      });
-    },
+
     addEvent: (state, action) => {
       const chapterIndex = action.payload;
       state.chapters[chapterIndex].events.push({
@@ -247,12 +208,10 @@ const memoirSlice = createSlice({
       // Handle fetchMemoir
       .addCase(fetchMemoir.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchMemoir.fulfilled, (state, action) => {
         state.loading = false;
         state.currentMemoir = action.payload;
-        state.error = null;
       })
       .addCase(fetchMemoir.rejected, (state, action) => {
         state.loading = false;
@@ -274,62 +233,25 @@ const memoirSlice = createSlice({
         state.userMemoirsError = action.payload;
       })
 
-      // Handle updateMemoirTimeline
-      .addCase(updateMemoirTimeline.pending, (state) => {
-        state.loading = true;
+      // Handle saveMemoir (Create/Update)
+      .addCase(saveMemoir.pending, (state) => {
+        state.loading = true; // Use general loading/error for save
         state.error = null;
       })
-      .addCase(updateMemoirTimeline.fulfilled, (state, action) => {
+      .addCase(saveMemoir.fulfilled, (state, action) => {
         state.loading = false;
-        // Optionally update the memoir with the response
-        state.currentMemoir = action.payload.memoir;
-      })
-      .addCase(updateMemoirTimeline.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // Handle updateMemoirDetails
-      .addCase(updateMemoirDetails.pending, (state) => {
-        state.loading = true; // Use the general loading state
-        state.error = null;
-      })
-      .addCase(updateMemoirDetails.fulfilled, (state, action) => {
-        state.loading = false;
-        if (
-          state.currentMemoir &&
-          state.currentMemoir._id === action.payload.memoir._id
-        ) {
-          // Update currentMemoir if it's the one being edited
-          state.currentMemoir.title = action.payload.memoir.title;
-          state.currentMemoir.content = action.payload.memoir.content;
-        }
-        // Update the memoir in the userMemoirs list as well
-        const index = state.userMemoirs.findIndex(
-          (m) => m._id === action.payload.memoir._id,
-        );
-        if (index !== -1) {
-          state.userMemoirs[index].title = action.payload.memoir.title;
-          state.userMemoirs[index].content = action.payload.memoir.content;
-        }
-        state.error = null;
-      })
-      .addCase(updateMemoirDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload; // Set the general error state
-      })
-
-      // Handle createMemoir
-      .addCase(createMemoir.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createMemoir.fulfilled, (state, action) => {
-        state.loading = false;
+        state.currentMemoir = action.payload.memoir; // Update current memoir
         state.currentId = action.payload.memoir._id;
-        state.error = null;
+
+        // Update or add in userMemoirs list
+        const index = state.userMemoirs.findIndex(m => m._id === action.payload.memoir._id);
+        if (index !== -1) {
+          state.userMemoirs[index] = action.payload.memoir;
+        } else {
+          state.userMemoirs.push(action.payload.memoir);
+        }
       })
-      .addCase(createMemoir.rejected, (state, action) => {
+      .addCase(saveMemoir.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

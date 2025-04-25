@@ -4,14 +4,23 @@ import axios from 'axios';
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
   const handleRegister = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      alert('Please fill in all fields.');
+      return;
+    }
     try {
-      await axios.post('/api/users/register', { email, password });
+      await axios.post('/api/users/register', { name, email, password });
       alert('Registration successful! Please log in.');
       window.location.href = '/';
     } catch (err) {
-      alert('Registration failed');
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Registration failed';
+      alert(errorMsg);
     }
   };
 
@@ -19,6 +28,13 @@ const RegisterPage = () => {
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100'>
       <div className='bg-white p-8 rounded shadow-md w-80'>
         <h2 className='text-xl font-bold mb-4'>Register</h2>
+        <input
+          className='border mb-2 p-2 w-full'
+          type='text'
+          placeholder='Full Name'
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <input
           className='border mb-2 p-2 w-full'
           type='email'

@@ -4,10 +4,9 @@ import { Card, CardContent } from './ui/card';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMemoir,
-  updateMemoirTimeline,
+  saveMemoir,
   updateChaptersOrder,
-  updateEvents,
-  addChapter,
+  updateEvents
 } from '../store/memoirSlice';
 import EventEditor from './EventEditor';
 import ChapterEditor from './ChapterEditor';
@@ -60,7 +59,7 @@ export default function TimelineBoard({ memoirId }) {
       reorderedChapters.splice(destination.index, 0, removed);
 
       dispatch(
-        updateMemoirTimeline({
+        saveMemoir({
           ...currentMemoir,
           chapters: reorderedChapters,
         }),
@@ -115,7 +114,7 @@ export default function TimelineBoard({ memoirId }) {
 
     // Update the memoir with the new chapter/event structure
     dispatch(
-      updateMemoirTimeline({
+      saveMemoir({
         ...currentMemoir,
         chapters: updatedChapters,
       }),
@@ -171,7 +170,7 @@ export default function TimelineBoard({ memoirId }) {
 
     // Update memoir with new chapter structure
     dispatch(
-      updateMemoirTimeline({
+      saveMemoir({
         ...currentMemoir,
         chapters: updatedChapters,
       }),
@@ -206,7 +205,7 @@ export default function TimelineBoard({ memoirId }) {
     const updatedChapters = [...currentMemoir.chapters, newChapter];
 
     dispatch(
-      updateMemoirTimeline({
+      saveMemoir({
         ...currentMemoir,
         chapters: updatedChapters,
       }),
@@ -248,7 +247,7 @@ export default function TimelineBoard({ memoirId }) {
       JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)
     ) {
       dispatch(
-        updateMemoirTimeline({
+        saveMemoir({
           ...currentMemoir,
           chapters: updatedChapters,
         }),
@@ -278,7 +277,7 @@ export default function TimelineBoard({ memoirId }) {
     // Only dispatch if an event was actually removed
     if (chapterIdContainingEvent) {
       dispatch(
-        updateMemoirTimeline({
+        saveMemoir({
           ...currentMemoir,
           chapters: updatedChapters,
         }),
@@ -322,7 +321,7 @@ export default function TimelineBoard({ memoirId }) {
       JSON.stringify(updatedChapters) !== JSON.stringify(currentMemoir.chapters)
     ) {
       dispatch(
-        updateMemoirTimeline({
+        saveMemoir({
           ...currentMemoir,
           chapters: updatedChapters,
         }),
@@ -344,7 +343,7 @@ export default function TimelineBoard({ memoirId }) {
     // Only dispatch if a chapter was actually removed
     if (updatedChapters.length < currentMemoir.chapters.length) {
       dispatch(
-        updateMemoirTimeline({
+        saveMemoir({
           ...currentMemoir,
           chapters: updatedChapters,
         }),
