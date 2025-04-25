@@ -68,18 +68,8 @@ const MemoirPicker = () => {
   }
 
   if (!userMemoirs || userMemoirs.length === 0) {
-    return (
-      <div className='p-6 text-center'>
-        <p>You haven't created any memoirs yet.</p>
-        {/* Optional: Add a button/link to create a new one */}
-        <button
-          onClick={() => navigate('/create')} // Route to your create memoir page/component
-          className='mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
-        >
-          Create New Memoir
-        </button>
-      </div>
-    );
+    // setShowCreateForm(true);
+    return (<MemoirForm />);
   }
 
   // If showCreateForm is true, render the form instead of the picker
