@@ -25,7 +25,7 @@ const sendInvitationEmail = async (
   memoirId,
 ) => {
   // TODO: Generate a proper frontend URL for accepting the invitation
-  const acceptUrl = `http://localhost:5173/accept-invite?memoirId=${memoirId}`; // Placeholder URL
+  const acceptUrl = `http://localhost:5173/api/memoir/${memoirId}/collaborators/respond`; // Placeholder URL
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
