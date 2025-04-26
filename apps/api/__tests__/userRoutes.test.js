@@ -163,13 +163,11 @@ describe('User Routes', () => {
   describe('POST /api/users/forgot-password', () => {
     test('should generate reset token', async () => {
       const mockUser = {
-        _id: 'mockUserId',
+        _id: 'userId',
         email: 'test@example.com',
-        // Mock the instance method
         generateResetToken: jest.fn().mockReturnValue('resetToken'),
-        save: jest.fn().mockResolvedValue(true)
+        save: jest.fn().mockResolvedValue(true),
       };
-
       User.findOne.mockResolvedValue(mockUser);
 
       const response = await request(app)
@@ -177,21 +175,20 @@ describe('User Routes', () => {
         .send({ email: 'test@example.com' });
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe('Reset link generated');
-      expect(response.body.token).toBe('resetToken');
+      expect(response.body.message).toBe('If your email is registered, you will receive a password reset link.');
       expect(mockUser.generateResetToken).toHaveBeenCalled();
       expect(mockUser.save).toHaveBeenCalled();
     });
 
-    test('should return 404 if user not found for forgot password', async () => {
+    test('should return success message even if user not found', async () => {
       User.findOne.mockResolvedValue(null);
 
       const response = await request(app)
         .post('/api/users/forgot-password')
         .send({ email: 'nonexistent@example.com' });
 
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('User not found');
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('If your email is registered, you will receive a password reset link.');
     });
   });
 
@@ -213,7 +210,7 @@ describe('User Routes', () => {
         .send({ token: 'resetToken', password: 'newpassword123' });
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe('Password reset successful');
+      expect(response.body.message).toBe('Password has been reset successfully.');
       expect(mockUser.password).toBe('newpassword123');
       expect(mockUser.resetPasswordToken).toBeUndefined();
       expect(mockUser.resetPasswordExpires).toBeUndefined();
