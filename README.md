@@ -1,11 +1,11 @@
-# StoryNest
+# PureTome
 
 ## Project Overview
-StoryNest is a collaborative memoir monorepo application where real-life stories come to life. 
+PureTome is a collaborative memoir monorepo application where real-life stories come to life. 
 Authors can write their life journeys, invite characters to validate events, 
 and serialize chapters for a growing audience. 
 With built-in tools for monetization and a publishing pipeline on the horizon, 
-StoryNest turns lived experience into legacy — and income.
+PureTome turns lived experience into legacy — and income.
 ```md
 storynest/
 ├── .yarn/             # Yarn package manager files
