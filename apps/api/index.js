@@ -10,7 +10,7 @@ const memoirRoutes = require('./routes/memoirRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 
 const app = express();
-let uri = process.env.MONGO_URI;
+let uri = process.env.MONGO_URI || 'mongodb://mongo:27017/storynest';
 
 app.use(cors());
 app.use(express.json());
