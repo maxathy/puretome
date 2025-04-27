@@ -24,15 +24,27 @@ storynest/
 ```
 ## Local development
 *Prerequisites:* make sure mongo is running and yarn v2 is installed globally
+
+if not running api in container add local ENV var (APP_DEBUG=true)
 ```
 cd docker
 docker-compose up -d mongo
 ```
 
-## Supported yarn commands
+### Supported yarn commands
 ```
 yarn dev - Starts both the web and API applications concurrently
 yarn dev:web - Starts only the web application
 yarn dev:api - Starts only the API application
 yarn format - Runs Prettier to format all code
+```
+
+### API configurable env vars (.env file not tracked in source control)
+```
+MONGO_URI
+JWT_SECRET
+EMAIL_HOST
+EMAIL_PORT
+EMAIL_USER
+EMAIL_PASS
 ```
