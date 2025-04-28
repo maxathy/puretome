@@ -289,16 +289,10 @@ const memoirSlice = createSlice({
       })
       .addCase(inviteCollaborator.fulfilled, (state, action) => {
         state.loading = false;
-        // If current memoir is loaded, update it with new collaborator
-        if (
-          state.currentMemoir &&
-          state.currentMemoir._id === action.meta.arg.memoirId
-        ) {
-          if (!state.currentMemoir.collaborators) {
-            state.currentMemoir.collaborators = [];
-          }
-          state.currentMemoir.collaborators.push(action.payload.collaborator);
-        }
+        // No direct state manipulation needed here,
+        // as fetchMemoir will be dispatched to get the updated list including the pending invite.
+        // We might want to clear any specific invitation-related error here if we had one.
+        state.error = null; // Clear potential previous errors
       })
       .addCase(inviteCollaborator.rejected, (state, action) => {
         state.loading = false;

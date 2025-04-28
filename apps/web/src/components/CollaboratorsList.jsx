@@ -1,26 +1,34 @@
 // apps/web/src/components/CollaboratorsList.jsx
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { inviteCollaborator } from '../store/memoirSlice';
+import { inviteCollaborator, fetchMemoir } from '../store/memoirSlice';
 
 const CollaboratorsList = ({ memoir }) => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('viewer');
   const dispatch = useDispatch();
 
-  const handleInvite = () => {
-    if (!email.trim()) return;
+  const handleInvite = async () => {
+    if (!email.trim() || !memoir?._id) return;
 
-    dispatch(
-      inviteCollaborator({
-        memoirId: memoir._id,
-        email,
-        role,
-      }),
-    );
+    try {
+      const resultAction = await dispatch(
+        inviteCollaborator({
+          memoirId: memoir._id,
+          email,
+          role,
+        }),
+      );
 
-    // Clear form
-    setEmail('');
+      if (inviteCollaborator.fulfilled.match(resultAction)) {
+        setEmail('');
+        dispatch(fetchMemoir(memoir._id));
+      } else {
+        console.error('Failed to invite collaborator:', resultAction.payload);
+      }
+    } catch (error) {
+      console.error('Error dispatching inviteCollaborator:', error);
+    }
   };
 
   return (
@@ -37,25 +45,37 @@ const CollaboratorsList = ({ memoir }) => {
             >
               <div>
                 <span className='font-medium'>
-                  {collab.user ? collab.user.email : collab.inviteEmail}
+                  {collab.user
+                    ? collab.user.email
+                    : collab.inviteEmail || 'Invited User'}
                 </span>
                 <span className='ml-2 text-sm text-gray-500'>
-                  {collab.role} ({collab.inviteStatus})
+                  {collab.role} (
+                  {collab.status === 'pending' ||
+                  collab.inviteStatus === 'pending'
+                    ? 'Pending'
+                    : 'Accepted'}
+                  )
                 </span>
               </div>
               <button
                 className='text-red-500 hover:text-red-700'
                 onClick={() => {
-                  /* TODO: Remove collaborator function */
+                  console.log('Remove/Revoke clicked for:', collab);
                 }}
               >
-                Remove
+                {collab.status === 'pending' ||
+                collab.inviteStatus === 'pending'
+                  ? 'Revoke'
+                  : 'Remove'}
               </button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className='text-gray-500 mb-4'>No collaborators yet</p>
+        <p className='text-gray-500 mb-4'>
+          No collaborators or pending invites
+        </p>
       )}
 
       {/* Invite form */}

@@ -90,27 +90,106 @@ exports.deleteMemoir = async (req, res) => {
 // GET /api/memoir/:id
 exports.getMemoirById = async (req, res) => {
   try {
+    const memoirId = req.params.id;
+    const userId = req.user.id;
+
+    // 1. Fetch the memoir, check if user is author or accepted collaborator
     const memoir = await Memoir.findOne({
-      _id: req.params.id,
+      _id: memoirId,
       $or: [
-        { author: req.user.id },
+        { author: userId },
         {
-          'collaborators.user': req.user.id,
+          'collaborators.user': userId,
           'collaborators.inviteStatus': 'accepted',
         },
       ],
     })
-      .populate({ path: 'author', select: '-password' })
-      .populate({ path: 'collaborators.user', select: '-password' }); // Corrected population
+      .populate({ path: 'author', select: 'id name email' })
+      .populate({
+        path: 'collaborators.user',
+        select: 'id name email',
+        model: 'User', // Explicitly specify the model for nested population
+      });
 
     if (!memoir) {
       return res
         .status(404)
         .json({ message: 'Memoir not found or access denied' });
     }
-    res.json(memoir);
+
+    // Defensively check if author population worked
+    if (!memoir.author || !memoir.author._id) {
+      console.error(`Author not populated correctly for memoir ${memoirId}`);
+      // It's an internal issue if the author (who exists) isn't populated
+      return res
+        .status(500)
+        .json({
+          message: 'Internal server error: Failed to load memoir author data',
+        });
+    }
+
+    // 2. Fetch pending invitations ONLY if the requester is the author
+    let pendingInvitations = [];
+    if (memoir.author._id.toString() === userId.toString()) {
+      pendingInvitations = await Invitation.find({
+        memoir: memoirId,
+        status: 'pending',
+      }).lean(); // Use .lean() for plain JS objects
+    }
+
+    // 3. Combine collaborators and pending invitations
+    const acceptedCollaborators = memoir.collaborators
+      // Filter for safety: only process accepted collaborators with a populated user field
+      .filter((collab) => collab.inviteStatus === 'accepted' && collab.user)
+      .map((collab) => ({
+        // Ensure consistent structure and add status
+        user: {
+          // Explicitly structure user data for consistency
+          id: collab.user.id || collab.user._id, // Prefer 'id' if available from virtuals, fallback to _id
+          name: collab.user.name,
+          email: collab.user.email,
+        },
+        role: collab.role,
+        status: 'accepted', // Explicitly set status
+        inviteEmail: collab.inviteEmail, // Keep inviteEmail if available
+        _id: collab._id, // Keep original collaborator subdocument ID if needed
+      }));
+
+    const formattedPendingInvitations = pendingInvitations.map((invite) => ({
+      user: null, // No user object for pending invites
+      role: invite.role,
+      status: 'pending',
+      inviteEmail: invite.inviteeEmail,
+      _id: invite._id, // Use invitation ID
+    }));
+
+    // Combine the lists (only includes pending if user is author)
+    const combinedList = [
+      ...acceptedCollaborators,
+      ...formattedPendingInvitations,
+    ];
+
+    // 4. Return the memoir with the combined list
+    // Convert memoir to a plain object to modify it, use virtuals if they exist
+    const memoirObject = memoir.toObject({ virtuals: true });
+
+    // Replace collaborators list
+    memoirObject.collaborators = combinedList;
+
+    // Explicitly structure the author object in the response
+    memoirObject.author = {
+      id: memoir.author.id || memoir.author._id,
+      name: memoir.author.name,
+      email: memoir.author.email,
+    };
+
+    // Remove potentially sensitive or large fields if not needed by frontend
+    delete memoirObject.__v; // Remove mongoose version key
+
+    res.json(memoirObject);
   } catch (err) {
-    console.error('Get Memoir By ID error:', err);
+    // Log the detailed error causing the 500
+    console.error('Get Memoir By ID controller error:', err);
     res
       .status(500)
       .json({ message: 'Error retrieving memoir', error: err.message });
