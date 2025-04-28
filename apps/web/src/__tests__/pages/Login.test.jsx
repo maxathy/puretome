@@ -6,6 +6,9 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from '../../../src/store/userSlice';
 
+// Mock axios module
+vi.mock('axios');
+
 // Mock react-router-dom hooks
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -55,7 +58,44 @@ describe('Login Page', () => {
     expect(screen.getByPlaceholderText(/password/i).value).toBe('password123');
   });
 
+  it('handles successful login and redirects to /editor by default', async () => {
+    axios.post.mockResolvedValueOnce({
+      data: { token: 'fake-jwt-token', user: { email: 'test@example.com', role: 'author' } },
+    });
 
+    renderWithProviders(<LoginPage />); 
+
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
+
+    expect(axios.post).toHaveBeenCalledWith('/api/users/login', { email: 'test@example.com', password: 'password123' });
+
+    await waitFor(() => {
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'fake-jwt-token');
+      expect(mockNavigate).toHaveBeenCalledWith('/editor', { replace: true });
+    });
+  });
+
+  it('handles successful login and redirects to landingPage if present', async () => {
+    axios.post.mockResolvedValueOnce({
+      data: { token: 'fake-jwt-token', user: { email: 'test@example.com', role: 'author' } },
+    });
+    
+    const landingPage = '/invite/someMemoirId?token=inviteToken';
+    const route = `/login?landingPage=${encodeURIComponent(landingPage)}`;
+
+    renderWithProviders(<LoginPage />, { route: '/login', initialEntries: [route] });
+
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
+
+    await waitFor(() => {
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'fake-jwt-token');
+      expect(mockNavigate).toHaveBeenCalledWith(landingPage, { replace: true });
+    });
+  });
 
   it('handles login failure and displays error message', async () => {
     const errorMessage = 'Invalid credentials mate!';
