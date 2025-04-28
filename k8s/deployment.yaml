@@ -1,56 +1,56 @@
 # Kubernetes Deployment Configuration
 # Defines deployments and services for:
-# - storynest-web: Frontend application with 2 replicas
-# - storynest-api: Backend API with 2 replicas
+# - puretome-web: Frontend application with 2 replicas
+# - puretome-api: Backend API with 2 replicas
 # - Services for routing traffic to pods
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storynest-web
+  name: puretome-web
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: storynest-web
+      app: puretome-web
   template:
     metadata:
       labels:
-        app: storynest-web
+        app: puretome-web
     spec:
       containers:
         - name: web
-          image: storynest/web:latest
+          image: puretome/web:latest
           ports:
             - containerPort: 5173
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storynest-api
+  name: puretome-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: storynest-api
+      app: puretome-api
   template:
     metadata:
       labels:
-        app: storynest-api
+        app: puretome-api
     spec:
       containers:
         - name: api
-          image: storynest/api:latest
+          image: puretome/api:latest
           ports:
             - containerPort: 5000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: storynest-web
+  name: puretome-web
 spec:
   selector:
-    app: storynest-web
+    app: puretome-web
   ports:
     - port: 80
       targetPort: 5173
@@ -58,10 +58,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: storynest-api
+  name: puretome-api
 spec:
   selector:
-    app: storynest-api
+    app: puretome-api
   ports:
     - port: 80
       targetPort: 5000

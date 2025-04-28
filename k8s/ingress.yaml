@@ -1,31 +1,31 @@
 # Kubernetes Ingress Configuration
 # Routes external traffic to appropriate services:
-# - / routes to storynest-web service
-# - /api routes to storynest-api service
-# Host: storynest.local
+# - / routes to puretome-web service
+# - /api routes to puretome-api service
+# Host: puretome.local
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: storynest-ingress
+  name: puretome-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: storynest.local
+    - host: puretome.local
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: storynest-web
+                name: puretome-web
                 port:
                   number: 80
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: storynest-api
+                name: puretome-api
                 port:
                   number: 80

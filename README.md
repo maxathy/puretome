@@ -7,7 +7,7 @@ and serialize chapters for a growing audience.
 With built-in tools for monetization and a publishing pipeline on the horizon, 
 PureTome turns lived experience into legacy — and income.
 ```md
-storynest/
+puretome/
 ├── .yarn/             # Yarn package manager files
 ├── apps/              # Application packages
 │   ├── api/           # Backend Express API

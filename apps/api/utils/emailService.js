@@ -34,12 +34,12 @@ const sendInvitationEmail = async (
     from: process.env.EMAIL_FROM,
     to: toEmail,
     subject: `Invitation to collaborate on memoir: ${memoirTitle}`,
-    text: `Hello,\n\nYou have been invited by ${authorName} to collaborate on the memoir "${memoirTitle}".\n\nClick here to accept: ${acceptUrl}\n\nIf you did not expect this invitation, please ignore this email.\n\nThanks,\nThe StoryNest Team`,
+    text: `Hello,\n\nYou have been invited by ${authorName} to collaborate on the memoir "${memoirTitle}".\n\nClick here to accept: ${acceptUrl}\n\nIf you did not expect this invitation, please ignore this email.\n\nThanks,\nThe PureTome Team`,
     html: `<p>Hello,</p>
            <p>You have been invited by <strong>${authorName}</strong> to collaborate on the memoir "<strong>${memoirTitle}</strong>".</p>
            <p><a href="${acceptUrl}">Click here to accept the invitation</a>.</p>
            <p>If you did not expect this invitation, please ignore this email.</p>
-           <p>Thanks,<br/>The StoryNest Team</p>`,
+           <p>Thanks,<br/>The PureTome Team</p>`,
   };
 
   try {

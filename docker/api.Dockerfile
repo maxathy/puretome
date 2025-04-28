@@ -1,5 +1,5 @@
 # docker/api.Dockerfile
-FROM storynest/base:latest
+FROM puretome/base:latest
 
 # Set working directory to the API app
 WORKDIR /app/apps/api

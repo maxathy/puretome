@@ -1,5 +1,5 @@
 # docker/web.Dockerfile
-FROM storynest/base:latest
+FROM puretome/base:latest
 
 # Set working directory to the web app
 WORKDIR /app/apps/web

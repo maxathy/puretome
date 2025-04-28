@@ -9,7 +9,7 @@ services:
     build:
       context: ../
       dockerfile: docker/base.Dockerfile
-    image: storynest/base:latest
+    image: puretome/base:latest
 
   web:
     build:
