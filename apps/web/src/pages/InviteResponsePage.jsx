@@ -32,12 +32,14 @@ function InviteResponsePage() {
     // Check login status
     if (!isLoggedIn) {
       // Construct the landingPage URL (current path + search params)
-      const landingPage = encodeURIComponent(location.pathname + location.search);
+      const landingPage = encodeURIComponent(
+        location.pathname + location.search,
+      );
       // Redirect to login page
       navigate(`/login?landingPage=${landingPage}`, { replace: true });
     } else {
       // User is logged in, proceed to show buttons
-      setStatus('idle'); 
+      setStatus('idle');
     }
     // Rerun effect if login status changes (e.g., after redirect and login)
   }, [token, isLoggedIn, navigate, location]);
@@ -96,7 +98,9 @@ function InviteResponsePage() {
       <h1 className='text-2xl font-bold mb-4'>Memoir Invitation</h1>
 
       {/* Show loading indicator while checking auth or processing API */}
-      {(status === 'loading' || status === 'processing_auth') && <p>Processing...</p>}
+      {(status === 'loading' || status === 'processing_auth') && (
+        <p>Processing...</p>
+      )}
 
       {/* Only show buttons if logged in and ready */}
       {isLoggedIn && status === 'idle' && (

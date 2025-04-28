@@ -20,19 +20,25 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 // Helper function to render with providers
-const renderWithProviders = (ui, { route = '/login', preloadedState = {}, initialEntries = [route] } = {}) => {
-  const store = configureStore({ reducer: { user: userReducer }, preloadedState });
+const renderWithProviders = (
+  ui,
+  { route = '/login', preloadedState = {}, initialEntries = [route] } = {},
+) => {
+  const store = configureStore({
+    reducer: { user: userReducer },
+    preloadedState,
+  });
   return render(
     <Provider store={store}>
       <MemoryRouter initialEntries={initialEntries}>
-         <Routes>
-            <Route path="/login" element={ui} />
-            <Route path="/editor" element={<div>Editor Page</div>} />
-            <Route path="/register" element={<div>Register Page</div>} />
-            <Route path="/invite/:memoirId" element={<div>Invite Page</div>} /> 
-         </Routes>
+        <Routes>
+          <Route path='/login' element={ui} />
+          <Route path='/editor' element={<div>Editor Page</div>} />
+          <Route path='/register' element={<div>Register Page</div>} />
+          <Route path='/invite/:memoirId' element={<div>Invite Page</div>} />
+        </Routes>
       </MemoryRouter>
-    </Provider>
+    </Provider>,
   );
 };
 
@@ -47,64 +53,104 @@ describe('Login Page', () => {
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /sign up/i }),
+    ).toBeInTheDocument();
   });
 
   it('handles input changes', () => {
     renderWithProviders(<LoginPage />);
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
-    expect(screen.getByPlaceholderText(/email/i).value).toBe('test@example.com');
+    fireEvent.change(screen.getByPlaceholderText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: 'password123' },
+    });
+    expect(screen.getByPlaceholderText(/email/i).value).toBe(
+      'test@example.com',
+    );
     expect(screen.getByPlaceholderText(/password/i).value).toBe('password123');
   });
 
   it('handles successful login and redirects to /editor by default', async () => {
     axios.post.mockResolvedValueOnce({
-      data: { token: 'fake-jwt-token', user: { email: 'test@example.com', role: 'author' } },
+      data: {
+        token: 'fake-jwt-token',
+        user: { email: 'test@example.com', role: 'author' },
+      },
     });
 
-    renderWithProviders(<LoginPage />); 
+    renderWithProviders(<LoginPage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByPlaceholderText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: 'password123' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
 
-    expect(axios.post).toHaveBeenCalledWith('/api/users/login', { email: 'test@example.com', password: 'password123' });
+    expect(axios.post).toHaveBeenCalledWith('/api/users/login', {
+      email: 'test@example.com',
+      password: 'password123',
+    });
 
     await waitFor(() => {
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'fake-jwt-token');
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'token',
+        'fake-jwt-token',
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/editor', { replace: true });
     });
   });
 
   it('handles successful login and redirects to landingPage if present', async () => {
     axios.post.mockResolvedValueOnce({
-      data: { token: 'fake-jwt-token', user: { email: 'test@example.com', role: 'author' } },
+      data: {
+        token: 'fake-jwt-token',
+        user: { email: 'test@example.com', role: 'author' },
+      },
     });
-    
+
     const landingPage = '/invite/someMemoirId?token=inviteToken';
     const route = `/login?landingPage=${encodeURIComponent(landingPage)}`;
 
-    renderWithProviders(<LoginPage />, { route: '/login', initialEntries: [route] });
+    renderWithProviders(<LoginPage />, {
+      route: '/login',
+      initialEntries: [route],
+    });
 
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
+    fireEvent.change(screen.getByPlaceholderText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: 'password123' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
 
     await waitFor(() => {
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'fake-jwt-token');
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'token',
+        'fake-jwt-token',
+      );
       expect(mockNavigate).toHaveBeenCalledWith(landingPage, { replace: true });
     });
   });
 
   it('handles login failure and displays error message', async () => {
     const errorMessage = 'Invalid credentials mate!';
-    axios.post.mockRejectedValueOnce({ response: { data: { message: errorMessage } } });
+    axios.post.mockRejectedValueOnce({
+      response: { data: { message: errorMessage } },
+    });
 
     renderWithProviders(<LoginPage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'wrongpassword' } });
+    fireEvent.change(screen.getByPlaceholderText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: 'wrongpassword' },
+    });
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
 
     await waitFor(() => {
@@ -113,10 +159,10 @@ describe('Login Page', () => {
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
-  
+
   it('navigates to register page when sign up button is clicked', () => {
-      renderWithProviders(<LoginPage />);
-      fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/register');
+    renderWithProviders(<LoginPage />);
+    fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/register');
   });
 });

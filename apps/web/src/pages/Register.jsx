@@ -25,12 +25,13 @@ const RegisterPage = () => {
       setSuccessMessage('Registration successful! Redirecting to login...');
 
       const landingPage = searchParams.get('landingPage');
-      const loginPath = landingPage ? `/login?landingPage=${landingPage}` : '/login';
+      const loginPath = landingPage
+        ? `/login?landingPage=${landingPage}`
+        : '/login';
 
       setTimeout(() => {
         navigate(loginPath, { replace: true });
       }, 1500);
-      
     } catch (err) {
       const errorMsg =
         err.response?.data?.message ||
@@ -45,14 +46,14 @@ const RegisterPage = () => {
       <div className='bg-white p-8 rounded shadow-md w-80'>
         <h2 className='text-xl font-bold mb-4 text-center'>Register</h2>
         {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm'>
-                {error}
-            </div>
+          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm'>
+            {error}
+          </div>
         )}
         {successMessage && (
-             <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm'>
-                {successMessage}
-            </div>
+          <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm'>
+            {successMessage}
+          </div>
         )}
         <form onSubmit={handleRegister}>
           <fieldset disabled={!!successMessage}>
@@ -82,25 +83,27 @@ const RegisterPage = () => {
               minLength={6}
             />
             <button
-              type="submit"
+              type='submit'
               className='bg-green-600 text-white px-4 py-2 rounded w-full hover:bg-green-700 transition'
             >
               Sign Up
             </button>
           </fieldset>
         </form>
-         <p className="mt-4 text-center text-sm">
-            Already have an account?{' '}
-            <button 
-                onClick={() => {
-                    const landingPage = searchParams.get('landingPage');
-                    const loginPath = landingPage ? `/login?landingPage=${landingPage}` : '/login';
-                    navigate(loginPath);
-                 }}
-                className="text-blue-600 hover:underline"
-            >
-                Log In
-            </button>
+        <p className='mt-4 text-center text-sm'>
+          Already have an account?{' '}
+          <button
+            onClick={() => {
+              const landingPage = searchParams.get('landingPage');
+              const loginPath = landingPage
+                ? `/login?landingPage=${landingPage}`
+                : '/login';
+              navigate(loginPath);
+            }}
+            className='text-blue-600 hover:underline'
+          >
+            Log In
+          </button>
         </p>
       </div>
     </div>

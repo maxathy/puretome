@@ -20,24 +20,26 @@ const LoginPage = () => {
       const res = await axios.post('/api/users/login', { email, password });
       const token = res.data.token;
       const userData = res.data.user;
-      
+
       localStorage.setItem('token', token);
-      
+
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       dispatch(setUser({ email: userData.email, role: userData.role }));
-      
+
       const landingPage = searchParams.get('landingPage');
-      
+
       if (landingPage) {
-        navigate(decodeURIComponent(landingPage), { replace: true }); 
+        navigate(decodeURIComponent(landingPage), { replace: true });
       } else {
         navigate('/editor', { replace: true });
       }
-
     } catch (err) {
       console.error('Login failed:', err);
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Login failed. Please check your credentials.';
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Login failed. Please check your credentials.';
       setError(errorMsg);
     }
   };
@@ -47,9 +49,9 @@ const LoginPage = () => {
       <div className='bg-white p-8 rounded shadow-md w-80'>
         <h2 className='text-xl font-bold mb-4 text-center'>Login</h2>
         {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm'>
-                {error}
-            </div>
+          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm'>
+            {error}
+          </div>
         )}
         <form onSubmit={handleLogin}>
           <input
@@ -69,26 +71,26 @@ const LoginPage = () => {
             required
           />
           <button
-            type="submit"
+            type='submit'
             className='bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition'
           >
             Log In
           </button>
         </form>
-        <p className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
-            <button 
-                onClick={() => {
-                    const landingPage = searchParams.get('landingPage');
-                    const registerPath = landingPage 
-                        ? `/register?landingPage=${landingPage}`
-                        : '/register';
-                    navigate(registerPath);
-                }}
-                className="text-blue-600 hover:underline"
-            >
-                Sign Up
-            </button>
+        <p className='mt-4 text-center text-sm'>
+          Don't have an account?{' '}
+          <button
+            onClick={() => {
+              const landingPage = searchParams.get('landingPage');
+              const registerPath = landingPage
+                ? `/register?landingPage=${landingPage}`
+                : '/register';
+              navigate(registerPath);
+            }}
+            className='text-blue-600 hover:underline'
+          >
+            Sign Up
+          </button>
         </p>
       </div>
     </div>
