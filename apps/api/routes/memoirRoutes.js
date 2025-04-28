@@ -18,7 +18,12 @@ const { authMiddleware, authorizeRoles } = require('../middleware/auth');
  * @returns {Object} Created memoir data
  */
 
-router.post('/', authMiddleware, authorizeRoles('author'), memoirController.createMemoir);
+router.post(
+  '/',
+  authMiddleware,
+  authorizeRoles('author'),
+  memoirController.createMemoir,
+);
 
 /**
  * Update memoir endpoint
@@ -29,7 +34,12 @@ router.post('/', authMiddleware, authorizeRoles('author'), memoirController.crea
  * @param {Object} req.body - Memoir data to update
  * @returns {Object} Updated memoir data
  */
-router.put('/:id', authMiddleware, authorizeRoles('author'), memoirController.updateMemoir);
+router.put(
+  '/:id',
+  authMiddleware,
+  authorizeRoles('author'),
+  memoirController.updateMemoir,
+);
 
 /**
  * Delete memoir endpoint
@@ -40,7 +50,12 @@ router.put('/:id', authMiddleware, authorizeRoles('author'), memoirController.up
  * @returns {Object} Success message
  */
 
-router.delete('/:id', authMiddleware, authorizeRoles('author'), memoirController.deleteMemoir);
+router.delete(
+  '/:id',
+  authMiddleware,
+  authorizeRoles('author'),
+  memoirController.deleteMemoir,
+);
 
 /**
  * Get memoir by ID endpoint
@@ -71,7 +86,11 @@ router.get('/', authMiddleware, memoirController.getMyMemoirs);
  * @param {String} req.params.id - Memoir ID
  * @returns {Object} Success message
  */
-router.post('/:id/collaborators', authMiddleware, memoirController.inviteCollaborator);
+router.post(
+  '/:id/collaborators',
+  authMiddleware,
+  memoirController.inviteCollaborator,
+);
 
 // Respond to a collaboration invite using a token
 router.post('/:id/collaborators/respond', memoirController.respondToInvitation);

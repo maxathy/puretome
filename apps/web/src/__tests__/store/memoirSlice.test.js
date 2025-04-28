@@ -107,7 +107,6 @@ describe('memoirSlice', () => {
       expect(nextState.chapters[0].events[0].title).toEqual(payload.value);
     });
 
-
     it('should handle addEvent', () => {
       const nextState = memoirReducer(initialFormState, addEvent(0));
       expect(nextState.chapters[0].events.length).toBe(2);
@@ -257,6 +256,5 @@ describe('memoirSlice', () => {
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
     });
-
   });
 });

@@ -69,7 +69,7 @@ const MemoirPicker = () => {
 
   if (!userMemoirs || userMemoirs.length === 0) {
     // setShowCreateForm(true);
-    return (<MemoirForm />);
+    return <MemoirForm />;
   }
 
   // If showCreateForm is true, render the form instead of the picker

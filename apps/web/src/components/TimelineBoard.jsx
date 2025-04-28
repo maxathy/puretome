@@ -6,7 +6,7 @@ import {
   fetchMemoir,
   saveMemoir,
   updateChaptersOrder,
-  updateEvents
+  updateEvents,
 } from '../store/memoirSlice';
 import EventEditor from './EventEditor';
 import ChapterEditor from './ChapterEditor';

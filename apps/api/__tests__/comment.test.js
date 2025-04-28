@@ -33,7 +33,7 @@ describe('Comment Routes', () => {
       const mockMemoir = {
         _id: 'mockMemoirId',
         author: 'mockUserId',
-        collaborators: []
+        collaborators: [],
       };
 
       const mockCommentInstance = {
@@ -45,10 +45,11 @@ describe('Comment Routes', () => {
         content: 'Test comment',
         parentComment: null,
         save: jest.fn().mockResolvedValue(true),
-        populate: jest.fn().mockImplementation(function() { // Use function for this context
+        populate: jest.fn().mockImplementation(function () {
+          // Use function for this context
           this.author = { _id: 'mockUserId', name: 'Test User' }; // Simulate population
           return Promise.resolve(this);
-        })
+        }),
       };
 
       Memoir.findOne.mockResolvedValue(mockMemoir);
@@ -60,23 +61,32 @@ describe('Comment Routes', () => {
 
       expect(response.status).toBe(201);
       // Check the structure of the returned comment, including populated author
-      expect(response.body).toEqual(expect.objectContaining({
-        _id: 'mockCommentId',
-        memoir: 'mockMemoirId',
-        content: 'Test comment',
-        author: { _id: 'mockUserId', name: 'Test User' }
-      }));
-      expect(Memoir.findOne).toHaveBeenCalledWith(expect.objectContaining({
-        _id: 'mockMemoirId',
-        $or: expect.any(Array)
-      }));
-      expect(Comment).toHaveBeenCalledWith(expect.objectContaining({
-        memoir: 'mockMemoirId',
-        author: 'mockUserId',
-        content: 'Test comment'
-      }));
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          _id: 'mockCommentId',
+          memoir: 'mockMemoirId',
+          content: 'Test comment',
+          author: { _id: 'mockUserId', name: 'Test User' },
+        }),
+      );
+      expect(Memoir.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: 'mockMemoirId',
+          $or: expect.any(Array),
+        }),
+      );
+      expect(Comment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          memoir: 'mockMemoirId',
+          author: 'mockUserId',
+          content: 'Test comment',
+        }),
+      );
       expect(mockCommentInstance.save).toHaveBeenCalled();
-      expect(mockCommentInstance.populate).toHaveBeenCalledWith({ path: 'author', select: '-password' });
+      expect(mockCommentInstance.populate).toHaveBeenCalledWith({
+        path: 'author',
+        select: '-password',
+      });
     });
 
     test('should return 404 if memoir not found or user has no access', async () => {
@@ -108,56 +118,69 @@ describe('Comment Routes', () => {
       const mockMemoir = {
         _id: 'mockMemoirId',
         author: 'mockUserId',
-        collaborators: []
+        collaborators: [],
       };
 
       const mockComments = [
         { _id: 'mockCommentId1', content: 'Comment 1' },
-        { _id: 'mockCommentId2', content: 'Comment 2' }
+        { _id: 'mockCommentId2', content: 'Comment 2' },
       ];
 
       Memoir.findOne.mockResolvedValue(mockMemoir);
       Comment.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockResolvedValue(mockComments)
+        sort: jest.fn().mockResolvedValue(mockComments),
       });
 
-      const response = await request(app)
-        .get('/api/comments/memoir/mockMemoirId');
+      const response = await request(app).get(
+        '/api/comments/memoir/mockMemoirId',
+      );
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockComments);
-      expect(Memoir.findOne).toHaveBeenCalledWith(expect.objectContaining({
-        _id: 'mockMemoirId',
-        $or: expect.any(Array)
-      }));
+      expect(Memoir.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: 'mockMemoirId',
+          $or: expect.any(Array),
+        }),
+      );
       expect(Comment.find).toHaveBeenCalledWith({ memoir: 'mockMemoirId' });
-      expect(Comment.find().populate).toHaveBeenCalledWith({ path: 'author', select: '-password' });
-      expect(Comment.find().populate().sort).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(Comment.find().populate).toHaveBeenCalledWith({
+        path: 'author',
+        select: '-password',
+      });
+      expect(Comment.find().populate().sort).toHaveBeenCalledWith({
+        createdAt: -1,
+      });
     });
 
     test('should get comments for a specific memoir and chapter', async () => {
-        const mockMemoir = { _id: 'mockMemoirId' };
-        const mockComments = [{ _id: 'mockCommentId1' }];
+      const mockMemoir = { _id: 'mockMemoirId' };
+      const mockComments = [{ _id: 'mockCommentId1' }];
 
-        Memoir.findOne.mockResolvedValue(mockMemoir);
-        Comment.find.mockReturnValue({
-          populate: jest.fn().mockReturnThis(),
-          sort: jest.fn().mockResolvedValue(mockComments)
-        });
-
-        const response = await request(app)
-          .get('/api/comments/memoir/mockMemoirId?chapterId=mockChapterId');
-
-        expect(response.status).toBe(200);
-        expect(Comment.find).toHaveBeenCalledWith({ memoir: 'mockMemoirId', chapter: 'mockChapterId' });
+      Memoir.findOne.mockResolvedValue(mockMemoir);
+      Comment.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockComments),
       });
+
+      const response = await request(app).get(
+        '/api/comments/memoir/mockMemoirId?chapterId=mockChapterId',
+      );
+
+      expect(response.status).toBe(200);
+      expect(Comment.find).toHaveBeenCalledWith({
+        memoir: 'mockMemoirId',
+        chapter: 'mockChapterId',
+      });
+    });
 
     test('should return 404 if memoir not found or user has no access when getting comments', async () => {
       Memoir.findOne.mockResolvedValue(null);
 
-      const response = await request(app)
-        .get('/api/comments/memoir/nonExistentMemoirId');
+      const response = await request(app).get(
+        '/api/comments/memoir/nonExistentMemoirId',
+      );
 
       expect(response.status).toBe(404);
       expect(response.body.message).toBe('Memoir not found or access denied');
@@ -168,14 +191,17 @@ describe('Comment Routes', () => {
       Memoir.findOne.mockResolvedValue({ _id: 'mockMemoirId' }); // Assume memoir access check passes
       Comment.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockRejectedValue(new Error('Database error finding comments'))
+        sort: jest
+          .fn()
+          .mockRejectedValue(new Error('Database error finding comments')),
       });
 
-      const response = await request(app)
-        .get('/api/comments/memoir/mockMemoirId');
+      const response = await request(app).get(
+        '/api/comments/memoir/mockMemoirId',
+      );
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Database error finding comments');
     });
   });
-}); 
+});

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  resetMemoir,
-  saveMemoir,
-} from '../store/memoirSlice';
+import { resetMemoir, saveMemoir } from '../store/memoirSlice';
 import CollaboratorsList from './CollaboratorsList';
 
 /**
@@ -84,7 +81,7 @@ const MemoirForm = ({ memoirToEdit, onSaveComplete, onCancel }) => {
       title,
       content,
       // Include _id only if editing
-      ...(isEditing && { _id: memoirToEdit._id })
+      ...(isEditing && { _id: memoirToEdit._id }),
     };
 
     setIsSaving(true);

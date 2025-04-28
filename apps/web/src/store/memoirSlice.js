@@ -244,7 +244,9 @@ const memoirSlice = createSlice({
         state.currentId = action.payload.memoir._id;
 
         // Update or add in userMemoirs list
-        const index = state.userMemoirs.findIndex(m => m._id === action.payload.memoir._id);
+        const index = state.userMemoirs.findIndex(
+          (m) => m._id === action.payload.memoir._id,
+        );
         if (index !== -1) {
           state.userMemoirs[index] = action.payload.memoir;
         } else {

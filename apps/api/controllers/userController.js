@@ -16,7 +16,9 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email format.' });
     }
     if (!password || typeof password !== 'string' || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
+      return res
+        .status(400)
+        .json({ message: 'Password must be at least 6 characters long.' });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -42,7 +44,9 @@ exports.registerUser = async (req, res) => {
     console.error('Registration Error:', err);
     let errorMessage = 'Registration failed due to an internal error.';
     if (err.name === 'ValidationError') {
-      errorMessage = Object.values(err.errors).map((e) => e.message).join(', ');
+      errorMessage = Object.values(err.errors)
+        .map((e) => e.message)
+        .join(', ');
     } else if (err.code === 11000) {
       errorMessage = 'Email already registered.';
     }
@@ -66,7 +70,10 @@ exports.loginUser = async (req, res) => {
     res.json({ token, user });
   } catch (err) {
     console.error('Login Error:', err);
-    res.status(500).json({ message: 'Login failed due to an internal error.', error: err.message });
+    res.status(500).json({
+      message: 'Login failed due to an internal error.',
+      error: err.message,
+    });
   }
 };
 
@@ -81,8 +88,11 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       // Still return a generic success message to prevent email enumeration
-      console.log(`Password reset requested for non-existent email: ${email}`)
-      return res.json({ message: 'If your email is registered, you will receive a password reset link.' });
+      console.log(`Password reset requested for non-existent email: ${email}`);
+      return res.json({
+        message:
+          'If your email is registered, you will receive a password reset link.',
+      });
     }
 
     const token = user.generateResetToken();
@@ -92,10 +102,16 @@ exports.forgotPassword = async (req, res) => {
     console.log(`Password reset token for ${email}: ${token}`); // Log for dev
     // await sendPasswordResetEmail(user.email, token);
 
-    res.json({ message: 'If your email is registered, you will receive a password reset link.' });
+    res.json({
+      message:
+        'If your email is registered, you will receive a password reset link.',
+    });
   } catch (err) {
     console.error('Forgot Password Error:', err);
-    res.status(500).json({ message: 'Error processing forgot password request.', error: err.message });
+    res.status(500).json({
+      message: 'Error processing forgot password request.',
+      error: err.message,
+    });
   }
 };
 
@@ -105,12 +121,13 @@ exports.resetPassword = async (req, res) => {
     const { token, password } = req.body;
 
     if (!token) {
-       return res.status(400).json({ message: 'Reset token is required.' });
+      return res.status(400).json({ message: 'Reset token is required.' });
     }
-     if (!password || typeof password !== 'string' || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: 'Password must be at least 6 characters long.' });
     }
-
 
     const user = await User.findOne({
       resetPasswordToken: token,
@@ -130,13 +147,17 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: 'Password has been reset successfully.' });
   } catch (err) {
-     console.error('Reset Password Error:', err);
-      let errorMessage = 'Failed to reset password.';
-      if (err.name === 'ValidationError') {
-          // This might happen if the new password fails validation
-          errorMessage = Object.values(err.errors).map(e => e.message).join(', ');
-          return res.status(400).json({ message: errorMessage });
-      }
-    res.status(500).json({ message: 'Error resetting password.', error: err.message });
+    console.error('Reset Password Error:', err);
+    let errorMessage = 'Failed to reset password.';
+    if (err.name === 'ValidationError') {
+      // This might happen if the new password fails validation
+      errorMessage = Object.values(err.errors)
+        .map((e) => e.message)
+        .join(', ');
+      return res.status(400).json({ message: errorMessage });
+    }
+    res
+      .status(500)
+      .json({ message: 'Error resetting password.', error: err.message });
   }
-}; 
+};
