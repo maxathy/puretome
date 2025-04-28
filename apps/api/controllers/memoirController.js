@@ -90,40 +90,183 @@ exports.deleteMemoir = async (req, res) => {
 // GET /api/memoir/:id
 exports.getMemoirById = async (req, res) => {
   try {
+    const memoirId = req.params.id;
+    const userId = req.user.id;
+
+    // 1. Fetch the memoir, check if user is author or accepted collaborator
     const memoir = await Memoir.findOne({
-      _id: req.params.id,
+      _id: memoirId,
       $or: [
-        { author: req.user.id },
+        { author: userId },
         {
-          'collaborators.user': req.user.id,
+          'collaborators.user': userId,
           'collaborators.inviteStatus': 'accepted',
         },
       ],
     })
-      .populate({ path: 'author', select: '-password' })
-      .populate({ path: 'collaborators.user', select: '-password' }); // Corrected population
+      .populate({ path: 'author', select: 'id name email' })
+      .populate({
+        path: 'collaborators.user',
+        select: 'id name email',
+        model: 'User', // Explicitly specify the model for nested population
+      });
 
     if (!memoir) {
       return res
         .status(404)
         .json({ message: 'Memoir not found or access denied' });
     }
-    res.json(memoir);
+
+    // Defensively check if author population worked
+    if (!memoir.author || !memoir.author._id) {
+      console.error(`Author not populated correctly for memoir ${memoirId}`);
+      // It's an internal issue if the author (who exists) isn't populated
+      return res.status(500).json({
+        message: 'Internal server error: Failed to load memoir author data',
+      });
+    }
+
+    // 2. Fetch pending invitations ONLY if the requester is the author
+    let pendingInvitations = [];
+    if (memoir.author._id.toString() === userId.toString()) {
+      pendingInvitations = await Invitation.find({
+        memoir: memoirId,
+        status: 'pending',
+      }).lean(); // Use .lean() for plain JS objects
+    }
+
+    // 3. Combine collaborators and pending invitations
+    const acceptedCollaborators = memoir.collaborators
+      // Filter for safety: only process accepted collaborators with a populated user field
+      .filter((collab) => collab.inviteStatus === 'accepted' && collab.user)
+      .map((collab) => ({
+        // Ensure consistent structure and add status
+        user: {
+          // Explicitly structure user data for consistency
+          id: collab.user.id || collab.user._id, // Prefer 'id' if available from virtuals, fallback to _id
+          name: collab.user.name,
+          email: collab.user.email,
+        },
+        role: collab.role,
+        status: 'accepted', // Explicitly set status
+        inviteEmail: collab.inviteEmail, // Keep inviteEmail if available
+        _id: collab._id, // Keep original collaborator subdocument ID if needed
+      }));
+
+    const formattedPendingInvitations = pendingInvitations.map((invite) => ({
+      user: null, // No user object for pending invites
+      role: invite.role,
+      status: 'pending',
+      inviteEmail: invite.inviteeEmail,
+      _id: invite._id, // Use invitation ID
+    }));
+
+    // Combine the lists (only includes pending if user is author)
+    const combinedList = [
+      ...acceptedCollaborators,
+      ...formattedPendingInvitations,
+    ];
+
+    // 4. Return the memoir with the combined list
+    // Convert memoir to a plain object to modify it, use virtuals if they exist
+    const memoirObject = memoir.toObject({ virtuals: true });
+
+    // Replace collaborators list
+    memoirObject.collaborators = combinedList;
+
+    // Explicitly structure the author object in the response
+    memoirObject.author = {
+      id: memoir.author.id || memoir.author._id,
+      name: memoir.author.name,
+      email: memoir.author.email,
+    };
+
+    // Remove potentially sensitive or large fields if not needed by frontend
+    delete memoirObject.__v; // Remove mongoose version key
+
+    res.json(memoirObject);
   } catch (err) {
-    console.error('Get Memoir By ID error:', err);
+    // Log the detailed error causing the 500
+    console.error('Get Memoir By ID controller error:', err);
     res
       .status(500)
       .json({ message: 'Error retrieving memoir', error: err.message });
   }
 };
 
-// GET /api/memoir/ (Get all memoirs for the logged-in user)
+// GET /api/memoir/ (Get all memoirs for the logged-in user AND collaborations)
 exports.getMyMemoirs = async (req, res) => {
   try {
-    const memoirs = await Memoir.find({ author: req.user.id })
-      .populate({ path: 'author', select: '-password' })
-      .populate({ path: 'collaborators.user', select: '-password' }); // Corrected population
-    res.json(memoirs);
+    const userId = req.user.id;
+
+    // Find memoirs where the user is the author OR an accepted collaborator
+    const memoirs = await Memoir.find({
+      $or: [
+        { author: userId }, // User is the author
+        {
+          'collaborators.user': userId, // User is in the collaborators array
+          'collaborators.inviteStatus': 'accepted', // And the status is accepted
+        },
+      ],
+    })
+      .populate({ path: 'author', select: 'id name email' }) // Populate author details
+      .populate({
+        path: 'collaborators.user',
+        select: 'id name email',
+        model: 'User', // Explicit model for nested population
+      }); // Populate user details for collaborators
+
+    // Process results defensively before sending
+    const processedMemoirs = memoirs
+      .map((memoir) => {
+        // Check if author population failed
+        if (!memoir.author) {
+          console.error(
+            `Author population failed for memoir ${memoir._id} in getMyMemoirs`,
+          );
+          // Decide whether to skip this memoir or return with null author
+          // Skipping might be safer if frontend expects an author
+          return null;
+        }
+
+        // Convert to plain object
+        const memoirObject = memoir.toObject({ virtuals: true });
+
+        // Structure author
+        memoirObject.author = {
+          id: memoir.author.id || memoir.author._id,
+          name: memoir.author.name,
+          email: memoir.author.email,
+        };
+
+        // Structure collaborators (if any)
+        if (memoirObject.collaborators) {
+          memoirObject.collaborators = memoirObject.collaborators
+            .filter((collab) => collab.user) // Filter out collaborators where user population failed
+            .map((collab) => ({
+              user: {
+                id: collab.user.id || collab.user._id,
+                name: collab.user.name,
+                email: collab.user.email,
+              },
+              role: collab.role,
+              // Include status if needed by frontend (might differ from getMemoirById)
+              // status: collab.inviteStatus,
+              inviteEmail: collab.inviteEmail,
+              _id: collab._id,
+            }));
+        } else {
+          memoirObject.collaborators = []; // Ensure collaborators is always an array
+        }
+
+        // Clean up
+        delete memoirObject.__v;
+
+        return memoirObject;
+      })
+      .filter((memoir) => memoir !== null); // Filter out any memoirs that failed author population
+
+    res.json(processedMemoirs);
   } catch (err) {
     console.error('Get My Memoirs error:', err);
     res
@@ -301,5 +444,74 @@ exports.respondToInvitation = async (req, res) => {
       message: 'Error processing invitation response.',
       error: err.message,
     });
+  }
+};
+
+// DELETE /api/memoir/:id/collaborators
+exports.removeOrRevokeCollaborator = async (req, res) => {
+  try {
+    const { targetId, status } = req.body; // Get targetId and status from request body
+    const { id: memoirId } = req.params; // Memoir ID from URL params
+    const userId = req.user.id; // Requesting user (author)
+
+    if (!targetId || !status || !['pending', 'accepted'].includes(status)) {
+      return res
+        .status(400)
+        .json({ message: 'Missing or invalid parameters (targetId, status)' });
+    }
+
+    // Verify the memoir exists and the requester is the author
+    const memoir = await Memoir.findOne({
+      _id: memoirId,
+      author: userId, // Ensure requester is the author
+    });
+
+    if (!memoir) {
+      return res
+        .status(404)
+        .json({ message: 'Memoir not found or you are not the author.' });
+    }
+
+    if (status === 'pending') {
+      // Revoke Invitation: Delete the Invitation document
+      const deletedInvitation = await Invitation.findOneAndDelete({
+        _id: targetId,
+        memoir: memoirId, // Ensure invitation belongs to the correct memoir
+      });
+
+      if (!deletedInvitation) {
+        return res.status(404).json({ message: 'Pending invitation not found.' });
+      }
+
+      res.status(200).json({ message: 'Invitation revoked successfully.' });
+    
+    } else if (status === 'accepted') {
+      // Remove Collaborator: Pull from the collaborators array
+
+      // Check if the targetId corresponds to an actual collaborator in this memoir
+      const collaboratorExists = memoir.collaborators.some(
+        (c) => c._id.toString() === targetId
+      );
+
+      if (!collaboratorExists) {
+          return res.status(404).json({ message: 'Collaborator not found in this memoir.' });
+      }
+      
+      // Use $pull to remove the collaborator subdocument by its _id
+      memoir.collaborators.pull({ _id: targetId });
+      await memoir.save();
+
+      res.status(200).json({ message: 'Collaborator removed successfully.' });
+    
+    } else {
+       // Should be caught by initial validation, but good to have a fallback
+       return res.status(400).json({ message: 'Invalid status provided.' });
+    }
+
+  } catch (err) {
+    console.error('Error removing/revoking collaborator:', err);
+    res
+      .status(500)
+      .json({ message: 'Failed to update collaboration status.', error: err.message });
   }
 };
