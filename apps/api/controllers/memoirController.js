@@ -121,11 +121,9 @@ exports.getMemoirById = async (req, res) => {
     if (!memoir.author || !memoir.author._id) {
       console.error(`Author not populated correctly for memoir ${memoirId}`);
       // It's an internal issue if the author (who exists) isn't populated
-      return res
-        .status(500)
-        .json({
-          message: 'Internal server error: Failed to load memoir author data',
-        });
+      return res.status(500).json({
+        message: 'Internal server error: Failed to load memoir author data',
+      });
     }
 
     // 2. Fetch pending invitations ONLY if the requester is the author
@@ -196,13 +194,79 @@ exports.getMemoirById = async (req, res) => {
   }
 };
 
-// GET /api/memoir/ (Get all memoirs for the logged-in user)
+// GET /api/memoir/ (Get all memoirs for the logged-in user AND collaborations)
 exports.getMyMemoirs = async (req, res) => {
   try {
-    const memoirs = await Memoir.find({ author: req.user.id })
-      .populate({ path: 'author', select: '-password' })
-      .populate({ path: 'collaborators.user', select: '-password' }); // Corrected population
-    res.json(memoirs);
+    const userId = req.user.id;
+
+    // Find memoirs where the user is the author OR an accepted collaborator
+    const memoirs = await Memoir.find({
+      $or: [
+        { author: userId }, // User is the author
+        {
+          'collaborators.user': userId, // User is in the collaborators array
+          'collaborators.inviteStatus': 'accepted', // And the status is accepted
+        },
+      ],
+    })
+      .populate({ path: 'author', select: 'id name email' }) // Populate author details
+      .populate({
+        path: 'collaborators.user',
+        select: 'id name email',
+        model: 'User', // Explicit model for nested population
+      }); // Populate user details for collaborators
+
+    // Process results defensively before sending
+    const processedMemoirs = memoirs
+      .map((memoir) => {
+        // Check if author population failed
+        if (!memoir.author) {
+          console.error(
+            `Author population failed for memoir ${memoir._id} in getMyMemoirs`,
+          );
+          // Decide whether to skip this memoir or return with null author
+          // Skipping might be safer if frontend expects an author
+          return null;
+        }
+
+        // Convert to plain object
+        const memoirObject = memoir.toObject({ virtuals: true });
+
+        // Structure author
+        memoirObject.author = {
+          id: memoir.author.id || memoir.author._id,
+          name: memoir.author.name,
+          email: memoir.author.email,
+        };
+
+        // Structure collaborators (if any)
+        if (memoirObject.collaborators) {
+          memoirObject.collaborators = memoirObject.collaborators
+            .filter((collab) => collab.user) // Filter out collaborators where user population failed
+            .map((collab) => ({
+              user: {
+                id: collab.user.id || collab.user._id,
+                name: collab.user.name,
+                email: collab.user.email,
+              },
+              role: collab.role,
+              // Include status if needed by frontend (might differ from getMemoirById)
+              // status: collab.inviteStatus,
+              inviteEmail: collab.inviteEmail,
+              _id: collab._id,
+            }));
+        } else {
+          memoirObject.collaborators = []; // Ensure collaborators is always an array
+        }
+
+        // Clean up
+        delete memoirObject.__v;
+
+        return memoirObject;
+      })
+      .filter((memoir) => memoir !== null); // Filter out any memoirs that failed author population
+
+    res.json(processedMemoirs);
   } catch (err) {
     console.error('Get My Memoirs error:', err);
     res

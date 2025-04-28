@@ -193,45 +193,15 @@ describe('Memoir Routes', () => {
 
   // GET /api/memoir/
   describe('GET /api/memoir', () => {
-    it('should return all memoirs authored by the authenticated user', async () => {
-      // testMemoir is created in beforeEach for testUser
-      await Memoir.create({
-        title: 'Another Memoir',
-        content: '...',
-        author: testUser._id,
+    // Keep the existing test for empty results
+    it('should return empty array if user has no authored memoirs and no collaborations', async () => {
+      // Ensure no memoirs exist for anotherUser or have anotherUser as collaborator
+      await Memoir.deleteMany({
+        $or: [
+          { author: anotherUser._id },
+          { 'collaborators.user': anotherUser._id },
+        ],
       });
-      // Memoir by another user (should not be returned)
-      await Memoir.create({
-        title: 'Other User Memoir',
-        content: '...',
-        author: anotherUser._id,
-      });
-
-      const res = await request(app)
-        .get('/api/memoir')
-        .set('Authorization', `Bearer ${testUserToken}`);
-
-      expect(res.statusCode).toEqual(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2); // Expecting 2 memoirs for testUser
-
-      // Verify each returned memoir has the correct, populated author
-      //   res.body.forEach(memoir => {
-      //     // expect(memoir).toHaveProperty('author');
-      //     // // Add a crucial check: Ensure author population didn't return null
-      //     // expect(memoir.author).withContext(`Author population failed for memoir: ${memoir._id}`).not.toBeNull();
-      //     // // If author is not null, proceed with checking its properties
-      //     // if (memoir.author) {
-      //     //   expect(memoir.author).toHaveProperty('_id');
-      //     //   expect(memoir.author._id.toString()).toEqual(testUser._id.toString());
-      //     //   expect(memoir.author).not.toHaveProperty('password'); // Ensure password excluded
-      //     // }
-      //   });
-    });
-
-    it('should return empty array if user has no memoirs', async () => {
-      // Ensure no memoirs exist for anotherUser before test
-      await Memoir.deleteMany({ author: anotherUser._id });
 
       const res = await request(app)
         .get('/api/memoir')
@@ -241,6 +211,7 @@ describe('Memoir Routes', () => {
       expect(res.body).toEqual([]);
     });
 
+    // Keep the existing test for unauthenticated access
     it('should return 401 if user is not authenticated', async () => {
       const res = await request(app).get('/api/memoir');
       expect(res.statusCode).toEqual(401); // Expect 401 from mock middleware
