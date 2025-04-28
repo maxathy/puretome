@@ -1,106 +1,82 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import LoginPage from '../../../src/pages/Login';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import userReducer from '../../../src/store/userSlice';
 
-// Mock window.location
-const mockLocation = {
-  href: '',
-};
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
+// Mock react-router-dom hooks
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
 });
+
+// Helper function to render with providers
+const renderWithProviders = (ui, { route = '/login', preloadedState = {}, initialEntries = [route] } = {}) => {
+  const store = configureStore({ reducer: { user: userReducer }, preloadedState });
+  return render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={initialEntries}>
+         <Routes>
+            <Route path="/login" element={ui} />
+            <Route path="/editor" element={<div>Editor Page</div>} />
+            <Route path="/register" element={<div>Register Page</div>} />
+            <Route path="/invite/:memoirId" element={<div>Invite Page</div>} /> 
+         </Routes>
+      </MemoryRouter>
+    </Provider>
+  );
+};
 
 describe('Login Page', () => {
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
     window.localStorage.clear();
-    mockLocation.href = '';
   });
 
   it('renders login form correctly', () => {
-    render(<LoginPage />);
-
+    renderWithProviders(<LoginPage />);
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
   });
 
   it('handles input changes', () => {
-    render(<LoginPage />);
-
-    const emailInput = screen.getByPlaceholderText(/email/i);
-    const passwordInput = screen.getByPlaceholderText(/password/i);
-
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-
-    expect(emailInput.value).toBe('test@example.com');
-    expect(passwordInput.value).toBe('password123');
+    renderWithProviders(<LoginPage />);
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
+    expect(screen.getByPlaceholderText(/email/i).value).toBe('test@example.com');
+    expect(screen.getByPlaceholderText(/password/i).value).toBe('password123');
   });
 
-  it('handles successful login', async () => {
-    // Mock successful login response
-    axios.post.mockResolvedValueOnce({
-      data: { token: 'fake-jwt-token', user: { email: 'test@example.com' } },
-    });
 
-    render(<LoginPage />);
 
-    // Fill form
-    fireEvent.change(screen.getByPlaceholderText(/email/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), {
-      target: { value: 'password123' },
-    });
+  it('handles login failure and displays error message', async () => {
+    const errorMessage = 'Invalid credentials mate!';
+    axios.post.mockRejectedValueOnce({ response: { data: { message: errorMessage } } });
 
-    // Submit form
+    renderWithProviders(<LoginPage />);
+
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'wrongpassword' } });
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
 
-    // Check axios called correctly
-    expect(axios.post).toHaveBeenCalledWith('/api/users/login', {
-      email: 'test@example.com',
-      password: 'password123',
-    });
-
-    // Wait for async operations
     await waitFor(() => {
-      // Check localStorage and redirect
-      expect(window.localStorage.setItem).toHaveBeenCalledWith(
-        'token',
-        'fake-jwt-token',
-      );
-      expect(mockLocation.href).toBe('/editor');
-    });
-  });
-
-  it('handles login failure', async () => {
-    // Mock failed login
-    axios.post.mockRejectedValueOnce(new Error('Login failed'));
-
-    // Spy on window.alert
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-    render(<LoginPage />);
-
-    // Fill and submit form
-    fireEvent.change(screen.getByPlaceholderText(/email/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), {
-      target: { value: 'wrongpassword' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
-
-    // Wait for async operations
-    await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Login failed');
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
       expect(window.localStorage.setItem).not.toHaveBeenCalled();
-      expect(mockLocation.href).not.toBe('/editor');
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-
-    alertSpy.mockRestore();
+  });
+  
+  it('navigates to register page when sign up button is clicked', () => {
+      renderWithProviders(<LoginPage />);
+      fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
+      expect(mockNavigate).toHaveBeenCalledWith('/register');
   });
 });

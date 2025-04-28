@@ -24,7 +24,7 @@ const App = () => (
   <Provider store={store}>
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<LoginPage />} />
+        <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/editor/' element={<Editor />} />
         <Route path='/editor/:memoirId' element={<Editor />} />

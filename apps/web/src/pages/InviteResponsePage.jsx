@@ -1,24 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Assuming you use axios for API calls
+import {
+  useParams,
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux'; // Import useSelector
 
 function InviteResponsePage() {
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
   const { memoirId } = useParams();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState('loading'); // 'loading', 'success', 'error', 'idle'
+  const [status, setStatus] = useState('loading'); // 'loading', 'processing_auth', 'success', 'error', 'idle'
   const [message, setMessage] = useState('');
 
-  const token = searchParams.get('token'); // Assuming token is passed as a query parameter
+  const token = searchParams.get('token');
+
+  // Get auth status from Redux store
+  const { email: userEmail } = useSelector((state) => state.user);
+  const isLoggedIn = !!userEmail;
 
   useEffect(() => {
     if (!token) {
       setStatus('error');
       setMessage('Invite token is missing.');
-    } else {
-      setStatus('idle'); // Ready to respond
+      return;
     }
-  }, [token]);
+
+    // Check login status
+    if (!isLoggedIn) {
+      // Construct the landingPage URL (current path + search params)
+      const landingPage = encodeURIComponent(location.pathname + location.search);
+      // Redirect to login page
+      navigate(`/login?landingPage=${landingPage}`, { replace: true });
+    } else {
+      // User is logged in, proceed to show buttons
+      setStatus('idle'); 
+    }
+    // Rerun effect if login status changes (e.g., after redirect and login)
+  }, [token, isLoggedIn, navigate, location]);
 
   const handleResponse = async (accepted) => {
     if (!token) return;
@@ -36,13 +58,12 @@ function InviteResponsePage() {
       );
 
       if (response.status === 200 || response.status === 204) {
-        setStatus('success');
         if (accepted) {
-          const successMsg =
-            'Invite accepted successfully! Please log in or register to access the memoir.';
-          setMessage(successMsg);
+          // Redirect to the memoir editor page on successful accept
+          navigate(`/editor/${memoirId}`);
         } else {
           setMessage('Invite declined.');
+          setStatus('success'); // Keep status for declined message
         }
       } else {
         // Handle unexpected success statuses if necessary
@@ -74,9 +95,11 @@ function InviteResponsePage() {
     <div className='invite-response-page container mx-auto p-4'>
       <h1 className='text-2xl font-bold mb-4'>Memoir Invitation</h1>
 
-      {status === 'loading' && <p>Processing...</p>}
+      {/* Show loading indicator while checking auth or processing API */}
+      {(status === 'loading' || status === 'processing_auth') && <p>Processing...</p>}
 
-      {status === 'idle' && (
+      {/* Only show buttons if logged in and ready */}
+      {isLoggedIn && status === 'idle' && (
         <div>
           <p className='mb-4'>
             You have been invited to collaborate on a memoir.
@@ -98,9 +121,9 @@ function InviteResponsePage() {
         </div>
       )}
 
-      {status === 'success' && (
+      {/* Show success message ONLY for declined status now */}
+      {status === 'success' && !message.includes('accepted') && (
         <p className='text-green-600'>{message}</p>
-        // Optionally add a link to the memoir or dashboard
       )}
 
       {status === 'error' && <p className='text-red-600'>{message}</p>}
