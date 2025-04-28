@@ -822,4 +822,142 @@ describe('Memoir Routes', () => {
       );
     });
   });
+
+  // DELETE /api/memoir/:id/collaborators (Remove/Revoke)
+  describe('DELETE /api/memoir/:id/collaborators', () => {
+    let acceptedCollabUser, acceptedCollabSubDocId, pendingInvite;
+
+    beforeEach(async () => {
+      // Need a consistent accepted collaborator and pending invite for these tests
+      await User.deleteOne({ email: 'accepted-for-delete@test.com' });
+      acceptedCollabUser = await User.create({
+        name: 'Accepted For Delete',
+        email: 'accepted-for-delete@test.com',
+        password: 'password123',
+      });
+
+      testMemoir.collaborators.push({
+        user: acceptedCollabUser._id,
+        role: 'editor',
+        inviteStatus: 'accepted',
+        inviteEmail: acceptedCollabUser.email,
+      });
+      await testMemoir.save();
+      // Need to fetch the memoir again to get the subdocument ID
+      const updatedMemoir = await Memoir.findById(testMemoir._id);
+      acceptedCollabSubDocId = updatedMemoir.collaborators.find(
+        c => c.user.toString() === acceptedCollabUser._id.toString()
+      )?._id;
+      expect(acceptedCollabSubDocId).toBeDefined(); // Ensure we got the ID
+
+      await Invitation.deleteOne({ inviteeEmail: 'pending-for-revoke@test.com' });
+      pendingInvite = await Invitation.create({
+        memoir: testMemoir._id,
+        inviteeEmail: 'pending-for-revoke@test.com',
+        role: 'viewer',
+        token: crypto.randomBytes(32).toString('hex'),
+        expiresAt: new Date(Date.now() + 3600000),
+        invitedBy: testUser._id,
+        status: 'pending',
+      });
+    });
+
+    afterEach(async () => {
+       await User.deleteOne({ email: 'accepted-for-delete@test.com' });
+    });
+
+    it('should REVOKE a pending invitation if user is the author', async () => {
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ targetId: pendingInvite._id, status: 'pending' });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty('message', 'Invitation revoked successfully.');
+
+      // Verify invitation deleted from DB
+      const dbInvite = await Invitation.findById(pendingInvite._id);
+      expect(dbInvite).toBeNull();
+    });
+
+    it('should REMOVE an accepted collaborator if user is the author', async () => {
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ targetId: acceptedCollabSubDocId, status: 'accepted' });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty('message', 'Collaborator removed successfully.');
+
+      // Verify collaborator removed from memoir
+      const dbMemoir = await Memoir.findById(testMemoir._id);
+      const collaborator = dbMemoir.collaborators.find(
+        c => c._id.toString() === acceptedCollabSubDocId.toString()
+      );
+      expect(collaborator).toBeUndefined();
+    });
+
+    it('should return 404 if pending invitation ID is not found', async () => {
+        const wrongId = new mongoose.Types.ObjectId();
+        const res = await request(app)
+            .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+            .set('Authorization', `Bearer ${testUserToken}`)
+            .send({ targetId: wrongId, status: 'pending' });
+
+        expect(res.statusCode).toEqual(404);
+        expect(res.body).toHaveProperty('message', 'Pending invitation not found.');
+    });
+    
+    it('should return 404 if accepted collaborator ID is not found in the memoir', async () => {
+        const wrongId = new mongoose.Types.ObjectId();
+        const res = await request(app)
+            .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+            .set('Authorization', `Bearer ${testUserToken}`)
+            .send({ targetId: wrongId, status: 'accepted' });
+
+        expect(res.statusCode).toEqual(404);
+        expect(res.body).toHaveProperty('message', 'Collaborator not found in this memoir.');
+    });
+
+    it('should return 403 if user is NOT the author', async () => {
+      // Attempt by collaborator to remove another collaborator
+      const collabToken = generateToken(acceptedCollabUser);
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .set('Authorization', `Bearer ${collabToken}`) // Use collaborator token
+        .send({ targetId: acceptedCollabSubDocId, status: 'accepted' });
+
+      expect(res.statusCode).toEqual(403);
+      expect(res.body).toHaveProperty('message', 'Mock Forbidden: Insufficient role');
+    });
+
+    it('should return 400 if status is missing or invalid', async () => {
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ targetId: acceptedCollabSubDocId, status: 'invalid_status' });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('message', 'Missing or invalid parameters (targetId, status)');
+    });
+    
+    it('should return 400 if targetId is missing', async () => {
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ status: 'accepted' }); // Missing targetId
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('message', 'Missing or invalid parameters (targetId, status)');
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const res = await request(app)
+        .delete(`/api/memoir/${testMemoir._id}/collaborators`)
+        .send({ targetId: acceptedCollabSubDocId, status: 'accepted' });
+
+      expect(res.statusCode).toEqual(401);
+      expect(res.body).toHaveProperty('message', 'Mock Unauthorized: No Token');
+    });
+  });
 });

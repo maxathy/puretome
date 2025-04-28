@@ -446,3 +446,72 @@ exports.respondToInvitation = async (req, res) => {
     });
   }
 };
+
+// DELETE /api/memoir/:id/collaborators
+exports.removeOrRevokeCollaborator = async (req, res) => {
+  try {
+    const { targetId, status } = req.body; // Get targetId and status from request body
+    const { id: memoirId } = req.params; // Memoir ID from URL params
+    const userId = req.user.id; // Requesting user (author)
+
+    if (!targetId || !status || !['pending', 'accepted'].includes(status)) {
+      return res
+        .status(400)
+        .json({ message: 'Missing or invalid parameters (targetId, status)' });
+    }
+
+    // Verify the memoir exists and the requester is the author
+    const memoir = await Memoir.findOne({
+      _id: memoirId,
+      author: userId, // Ensure requester is the author
+    });
+
+    if (!memoir) {
+      return res
+        .status(404)
+        .json({ message: 'Memoir not found or you are not the author.' });
+    }
+
+    if (status === 'pending') {
+      // Revoke Invitation: Delete the Invitation document
+      const deletedInvitation = await Invitation.findOneAndDelete({
+        _id: targetId,
+        memoir: memoirId, // Ensure invitation belongs to the correct memoir
+      });
+
+      if (!deletedInvitation) {
+        return res.status(404).json({ message: 'Pending invitation not found.' });
+      }
+
+      res.status(200).json({ message: 'Invitation revoked successfully.' });
+    
+    } else if (status === 'accepted') {
+      // Remove Collaborator: Pull from the collaborators array
+
+      // Check if the targetId corresponds to an actual collaborator in this memoir
+      const collaboratorExists = memoir.collaborators.some(
+        (c) => c._id.toString() === targetId
+      );
+
+      if (!collaboratorExists) {
+          return res.status(404).json({ message: 'Collaborator not found in this memoir.' });
+      }
+      
+      // Use $pull to remove the collaborator subdocument by its _id
+      memoir.collaborators.pull({ _id: targetId });
+      await memoir.save();
+
+      res.status(200).json({ message: 'Collaborator removed successfully.' });
+    
+    } else {
+       // Should be caught by initial validation, but good to have a fallback
+       return res.status(400).json({ message: 'Invalid status provided.' });
+    }
+
+  } catch (err) {
+    console.error('Error removing/revoking collaborator:', err);
+    res
+      .status(500)
+      .json({ message: 'Failed to update collaboration status.', error: err.message });
+  }
+};

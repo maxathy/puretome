@@ -115,6 +115,30 @@ export const inviteCollaborator = createAsyncThunk(
   },
 );
 
+// Thunk to remove an accepted collaborator OR revoke a pending invitation
+export const removeOrRevokeCollaborator = createAsyncThunk(
+  'memoir/removeOrRevokeCollaborator',
+  async (
+    { memoirId, targetId, status }, // status should be 'pending' or 'accepted'
+    { rejectWithValue }
+  ) => {
+    try {
+      // Use DELETE method, sending targetId and status in the request body
+      const response = await axios.delete(
+        `/api/memoir/${memoirId}/collaborators`,
+        { data: { targetId, status } } // Pass data in the 'data' property for DELETE requests in axios
+      );
+      // Return necessary info for potential state update or confirmation
+      return { targetId, status, ...response.data }; 
+    } catch (error) {
+      console.error('Error removing/revoking collaborator:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update collaborator status',
+      );
+    }
+  }
+);
+
 /**
  * Memoir slice for state management related to memoirs
  * Handles both creation and timeline editing functionality
@@ -297,6 +321,23 @@ const memoirSlice = createSlice({
       .addCase(inviteCollaborator.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Handle removeOrRevokeCollaborator
+      .addCase(removeOrRevokeCollaborator.pending, (state) => {
+        // Optionally set a specific loading state for this action
+        state.loading = true; 
+        state.error = null;
+      })
+      .addCase(removeOrRevokeCollaborator.fulfilled, (state, action) => {
+        state.loading = false;
+        // Instead of trying to manually remove, we rely on fetchMemoir being called afterwards
+        // to get the definitive list from the backend.
+        // We just clear any potential errors.
+        state.error = null; 
+      })
+      .addCase(removeOrRevokeCollaborator.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload; // Display the error from the API
       });
   },
 });

@@ -1,7 +1,11 @@
 // apps/web/src/components/CollaboratorsList.jsx
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { inviteCollaborator, fetchMemoir } from '../store/memoirSlice';
+import {
+  inviteCollaborator,
+  fetchMemoir,
+  removeOrRevokeCollaborator,
+} from '../store/memoirSlice';
 
 const CollaboratorsList = ({ memoir }) => {
   const [email, setEmail] = useState('');
@@ -31,6 +35,39 @@ const CollaboratorsList = ({ memoir }) => {
     }
   };
 
+  const handleRemove = async (collab) => {
+    if (!memoir?._id || !collab?._id) return;
+
+    const status = collab.status === 'pending' || collab.inviteStatus === 'pending' ? 'pending' : 'accepted';
+    const targetId = collab._id;
+
+    if (!window.confirm(
+        `Are you sure you want to ${status === 'pending' ? 'revoke the invitation for' : 'remove'} ${collab.user?.email || collab.inviteEmail}?`
+    )) {
+        return;
+    }
+
+    try {
+      const resultAction = await dispatch(
+        removeOrRevokeCollaborator({
+          memoirId: memoir._id,
+          targetId: targetId,
+          status: status,
+        }),
+      );
+
+      if (removeOrRevokeCollaborator.fulfilled.match(resultAction)) {
+        dispatch(fetchMemoir(memoir._id));
+      } else {
+        console.error('Failed to remove/revoke collaborator:', resultAction.payload);
+        alert(`Failed: ${resultAction.payload || 'Could not update collaborator'}`);
+      }
+    } catch (error) {
+      console.error('Error dispatching removeOrRevokeCollaborator:', error);
+      alert('An unexpected error occurred.');
+    }
+  };
+
   return (
     <div className='border rounded-lg p-4 my-4'>
       <h2 className='text-xl font-bold mb-4'>Collaborators</h2>
@@ -38,9 +75,9 @@ const CollaboratorsList = ({ memoir }) => {
       {/* Show existing collaborators */}
       {memoir.collaborators && memoir.collaborators.length > 0 ? (
         <ul className='mb-4'>
-          {memoir.collaborators.map((collab, index) => (
+          {memoir.collaborators.map((collab) => (
             <li
-              key={index}
+              key={collab._id}
               className='flex justify-between items-center p-2 border-b'
             >
               <div>
@@ -60,14 +97,9 @@ const CollaboratorsList = ({ memoir }) => {
               </div>
               <button
                 className='text-red-500 hover:text-red-700'
-                onClick={() => {
-                  console.log('Remove/Revoke clicked for:', collab);
-                }}
+                onClick={() => handleRemove(collab)}
               >
-                {collab.status === 'pending' ||
-                collab.inviteStatus === 'pending'
-                  ? 'Revoke'
-                  : 'Remove'}
+                {(collab.status === 'pending' || collab.inviteStatus === 'pending') ? 'Revoke' : 'Remove'}
               </button>
             </li>
           ))}
