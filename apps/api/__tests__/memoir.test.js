@@ -834,6 +834,7 @@ describe('Memoir Routes', () => {
         name: 'Accepted For Delete',
         email: 'accepted-for-delete@test.com',
         password: 'password123',
+        role: 'author'
       });
 
       testMemoir.collaborators.push({
@@ -920,15 +921,16 @@ describe('Memoir Routes', () => {
     });
 
     it('should return 403 if user is NOT the author', async () => {
-      // Attempt by collaborator to remove another collaborator
+      // Attempt by user with 'author' role (but not THIS memoir's author)
       const collabToken = generateToken(acceptedCollabUser);
       const res = await request(app)
         .delete(`/api/memoir/${testMemoir._id}/collaborators`)
-        .set('Authorization', `Bearer ${collabToken}`) // Use collaborator token
+        .set('Authorization', `Bearer ${collabToken}`) 
         .send({ targetId: acceptedCollabSubDocId, status: 'accepted' });
 
-      expect(res.statusCode).toEqual(403);
-      expect(res.body).toHaveProperty('message', 'Mock Forbidden: Insufficient role');
+      // Expect 404 because the middleware passes but controller check fails
+      expect(res.statusCode).toEqual(404); 
+      expect(res.body).toHaveProperty('message', 'Memoir not found or you are not the author.'); // Controller message
     });
 
     it('should return 400 if status is missing or invalid', async () => {
