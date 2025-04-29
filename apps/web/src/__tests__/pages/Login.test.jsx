@@ -4,7 +4,7 @@ import LoginPage from '../../../src/pages/Login';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import userReducer from '../../../src/store/userSlice';
+import authReducer from '../../../src/store/authSlice';
 
 // Mock axios module
 vi.mock('axios');
@@ -25,7 +25,7 @@ const renderWithProviders = (
   { route = '/login', preloadedState = {}, initialEntries = [route] } = {},
 ) => {
   const store = configureStore({
-    reducer: { user: userReducer },
+    reducer: { auth: authReducer },
     preloadedState,
   });
   return render(

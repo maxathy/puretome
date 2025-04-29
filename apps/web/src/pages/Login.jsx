@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../store/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../store/authSlice';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,38 +9,21 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-
-    try {
-      const res = await axios.post('/api/users/login', { email, password });
-      const token = res.data.token;
-      const userData = res.data.user;
-
-      localStorage.setItem('token', token);
-
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      dispatch(setUser({ email: userData.email, role: userData.role }));
-
-      const landingPage = searchParams.get('landingPage');
-
-      if (landingPage) {
-        navigate(decodeURIComponent(landingPage), { replace: true });
-      } else {
-        navigate('/editor', { replace: true });
-      }
-    } catch (err) {
-      console.error('Login failed:', err);
-      const errorMsg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        'Login failed. Please check your credentials.';
-      setError(errorMsg);
-    }
+    dispatch(login({ email, password }))
+      .unwrap()
+      .then(() => {
+        const landingPage = searchParams.get('landingPage');
+        if (landingPage) {
+          navigate(decodeURIComponent(landingPage), { replace: true });
+        } else {
+          navigate('/editor', { replace: true });
+        }
+      })
+      .catch(() => {});
   };
 
   return (
@@ -73,8 +55,9 @@ const LoginPage = () => {
           <button
             type='submit'
             className='bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition'
+            disabled={loading}
           >
-            Log In
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
         <p className='mt-4 text-center text-sm'>
