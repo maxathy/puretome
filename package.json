@@ -10,7 +10,7 @@
     "lint:web": "yarn workspace web lint",
     "lint:api": "yarn workspace api lint",
     "lint:e2e": "yarn workspace e2e lint",
-    "test": "concurrently \"yarn test:web\" \"yarn test:api\"",
+    "test": "concurrently \"yarn test:web\" \"yarn test:api\" \"yarn test:e2e\"",
     "test:web": "yarn workspace web test",
     "test:api": "yarn workspace api test",
     "test:e2e": "yarn workspace e2e test",

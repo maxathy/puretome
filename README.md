@@ -14,6 +14,9 @@ puretome/
 │   │   ├── middleware/  # API middleware
 │   │   ├── models/      # MongoDB data models
 │   │   └── routes/      # API endpoints
+│   ├── e2e/           # E2E tests
+│   │   ├── tests/       # E2E test files
+│   │   └── utils/       # E2E test utilities
 │   └── web/           # Frontend React application
 │       ├── src/         # Source files
 │       │   ├── components/ # React components
@@ -23,23 +26,21 @@ puretome/
 └── k8s/               # Kubernetes deployment files
 ```
 ## Local development
-*Prerequisites:* make sure mongo is running and yarn v2 is installed globally
-
-if not running api in container add local ENV var (APP_DEBUG=true)
 ```
 cd docker
-docker-compose up -d mongo
+docker-compose up
 ```
 
 ### Supported yarn commands
 ```
-yarn dev - Starts both the web and API applications concurrently
-yarn dev:web - Starts only the web application
-yarn dev:api - Starts only the API application
-yarn format - Runs Prettier to format all code
+yarn dev  - Starts both the web and API applications concurrently locally
+yarn test - Runs all tests locally
+
+docker-compose run {e2e|api|web} yarn test - runs tests in container
+
 ```
 
-### API configurable env vars (.env file not tracked in source control)
+### API configurable env vars (place .env file at root)
 ```
 MONGO_URI
 JWT_SECRET
@@ -48,15 +49,3 @@ EMAIL_PORT
 EMAIL_USER
 EMAIL_PASS
 ```
-### Running e2e tests locally
-
-1. Install dependencies:
-   ```bash
-   yarn workspace e2e install
-   yarn workspace e2e playwright install-deps
-   yarn workspace e2e playwright install
-   ```
-2. Run tests:
-   ```bash
-   yarn workspace e2e test
-   ```
