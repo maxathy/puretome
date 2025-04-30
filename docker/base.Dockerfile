@@ -18,6 +18,7 @@ COPY package.json yarn.lock ./
 # Copy workspaces package.json files
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
+COPY apps/e2e/package.json ./apps/e2e/
 
 # multi-stage builds
 FROM node AS builder

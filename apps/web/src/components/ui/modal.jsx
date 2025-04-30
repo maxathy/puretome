@@ -59,16 +59,30 @@ const Modal = ({ isOpen, onClose, title, children, className = '' }) => {
     >
       {/* Modal Content Container */}
       <div
-        className={`bg-white rounded-lg shadow-xl p-6 relative ${className}`} // Base styling + custom classes
+        className={`bg-white rounded-lg shadow-xl p-6 relative modal-content-responsive ${className}`} // Base styling + custom classes
         style={{
-          minWidth: '400px', // Minimum width
-          maxWidth: '90vw', // Max width relative to viewport width
-          maxHeight: '90vh', // Max height relative to viewport height
-          overflowY: 'auto', // Allow vertical scrolling if content exceeds max height
+          width: '100%',
+          minWidth: '90vw', // Full width on mobile
+          maxWidth: '420px', // Default max for small screens
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
-        // Stop propagation to prevent overlay click when clicking inside the modal content
         onClick={(e) => e.stopPropagation()}
       >
+        <style>{`
+          @media (min-width: 768px) {
+            .modal-content-responsive {
+              min-width: 400px !important;
+              max-width: 480px !important;
+            }
+          }
+          @media (min-width: 1024px) {
+            .modal-content-responsive {
+              min-width: 400px !important;
+              max-width: 540px !important;
+            }
+          }
+        `}</style>
         {/* Close Button (Top Right) */}
         <button
           onClick={onClose}
