@@ -11,3 +11,4 @@ node_modules
 /apps/api/coverage/*
 **/.env
 /apps/web/public/**/*:Zone.Identifier
+/apps/e2e/test-results/

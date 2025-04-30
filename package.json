@@ -9,9 +9,11 @@
     "lint": "concurrently \"yarn lint:web\" \"yarn lint:api\"",
     "lint:web": "yarn workspace web lint",
     "lint:api": "yarn workspace api lint",
+    "lint:e2e": "yarn workspace e2e lint",
     "test": "concurrently \"yarn test:web\" \"yarn test:api\"",
     "test:web": "yarn workspace web test",
     "test:api": "yarn workspace api test",
+    "test:e2e": "yarn workspace e2e test",
     "dev:web": "yarn workspace web dev",
     "dev:api": "yarn workspace api dev",
     "dev": "concurrently \"yarn dev:web\" \"yarn dev:api\""

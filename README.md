@@ -48,3 +48,15 @@ EMAIL_PORT
 EMAIL_USER
 EMAIL_PASS
 ```
+### Running e2e tests locally
+
+1. Install dependencies:
+   ```bash
+   yarn workspace e2e install
+   yarn workspace e2e playwright install-deps
+   yarn workspace e2e playwright install
+   ```
+2. Run tests:
+   ```bash
+   yarn workspace e2e test
+   ```
