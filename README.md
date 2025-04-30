@@ -28,16 +28,12 @@ puretome/
 ## Local development
 ```
 cd docker
-docker-compose up
+docker-compose up - start all containers and watch for changes
 ```
 
 ### Supported yarn commands
 ```
-yarn dev  - Starts both the web and API applications concurrently locally
-yarn test - Runs all tests locally
-
-docker-compose run {e2e|api|web} yarn test - runs tests in container
-
+docker-compose run {e2e|api|web} yarn test - runs tests in specified container
 ```
 
 ### API configurable env vars (place .env file at root)
