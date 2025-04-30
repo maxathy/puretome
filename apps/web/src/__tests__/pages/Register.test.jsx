@@ -2,6 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import RegisterPage from '../../../src/pages/Register';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../../../src/store/authSlice';
 
 // Mock axios module (simple version)
 vi.mock('axios');
@@ -16,18 +19,24 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-// Helper function to render with Router context
-const renderWithRouter = (
+// Helper function to render with Router and Redux context
+const renderWithProviders = (
   ui,
-  { route = '/register', initialEntries = [route] } = {},
+  { route = '/register', preloadedState = {}, initialEntries = [route] } = {},
 ) => {
+  const store = configureStore({
+    reducer: { auth: authReducer },
+    preloadedState,
+  });
   return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <Routes>
-        <Route path='/register' element={ui} />
-        <Route path='/login' element={<div>Login Page</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <Provider store={store}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path='/register' element={ui} />
+          <Route path='/login' element={<div>Login Page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>,
   );
 };
 
@@ -44,7 +53,7 @@ describe('Register Page', () => {
   });
 
   it('renders register form correctly', () => {
-    renderWithRouter(<RegisterPage />);
+    renderWithProviders(<RegisterPage />);
     expect(screen.getByPlaceholderText(/full name/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
@@ -55,7 +64,7 @@ describe('Register Page', () => {
   });
 
   it('handles input changes', () => {
-    renderWithRouter(<RegisterPage />);
+    renderWithProviders(<RegisterPage />);
     fireEvent.change(screen.getByPlaceholderText(/full name/i), {
       target: { value: 'Test User' },
     });
@@ -73,7 +82,7 @@ describe('Register Page', () => {
   });
 
   it('shows error if fields are empty on submit', async () => {
-    renderWithRouter(<RegisterPage />);
+    renderWithProviders(<RegisterPage />);
     fireEvent.click(screen.getByRole('button', { name: /sign up/i }));
 
     expect(axios.post).not.toHaveBeenCalled();
@@ -84,7 +93,7 @@ describe('Register Page', () => {
     // Use axios.post for mock setup
     axios.post.mockResolvedValueOnce({ data: {} });
 
-    renderWithRouter(<RegisterPage />);
+    renderWithProviders(<RegisterPage />);
 
     fireEvent.change(screen.getByPlaceholderText(/full name/i), {
       target: { value: 'Test User' },
@@ -106,7 +115,7 @@ describe('Register Page', () => {
   });
 
   it('navigates to /login when "Log In" button is clicked (no landingPage)', () => {
-    renderWithRouter(<RegisterPage />);
+    renderWithProviders(<RegisterPage />);
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
@@ -115,7 +124,7 @@ describe('Register Page', () => {
     const landingPage = '/invite/mem456?token=xyz'; // Decoded target page
     // Initial route has the landing page value encoded
     const initialRoute = `/register?landingPage=${encodeURIComponent(landingPage)}`;
-    renderWithRouter(<RegisterPage />, { initialEntries: [initialRoute] });
+    renderWithProviders(<RegisterPage />, { initialEntries: [initialRoute] });
 
     fireEvent.click(screen.getByRole('button', { name: /log in/i }));
 

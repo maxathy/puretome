@@ -100,7 +100,7 @@ router.delete(
   '/:id/collaborators', // Note: No :collaboratorId here, we use request body
   authMiddleware, // Require user to be logged in
   authorizeRoles('author'), // Only allow authors to remove/revoke
-  memoirController.removeOrRevokeCollaborator // Link to the new controller function
+  memoirController.removeOrRevokeCollaborator, // Link to the new controller function
 );
 
 module.exports = router;

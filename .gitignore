@@ -10,4 +10,4 @@ node_modules
 /.idea/*
 /apps/api/coverage/*
 **/.env
-
+/apps/web/public/**/*:Zone.Identifier

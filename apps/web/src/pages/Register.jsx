@@ -1,44 +1,34 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { register } from '../store/authSlice';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const { loading, error } = useSelector((state) => state.auth);
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
     setSuccessMessage('');
-
-    if (!name.trim() || !email.trim() || !password) {
-      setError('Please fill in all fields.');
-      return;
-    }
-    try {
-      await axios.post('/api/users/register', { name, email, password });
-      setSuccessMessage('Registration successful! Redirecting to login...');
-
-      const landingPage = searchParams.get('landingPage');
-      const loginPath = landingPage
-        ? `/login?landingPage=${landingPage}`
-        : '/login';
-
-      setTimeout(() => {
-        navigate(loginPath, { replace: true });
-      }, 1500);
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        'Registration failed';
-      setError(errorMsg);
-    }
+    dispatch(register({ name, email, password }))
+      .unwrap()
+      .then(() => {
+        setSuccessMessage('Registration successful! Redirecting...');
+        const landingPage = searchParams.get('landingPage');
+        const editorPath = landingPage
+          ? decodeURIComponent(landingPage)
+          : '/editor';
+        setTimeout(() => {
+          navigate(editorPath, { replace: true });
+        }, 1200);
+      })
+      .catch(() => {});
   };
 
   return (
@@ -56,7 +46,7 @@ const RegisterPage = () => {
           </div>
         )}
         <form onSubmit={handleRegister}>
-          <fieldset disabled={!!successMessage}>
+          <fieldset disabled={!!successMessage || loading}>
             <input
               className='border mb-2 p-2 w-full'
               type='text'
@@ -85,8 +75,9 @@ const RegisterPage = () => {
             <button
               type='submit'
               className='bg-green-600 text-white px-4 py-2 rounded w-full hover:bg-green-700 transition'
+              disabled={loading}
             >
-              Sign Up
+              {loading ? 'Registering...' : 'Sign Up'}
             </button>
           </fieldset>
         </form>
