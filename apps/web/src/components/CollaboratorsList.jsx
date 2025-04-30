@@ -38,13 +38,18 @@ const CollaboratorsList = ({ memoir }) => {
   const handleRemove = async (collab) => {
     if (!memoir?._id || !collab?._id) return;
 
-    const status = collab.status === 'pending' || collab.inviteStatus === 'pending' ? 'pending' : 'accepted';
+    const status =
+      collab.status === 'pending' || collab.inviteStatus === 'pending'
+        ? 'pending'
+        : 'accepted';
     const targetId = collab._id;
 
-    if (!window.confirm(
-        `Are you sure you want to ${status === 'pending' ? 'revoke the invitation for' : 'remove'} ${collab.user?.email || collab.inviteEmail}?`
-    )) {
-        return;
+    if (
+      !window.confirm(
+        `Are you sure you want to ${status === 'pending' ? 'revoke the invitation for' : 'remove'} ${collab.user?.email || collab.inviteEmail}?`,
+      )
+    ) {
+      return;
     }
 
     try {
@@ -59,8 +64,13 @@ const CollaboratorsList = ({ memoir }) => {
       if (removeOrRevokeCollaborator.fulfilled.match(resultAction)) {
         dispatch(fetchMemoir(memoir._id));
       } else {
-        console.error('Failed to remove/revoke collaborator:', resultAction.payload);
-        alert(`Failed: ${resultAction.payload || 'Could not update collaborator'}`);
+        console.error(
+          'Failed to remove/revoke collaborator:',
+          resultAction.payload,
+        );
+        alert(
+          `Failed: ${resultAction.payload || 'Could not update collaborator'}`,
+        );
       }
     } catch (error) {
       console.error('Error dispatching removeOrRevokeCollaborator:', error);
@@ -99,7 +109,10 @@ const CollaboratorsList = ({ memoir }) => {
                 className='text-red-500 hover:text-red-700'
                 onClick={() => handleRemove(collab)}
               >
-                {(collab.status === 'pending' || collab.inviteStatus === 'pending') ? 'Revoke' : 'Remove'}
+                {collab.status === 'pending' ||
+                collab.inviteStatus === 'pending'
+                  ? 'Revoke'
+                  : 'Remove'}
               </button>
             </li>
           ))}

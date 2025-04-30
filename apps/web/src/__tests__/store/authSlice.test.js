@@ -21,7 +21,10 @@ describe('authSlice', () => {
   it('should handle login.fulfilled', () => {
     const action = {
       type: login.fulfilled.type,
-      payload: { user: { email: 'test@example.com', role: 'author' }, token: 'abc' },
+      payload: {
+        user: { email: 'test@example.com', role: 'author' },
+        token: 'abc',
+      },
     };
     const state = authReducer({ ...initialState, loading: true }, action);
     expect(state).toEqual({
@@ -36,7 +39,11 @@ describe('authSlice', () => {
   it('should handle login.rejected', () => {
     const action = { type: login.rejected.type, payload: 'Login failed' };
     const state = authReducer({ ...initialState, loading: true }, action);
-    expect(state).toEqual({ ...initialState, loading: false, error: 'Login failed' });
+    expect(state).toEqual({
+      ...initialState,
+      loading: false,
+      error: 'Login failed',
+    });
   });
 
   it('should handle logout.fulfilled', () => {
@@ -60,7 +67,10 @@ describe('authSlice', () => {
   it('should handle register.fulfilled', () => {
     const action = {
       type: register.fulfilled.type,
-      payload: { user: { email: 'test2@example.com', role: 'admin' }, token: 'def' },
+      payload: {
+        user: { email: 'test2@example.com', role: 'admin' },
+        token: 'def',
+      },
     };
     const state = authReducer({ ...initialState, loading: true }, action);
     expect(state).toEqual({
@@ -73,8 +83,15 @@ describe('authSlice', () => {
   });
 
   it('should handle register.rejected', () => {
-    const action = { type: register.rejected.type, payload: 'Registration failed' };
+    const action = {
+      type: register.rejected.type,
+      payload: 'Registration failed',
+    };
     const state = authReducer({ ...initialState, loading: true }, action);
-    expect(state).toEqual({ ...initialState, loading: false, error: 'Registration failed' });
+    expect(state).toEqual({
+      ...initialState,
+      loading: false,
+      error: 'Registration failed',
+    });
   });
 });

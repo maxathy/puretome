@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Get token from localStorage on init
+// Get token and user from localStorage on init
 const tokenFromStorage = localStorage.getItem('token');
+const userFromStorage = localStorage.getItem('user');
 
 export const login = createAsyncThunk(
   'auth/login',
@@ -11,18 +12,21 @@ export const login = createAsyncThunk(
       const res = await axios.post('/api/users/login', { email, password });
       const { token, user } = res.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return { user, token };
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || 'Login failed. Please check your credentials.'
+        err.response?.data?.message ||
+          'Login failed. Please check your credentials.',
       );
     }
-  }
+  },
 );
 
 export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
   delete axios.defaults.headers.common['Authorization'];
   return true;
 });
@@ -31,23 +35,28 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ name, email, password }, thunkAPI) => {
     try {
-      const res = await axios.post('/api/users/register', { name, email, password });
+      const res = await axios.post('/api/users/register', {
+        name,
+        email,
+        password,
+      });
       const { token, user } = res.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return { user, token };
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || 'Registration failed.'
+        err.response?.data?.message || 'Registration failed.',
       );
     }
-  }
+  },
 );
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
+    user: userFromStorage ? JSON.parse(userFromStorage) : null,
     token: tokenFromStorage || null,
     loading: false,
     error: null,

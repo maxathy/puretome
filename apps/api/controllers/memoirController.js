@@ -480,38 +480,42 @@ exports.removeOrRevokeCollaborator = async (req, res) => {
       });
 
       if (!deletedInvitation) {
-        return res.status(404).json({ message: 'Pending invitation not found.' });
+        return res
+          .status(404)
+          .json({ message: 'Pending invitation not found.' });
       }
 
       res.status(200).json({ message: 'Invitation revoked successfully.' });
-    
     } else if (status === 'accepted') {
       // Remove Collaborator: Pull from the collaborators array
 
       // Check if the targetId corresponds to an actual collaborator in this memoir
       const collaboratorExists = memoir.collaborators.some(
-        (c) => c._id.toString() === targetId
+        (c) => c._id.toString() === targetId,
       );
 
       if (!collaboratorExists) {
-          return res.status(404).json({ message: 'Collaborator not found in this memoir.' });
+        return res
+          .status(404)
+          .json({ message: 'Collaborator not found in this memoir.' });
       }
-      
+
       // Use $pull to remove the collaborator subdocument by its _id
       memoir.collaborators.pull({ _id: targetId });
       await memoir.save();
 
       res.status(200).json({ message: 'Collaborator removed successfully.' });
-    
     } else {
-       // Should be caught by initial validation, but good to have a fallback
-       return res.status(400).json({ message: 'Invalid status provided.' });
+      // Should be caught by initial validation, but good to have a fallback
+      return res.status(400).json({ message: 'Invalid status provided.' });
     }
-
   } catch (err) {
     console.error('Error removing/revoking collaborator:', err);
     res
       .status(500)
-      .json({ message: 'Failed to update collaboration status.', error: err.message });
+      .json({
+        message: 'Failed to update collaboration status.',
+        error: err.message,
+      });
   }
 };

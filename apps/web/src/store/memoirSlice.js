@@ -120,23 +120,23 @@ export const removeOrRevokeCollaborator = createAsyncThunk(
   'memoir/removeOrRevokeCollaborator',
   async (
     { memoirId, targetId, status }, // status should be 'pending' or 'accepted'
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       // Use DELETE method, sending targetId and status in the request body
       const response = await axios.delete(
         `/api/memoir/${memoirId}/collaborators`,
-        { data: { targetId, status } } // Pass data in the 'data' property for DELETE requests in axios
+        { data: { targetId, status } }, // Pass data in the 'data' property for DELETE requests in axios
       );
       // Return necessary info for potential state update or confirmation
-      return { targetId, status, ...response.data }; 
+      return { targetId, status, ...response.data };
     } catch (error) {
       console.error('Error removing/revoking collaborator:', error);
       return rejectWithValue(
         error.response?.data?.message || 'Failed to update collaborator status',
       );
     }
-  }
+  },
 );
 
 /**
@@ -325,7 +325,7 @@ const memoirSlice = createSlice({
       // Handle removeOrRevokeCollaborator
       .addCase(removeOrRevokeCollaborator.pending, (state) => {
         // Optionally set a specific loading state for this action
-        state.loading = true; 
+        state.loading = true;
         state.error = null;
       })
       .addCase(removeOrRevokeCollaborator.fulfilled, (state, action) => {
@@ -333,7 +333,7 @@ const memoirSlice = createSlice({
         // Instead of trying to manually remove, we rely on fetchMemoir being called afterwards
         // to get the definitive list from the backend.
         // We just clear any potential errors.
-        state.error = null; 
+        state.error = null;
       })
       .addCase(removeOrRevokeCollaborator.rejected, (state, action) => {
         state.loading = false;
