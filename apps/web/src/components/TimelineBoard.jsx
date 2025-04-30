@@ -378,7 +378,7 @@ export default function TimelineBoard({ memoirId }) {
         <Droppable droppableId='chapters' direction='horizontal' type='COLUMN'>
           {(provided) => (
             <div
-              className='flex gap-6 overflow-auto pb-4'
+              className='flex flex-wrap gap-6 pb-4'
               {...provided.droppableProps}
               ref={provided.innerRef}
             >
@@ -390,7 +390,7 @@ export default function TimelineBoard({ memoirId }) {
                 >
                   {(provided) => (
                     <div
-                      className='w-64 flex-shrink-0'
+                      className='w-full sm:w-64 flex-shrink-0 mb-6'
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       data-testid={`chapter-${chapter._id}`}
@@ -472,37 +472,6 @@ export default function TimelineBoard({ memoirId }) {
                                 </CardContent>
                               </Card>
                             )}
-
-                            {provided.placeholder}
-
-                            {/* Add Event Button Card */}
-                            {newEventChapter !== chapter._id && (
-                              <Card
-                                variant='muted'
-                                className='cursor-pointer hover:bg-gray-100 transition-colors'
-                                onClick={() =>
-                                  handleShowEventInput(chapter._id)
-                                }
-                                data-testid={`add-event-button-${chapter._id}`}
-                              >
-                                <CardContent className='flex justify-center items-center p-3'>
-                                  <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-6 w-6 text-gray-400'
-                                    fill='none'
-                                    viewBox='0 0 24 24'
-                                    stroke='currentColor'
-                                  >
-                                    <path
-                                      strokeLinecap='round'
-                                      strokeLinejoin='round'
-                                      strokeWidth={2}
-                                      d='M12 4v16m8-8H4'
-                                    />
-                                  </svg>
-                                </CardContent>
-                              </Card>
-                            )}
                           </div>
                         )}
                       </Droppable>
@@ -513,7 +482,7 @@ export default function TimelineBoard({ memoirId }) {
               {provided.placeholder}
 
               {/* Add Chapter Section */}
-              <div className='w-64 flex-shrink-0'>
+              <div className='w-full sm:w-64 flex-shrink-0 mb-6'>
                 {isAddingChapter ? (
                   <Card variant='muted' data-testid='add-chapter-form'>
                     <CardContent className='p-4'>
@@ -547,7 +516,7 @@ export default function TimelineBoard({ memoirId }) {
                 ) : (
                   <Card
                     variant='muted'
-                    className='h-32 cursor-pointer hover:bg-gray-100 transition-colors'
+                    className='h-32 cursor-pointer hover:bg-gray-100 transition-colors w-full sm:w-64 mb-6'
                     onClick={handleShowChapterInput}
                     data-testid='add-chapter-button'
                   >
