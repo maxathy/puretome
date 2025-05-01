@@ -10999,6 +10999,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     lucide-react: "npm:^0.439.0"
     postcss: "npm:^8.5.3"
+    prop-types: "npm:^15.8.1"
     react: "npm:^18.3.1"
     react-beautiful-dnd: "npm:^13.1.1"
     react-dom: "npm:^18.3.1"

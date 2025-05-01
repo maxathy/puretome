@@ -46,6 +46,7 @@ const App = () => (
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/editor/' element={<Editor />} />
           <Route path='/editor/:memoirId' element={<Editor />} />
+          <Route path='/editor/:memoirId/:chapterId' element={<Editor />} />
           <Route path='/invite/:memoirId' element={<InviteResponsePage />} />
         </Routes>
       </LayoutWithNavbar>
