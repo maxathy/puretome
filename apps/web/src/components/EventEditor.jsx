@@ -33,38 +33,38 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
   }, [event, isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
-    if (!editorRef.current) return;
-    if (!quillRef.current) {
-      quillRef.current = new Quill(editorRef.current, {
-        theme: 'snow',
-        placeholder: 'Enter event details...',
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ list: 'ordered' }, { list: 'bullet' }],
-            ['link', 'blockquote', 'code-block'],
-            ['clean'],
-          ],
-        },
-      });
-      quillRef.current.on('text-change', () => {
-        setCurrentContent(quillRef.current.root.innerHTML);
-      });
-    } else {
-      quillRef.current.enable(true);
+    if (!isOpen || !editorRef.current) return;
+    // Destroy any previous Quill instance
+    if (quillRef.current) {
+      quillRef.current.off('text-change');
+      quillRef.current = null;
+      editorRef.current.innerHTML = '';
     }
-    // Set editor content
+    quillRef.current = new Quill(editorRef.current, {
+      theme: 'snow',
+      placeholder: 'Enter event details...',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link', 'blockquote', 'code-block'],
+          ['clean'],
+        ],
+      },
+    });
     quillRef.current.root.innerHTML = currentContent || '';
-    // Cleanup on close
+    quillRef.current.on('text-change', () => {
+      setCurrentContent(quillRef.current.root.innerHTML);
+    });
+    // Cleanup on close or event change
     return () => {
-      if (!isOpen && quillRef.current) {
-        quillRef.current.setContents([]);
+      if (quillRef.current) {
+        quillRef.current.off('text-change');
+        quillRef.current = null;
       }
     };
-    // eslint-disable-next-line
-  }, [isOpen]);
+  }, [isOpen, event]);
 
   // Update Quill content if event changes while modal is open
   useEffect(() => {
@@ -77,7 +77,8 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
   const handleSave = () => {
     if (!event) return;
     onSave({ ...event, title: currentTitle, content: quillRef.current ? quillRef.current.root.innerHTML : currentContent });
-    onClose();
+    // Do not close the modal here; let the parent close it after updating state
+    // onClose();
   };
 
   const handleDelete = () => {
