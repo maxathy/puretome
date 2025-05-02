@@ -35,24 +35,28 @@ const Editor = () => {
   return (
     <div className='p-6 relative'>
       <div className='absolute top-4 right-8 z-10'>
+        {view === 'draftor' && (
+          <button
+            className={`px-4 py-2 mr-2 rounded ${view === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            onClick={() => setView('timeline')}
+          >
+            Board
+          </button>
+        )}
 
-      {view === 'draftor' &&      <button
-          className={`px-4 py-2 mr-2 rounded ${view === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          onClick={() => setView('timeline')}
-        >
-          Board
-        </button> }
-
-   {view === 'timeline' &&
-        <button
-          className={`px-4 py-2  mr-2 rounded ${view === 'draftor' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          onClick={() => setView('draftor')}
-        >
-          Draft
-        </button>}
+        {view === 'timeline' && (
+          <button
+            className={`px-4 py-2  mr-2 rounded ${view === 'draftor' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            onClick={() => setView('draftor')}
+          >
+            Draft
+          </button>
+        )}
       </div>
       {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
-      {view === 'draftor' && <Draftor memoirId={memoirId} chapterId={chapterId} />}
+      {view === 'draftor' && (
+        <Draftor memoirId={memoirId} chapterId={chapterId} />
+      )}
     </div>
   );
 };

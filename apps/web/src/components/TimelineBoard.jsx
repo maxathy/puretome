@@ -443,9 +443,12 @@ export default function TimelineBoard({ memoirId }) {
                                   <input
                                     type='text'
                                     value={newEventTitle}
-                                    onChange={(e) => setNewEventTitle(e.target.value)}
+                                    onChange={(e) =>
+                                      setNewEventTitle(e.target.value)
+                                    }
                                     onKeyDown={(e) => {
-                                      if (e.key === 'Enter') handleSaveNewEvent(chapter._id);
+                                      if (e.key === 'Enter')
+                                        handleSaveNewEvent(chapter._id);
                                     }}
                                     placeholder='Enter event title'
                                     className='w-full border rounded px-2 py-1 text-sm mb-2'
@@ -495,7 +498,9 @@ export default function TimelineBoard({ memoirId }) {
                                     d='M6 2v8m4-4H2'
                                   />
                                 </svg>
-                                <span className='text-gray-500 text-sm'>Add Event</span>
+                                <span className='text-gray-500 text-sm'>
+                                  Add Event
+                                </span>
                               </CardContent>
                             </Card>
                           </div>

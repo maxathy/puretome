@@ -511,11 +511,9 @@ exports.removeOrRevokeCollaborator = async (req, res) => {
     }
   } catch (err) {
     console.error('Error removing/revoking collaborator:', err);
-    res
-      .status(500)
-      .json({
-        message: 'Failed to update collaboration status.',
-        error: err.message,
-      });
+    res.status(500).json({
+      message: 'Failed to update collaboration status.',
+      error: err.message,
+    });
   }
 };

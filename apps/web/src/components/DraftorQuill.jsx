@@ -12,7 +12,8 @@ class EventDelimiterBlot extends BlockEmbed {
     let node = super.create();
     node.setAttribute('contenteditable', 'false');
     node.className = 'event-delimiter';
-    const safeTitle = value && typeof value.title === 'string' ? value.title : 'Event';
+    const safeTitle =
+      value && typeof value.title === 'string' ? value.title : 'Event';
     node.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><hr style="flex:1;border:0;border-top:2px dashed #cbd5e1;"/><span style="color:#64748b;font-size:0.8em;">${safeTitle}</span><hr style="flex:1;border:0;border-top:2px dashed #cbd5e1;"/></div>`;
     return node;
   }
@@ -42,7 +43,9 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
     const ops = [];
     events.forEach((ev, idx) => {
       // Always insert a delimiter before every event
-      ops.push({ insert: { eventDelimiter: { title: ev.title || `Event ${idx + 1}` } } });
+      ops.push({
+        insert: { eventDelimiter: { title: ev.title || `Event ${idx + 1}` } },
+      });
       ops.push({ insert: '\n' });
     });
     return { ops };
@@ -69,7 +72,7 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
                 key: 'Backspace',
                 format: ['eventDelimiter'],
                 collapsed: true,
-                handler: function(range, context) {
+                handler: function (range, context) {
                   if (context.format.eventDelimiter) return false;
                   return true;
                 },
@@ -78,7 +81,7 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
                 key: 'Delete',
                 format: ['eventDelimiter'],
                 collapsed: true,
-                handler: function(range, context) {
+                handler: function (range, context) {
                   if (context.format.eventDelimiter) return false;
                   return true;
                 },
@@ -88,25 +91,25 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
         },
       });
     }
-    
+
     // Set content only on mount or chapter change
     quillRef.current.setContents(getInitialDelta());
-    
+
     // Insert HTML content for each event after the delimiters
     if (events.length && quillRef.current) {
       let currentPosition = 0;
       events.forEach((ev) => {
         // Find the position after the delimiter
         currentPosition = quillRef.current.getLength() - 1;
-        
+
         // Insert HTML content if available
         if (ev.content) {
           quillRef.current.clipboard.dangerouslyPasteHTML(
             currentPosition,
-            ev.content
+            ev.content,
           );
         }
-        
+
         // Move to the next position
         currentPosition = quillRef.current.getLength();
       });
@@ -117,27 +120,30 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
   const handleSave = async () => {
     if (!quillRef.current || !chapter) return;
     setSaving(true);
-    
+
     // Get the Quill editor's content
     const quill = quillRef.current;
     const contents = quill.getContents();
-    
+
     // Find all event delimiter positions and their indices in the document
     const delimiterIndices = [];
     let currentIndex = 0;
-    
+
     contents.ops.forEach((op) => {
       if (op.insert && op.insert.eventDelimiter) {
         delimiterIndices.push(currentIndex);
       }
       // Increment the index based on the length of the insert
-      currentIndex += op.insert ? 
-        (typeof op.insert === 'string' ? op.insert.length : 1) : 0;
+      currentIndex += op.insert
+        ? typeof op.insert === 'string'
+          ? op.insert.length
+          : 1
+        : 0;
     });
-    
+
     // Add the end of document as the final position
     delimiterIndices.push(quill.getLength());
-    
+
     // Extract HTML content between delimiters
     const updatedEvents = [];
     for (let i = 0; i < delimiterIndices.length - 1; i++) {
@@ -145,14 +151,14 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
       const startPos = delimiterIndices[i] + 1; // +1 to skip the delimiter itself
       const endPos = delimiterIndices[i + 1];
       const length = endPos - startPos;
-      
+
       if (length > 0) {
         // Get HTML content for this range using Quill's clipboard
         const eventDelta = quill.getContents(startPos, length);
         const tempQuill = new Quill(document.createElement('div'));
         tempQuill.setContents(eventDelta);
         const eventContent = tempQuill.root.innerHTML;
-        
+
         // Create event object with preserved HTML content
         updatedEvents.push({
           ...(events[i]?._id ? { _id: events[i]._id } : {}),
@@ -168,29 +174,30 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
         });
       }
     }
-    
+
     // Prepare updated chapters array
-    const updatedChapters = currentMemoir.chapters.map(ch =>
-      ch._id === chapterId ? { ...ch, events: updatedEvents } : ch
+    const updatedChapters = currentMemoir.chapters.map((ch) =>
+      ch._id === chapterId ? { ...ch, events: updatedEvents } : ch,
     );
-    
+
     // Dispatch saveMemoir
     await dispatch(saveMemoir({ ...currentMemoir, chapters: updatedChapters }));
     setSaving(false);
   };
 
   return (
-    <div className="mt-8">
+    <div className='mt-8'>
       <div ref={editorRef} style={{ minHeight: 300, background: 'white' }} />
       <button
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+        className='mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60'
         onClick={handleSave}
         disabled={saving}
       >
         {saving ? 'Saving...' : 'Save Events'}
       </button>
-      <div className="text-xs text-gray-400 mt-2">
-        Each event is separated by a non-editable delimiter showing the event title (including the first event).
+      <div className='text-xs text-gray-400 mt-2'>
+        Each event is separated by a non-editable delimiter showing the event
+        title (including the first event).
       </div>
       <style>{`.event-delimiter { user-select: none; pointer-events: none; margin: 1.5em 0 !important; }`}</style>
     </div>

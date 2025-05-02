@@ -178,7 +178,7 @@ describe('TimelineBoard Component', () => {
     });
 
     const addEventButton = screen.getByTestId(
-      `add-event-button-${chapterIdToAddEvent}`,
+      `add-event-card-${chapterIdToAddEvent}`,
     );
     fireEvent.click(addEventButton);
 
@@ -215,7 +215,7 @@ describe('TimelineBoard Component', () => {
     });
 
     const addEventButton = screen.getByTestId(
-      `add-event-button-${chapterIdToCancelEvent}`,
+      `add-event-card-${chapterIdToCancelEvent}`,
     );
     fireEvent.click(addEventButton);
 

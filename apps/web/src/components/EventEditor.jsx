@@ -68,7 +68,11 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
 
   // Update Quill content if event changes while modal is open
   useEffect(() => {
-    if (isOpen && quillRef.current && currentContent !== quillRef.current.root.innerHTML) {
+    if (
+      isOpen &&
+      quillRef.current &&
+      currentContent !== quillRef.current.root.innerHTML
+    ) {
       quillRef.current.root.innerHTML = currentContent || '';
     }
     // eslint-disable-next-line
@@ -76,14 +80,24 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
 
   const handleSave = () => {
     if (!event) return;
-    onSave({ ...event, title: currentTitle, content: quillRef.current ? quillRef.current.root.innerHTML : currentContent });
+    onSave({
+      ...event,
+      title: currentTitle,
+      content: quillRef.current
+        ? quillRef.current.root.innerHTML
+        : currentContent,
+    });
     // Do not close the modal here; let the parent close it after updating state
     // onClose();
   };
 
   const handleDelete = () => {
     if (!event || !event._id) return;
-    if (window.confirm(`Are you sure you want to delete the event "${event.title}"?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the event "${event.title}"?`,
+      )
+    ) {
       onDelete(event._id);
       onClose();
     }

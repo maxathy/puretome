@@ -12,7 +12,7 @@ import Navbar from './components/Navbar';
 
 import axios from 'axios';
 import './index.css';
-axios.defaults.baseURL =  'http://localhost:5000';
+axios.defaults.baseURL = 'http://localhost:5000';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
