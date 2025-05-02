@@ -11,18 +11,18 @@ services:
       dockerfile: docker/base.Dockerfile
     image: puretome/base:latest
 
-  e2e:
-    build:
-      context: ../
-      dockerfile: docker/e2e.Dockerfile
-    ports:
-      - '9323:9323'
-    volumes:
-      - ../apps/e2e:/app/apps/e2e
-      - ../apps/e2e/test-results:/app/apps/e2e/test-results
-    depends_on:
-      - web
-      - base
+  # e2e:
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/e2e.Dockerfile
+  #   ports:
+  #     - '9323:9323'
+  #   volumes:
+  #     - ../apps/e2e:/app/apps/e2e
+  #     - ../apps/e2e/test-results:/app/apps/e2e/test-results
+  #   depends_on:
+  #     - web
+  #     - base
   web:
     build:
       context: ../

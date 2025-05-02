@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import DraftorNav from './DraftorNav';
+import DraftorQuill from './DraftorQuill'; // Import the new component
 
 const Draftor = ({ memoirId, chapterId }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -44,9 +45,10 @@ const Draftor = ({ memoirId, chapterId }) => {
           </div>
 
         </div>
-        <div>Memoir ID: {memoirId}</div>
-        {selectedChapterId && <div>Chapter ID: {selectedChapterId}</div>}
+
+
         {/* Draftor content goes here */}
+        <DraftorQuill memoirId={memoirId} chapterId={selectedChapterId} />
       </div>
     </div>
   );
