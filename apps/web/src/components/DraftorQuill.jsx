@@ -43,7 +43,7 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
     events.forEach((ev, idx) => {
       // Always insert a delimiter before every event
       ops.push({ insert: { eventDelimiter: { title: ev.title || `Event ${idx + 1}` } } });
-      ops.push({ insert: (ev.content || '') + '\n' });
+      ops.push({ insert: '\n' });
     });
     return { ops };
   }
@@ -88,39 +88,92 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
         },
       });
     }
+    
     // Set content only on mount or chapter change
     quillRef.current.setContents(getInitialDelta());
+    
+    // Insert HTML content for each event after the delimiters
+    if (events.length && quillRef.current) {
+      let currentPosition = 0;
+      events.forEach((ev) => {
+        // Find the position after the delimiter
+        currentPosition = quillRef.current.getLength() - 1;
+        
+        // Insert HTML content if available
+        if (ev.content) {
+          quillRef.current.clipboard.dangerouslyPasteHTML(
+            currentPosition,
+            ev.content
+          );
+        }
+        
+        // Move to the next position
+        currentPosition = quillRef.current.getLength();
+      });
+    }
     // eslint-disable-next-line
   }, [chapterId, currentMemoir?._id]);
 
   const handleSave = async () => {
     if (!quillRef.current || !chapter) return;
     setSaving(true);
-    // Get Delta and split by eventDelimiter blots
-    const delta = quillRef.current.getContents();
-    const eventsArr = [];
-    let curr = '';
-    for (let op of delta.ops) {
+    
+    // Get the Quill editor's content
+    const quill = quillRef.current;
+    const contents = quill.getContents();
+    
+    // Find all event delimiter positions and their indices in the document
+    const delimiterIndices = [];
+    let currentIndex = 0;
+    
+    contents.ops.forEach((op) => {
       if (op.insert && op.insert.eventDelimiter) {
-        // If not the very first delimiter (curr is not empty), push the previous event
-        if (curr !== '') eventsArr.push(curr.trim());
-        curr = '';
-      } else if (typeof op.insert === 'string') {
-        curr += op.insert;
+        delimiterIndices.push(currentIndex);
+      }
+      // Increment the index based on the length of the insert
+      currentIndex += op.insert ? 
+        (typeof op.insert === 'string' ? op.insert.length : 1) : 0;
+    });
+    
+    // Add the end of document as the final position
+    delimiterIndices.push(quill.getLength());
+    
+    // Extract HTML content between delimiters
+    const updatedEvents = [];
+    for (let i = 0; i < delimiterIndices.length - 1; i++) {
+      // Get the range for this event's content (start after delimiter, end before next delimiter)
+      const startPos = delimiterIndices[i] + 1; // +1 to skip the delimiter itself
+      const endPos = delimiterIndices[i + 1];
+      const length = endPos - startPos;
+      
+      if (length > 0) {
+        // Get HTML content for this range using Quill's clipboard
+        const eventDelta = quill.getContents(startPos, length);
+        const tempQuill = new Quill(document.createElement('div'));
+        tempQuill.setContents(eventDelta);
+        const eventContent = tempQuill.root.innerHTML;
+        
+        // Create event object with preserved HTML content
+        updatedEvents.push({
+          ...(events[i]?._id ? { _id: events[i]._id } : {}),
+          title: events[i]?.title || `Event ${i + 1}`,
+          content: eventContent,
+        });
+      } else {
+        // Handle empty content
+        updatedEvents.push({
+          ...(events[i]?._id ? { _id: events[i]._id } : {}),
+          title: events[i]?.title || `Event ${i + 1}`,
+          content: '',
+        });
       }
     }
-    // Push the last event (if any content after the last delimiter)
-    if (curr.trim().length > 0) eventsArr.push(curr.trim());
-    // Map back to event objects (preserve _id and use correct title)
-    const updatedEvents = eventsArr.map((content, idx) => ({
-      ...(events[idx]?._id ? { _id: events[idx]._id } : {}),
-      title: events[idx]?.title || `Event ${idx + 1}`,
-      content,
-    }));
+    
     // Prepare updated chapters array
     const updatedChapters = currentMemoir.chapters.map(ch =>
       ch._id === chapterId ? { ...ch, events: updatedEvents } : ch
     );
+    
     // Dispatch saveMemoir
     await dispatch(saveMemoir({ ...currentMemoir, chapters: updatedChapters }));
     setSaving(false);
