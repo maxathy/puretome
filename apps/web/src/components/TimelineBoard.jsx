@@ -404,26 +404,6 @@ export default function TimelineBoard({ memoirId }) {
                         >
                           {chapter.title}
                         </h2>
-                        <button
-                          onClick={() => handleShowEventInput(chapter._id)}
-                          className='px-2 py-1 text-xs text-white bg-gray-100 rounded hover:bg-gray-200 ml-2'
-                          data-testid={`add-event-button-${chapter._id}`}
-                        >
-                          <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-4 w-4 text-gray-400 mx-auto'
-                          fill='none'
-                          viewBox='0 0 12 12'
-                          stroke='currentColor'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M6 2v8m4-4H2'
-                          />
-                        </svg>
-                        </button>
                       </div>
 
                       <Droppable droppableId={chapter._id} type='CARD'>
@@ -492,6 +472,31 @@ export default function TimelineBoard({ memoirId }) {
                                 </CardContent>
                               </Card>
                             )}
+                            {/* Add Event Card at the bottom */}
+                            <Card
+                              variant='muted'
+                              className='h-20 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-center mt-2'
+                              onClick={() => handleShowEventInput(chapter._id)}
+                              data-testid={`add-event-card-${chapter._id}`}
+                            >
+                              <CardContent className='flex flex-col items-center justify-center h-full'>
+                                <svg
+                                  xmlns='http://www.w3.org/2000/svg'
+                                  className='h-6 w-6 text-gray-400 mb-1'
+                                  fill='none'
+                                  viewBox='0 0 12 12'
+                                  stroke='currentColor'
+                                >
+                                  <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth={2}
+                                    d='M6 2v8m4-4H2'
+                                  />
+                                </svg>
+                                <span className='text-gray-500 text-sm'>Add Event</span>
+                              </CardContent>
+                            </Card>
                           </div>
                         )}
                       </Droppable>
