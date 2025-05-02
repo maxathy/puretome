@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import Modal from './ui/modal'; // Import the reusable modal
-import { Trash2 } from 'lucide-react'; // Assuming lucide-react for icons
+import React, { useState, useEffect, useRef } from 'react';
+import Modal from './ui/modal';
+import { Trash2 } from 'lucide-react';
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
 
 /**
  * EventEditor Component
- * Modal dialog for editing event details using a simple textarea.
+ * Modal dialog for editing event details using Quill editor.
  *
  * @component
  * @param {object} event - The event object being edited (needs id, title, content)
@@ -15,62 +17,74 @@ import { Trash2 } from 'lucide-react'; // Assuming lucide-react for icons
  * @returns {JSX.Element|null} Modal editor component
  */
 const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
-  // State for the textarea content
-  const [currentContent, setCurrentContent] = useState('');
-  // State for the title input
   const [currentTitle, setCurrentTitle] = useState('');
+  const [currentContent, setCurrentContent] = useState('');
+  const quillRef = useRef(null);
+  const editorRef = useRef(null);
 
-  // Initialize state when the event data is available
   useEffect(() => {
     if (event) {
-      // Set Title
       setCurrentTitle(event.title || '');
-
-      // Set Content (handling object/string)
-      if (event.content) {
-        if (typeof event.content === 'object') {
-          try {
-            setCurrentContent(JSON.stringify(event.content, null, 2));
-          } catch {
-            setCurrentContent('[object Object]');
-          }
-        } else {
-          setCurrentContent(String(event.content));
-        }
-      } else {
-        setCurrentContent('');
-      }
+      setCurrentContent(typeof event.content === 'string' ? event.content : '');
     } else {
-      // Reset if no event
       setCurrentTitle('');
       setCurrentContent('');
     }
+  }, [event, isOpen]);
 
-    // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!editorRef.current) return;
+    if (!quillRef.current) {
+      quillRef.current = new Quill(editorRef.current, {
+        theme: 'snow',
+        placeholder: 'Enter event details...',
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link', 'blockquote', 'code-block'],
+            ['clean'],
+          ],
+        },
+      });
+      quillRef.current.on('text-change', () => {
+        setCurrentContent(quillRef.current.root.innerHTML);
+      });
+    } else {
+      quillRef.current.enable(true);
+    }
+    // Set editor content
+    quillRef.current.root.innerHTML = currentContent || '';
+    // Cleanup on close
     return () => {
-      if (!isOpen) {
-        setCurrentTitle('');
-        setCurrentContent('');
+      if (!isOpen && quillRef.current) {
+        quillRef.current.setContents([]);
       }
     };
-  }, [event, isOpen]);
+    // eslint-disable-next-line
+  }, [isOpen]);
+
+  // Update Quill content if event changes while modal is open
+  useEffect(() => {
+    if (isOpen && quillRef.current && currentContent !== quillRef.current.root.innerHTML) {
+      quillRef.current.root.innerHTML = currentContent || '';
+    }
+    // eslint-disable-next-line
+  }, [currentContent, isOpen]);
 
   const handleSave = () => {
     if (!event) return;
-    // Pass the updated event object back with the new title and content
-    onSave({ ...event, title: currentTitle, content: currentContent });
-    onClose(); // Close the modal after saving
+    onSave({ ...event, title: currentTitle, content: quillRef.current ? quillRef.current.root.innerHTML : currentContent });
+    onClose();
   };
 
   const handleDelete = () => {
     if (!event || !event._id) return;
-    if (
-      window.confirm(
-        `Are you sure you want to delete the event "${event.title}"?`,
-      )
-    ) {
-      onDelete(event._id); // Pass the event ID to the delete handler
-      onClose(); // Close the modal after deletion
+    if (window.confirm(`Are you sure you want to delete the event "${event.title}"?`)) {
+      onDelete(event._id);
+      onClose();
     }
   };
 
@@ -81,7 +95,7 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
       isOpen={isOpen}
       onClose={onClose}
       title='Edit Event'
-      className='min-w-[500px] max-w-[80%]' // Adjust width via className
+      className='min-w-[500px] max-w-[80%]'
     >
       {/* Title Input */}
       <div className='mb-4'>
@@ -91,24 +105,14 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
           value={currentTitle}
           onChange={(e) => setCurrentTitle(e.target.value)}
           className='w-full border rounded p-2'
-          autoFocus // Auto-focus the title input first
+          autoFocus
         />
       </div>
-
-      {/* Content Textarea */}
+      {/* Quill Editor */}
       <div className='mb-4'>
-        <textarea
-          id='eventContent'
-          value={currentContent}
-          onChange={(e) => setCurrentContent(e.target.value)}
-          placeholder='Enter event details...'
-          className='w-full h-64 border rounded p-2' // Basic styling for textarea
-        />
+        <div ref={editorRef} style={{ minHeight: 200, background: 'white' }} />
       </div>
-
-      {/* Button container - justify-between to push delete left, others right */}
       <div className='flex justify-between items-center mt-4'>
-        {/* Delete Button (Left) */}
         <button
           onClick={handleDelete}
           className='px-4 py-2 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 flex items-center'
@@ -117,8 +121,6 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
           <Trash2 className='h-4 w-4 mr-1' />
           Delete
         </button>
-
-        {/* Cancel and Save Buttons (Right) */}
         <div className='space-x-2'>
           <button
             onClick={onClose}
