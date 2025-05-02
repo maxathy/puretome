@@ -443,9 +443,10 @@ export default function TimelineBoard({ memoirId }) {
                                   <input
                                     type='text'
                                     value={newEventTitle}
-                                    onChange={(e) =>
-                                      setNewEventTitle(e.target.value)
-                                    }
+                                    onChange={(e) => setNewEventTitle(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveNewEvent(chapter._id);
+                                    }}
                                     placeholder='Enter event title'
                                     className='w-full border rounded px-2 py-1 text-sm mb-2'
                                     data-testid={`new-event-input-${chapter._id}`}
@@ -515,6 +516,9 @@ export default function TimelineBoard({ memoirId }) {
                         type='text'
                         value={newChapterTitle}
                         onChange={(e) => setNewChapterTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveNewChapter();
+                        }}
                         placeholder='Enter chapter title'
                         className='w-full border rounded px-3 py-2 text-sm mb-3'
                         autoFocus
