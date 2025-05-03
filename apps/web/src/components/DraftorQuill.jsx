@@ -37,20 +37,6 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
   const chapter = currentMemoir?.chapters?.find((ch) => ch._id === chapterId);
   const events = chapter?.events || [];
 
-  // Compose initial Delta with delimiters as blots, passing event title (including first event)
-  function getInitialDelta() {
-    if (!events.length) return { ops: [] };
-    const ops = [];
-    events.forEach((ev, idx) => {
-      // Always insert a delimiter before every event
-      ops.push({
-        insert: { eventDelimiter: { title: ev.title || `Event ${idx + 1}` } },
-      });
-      ops.push({ insert: '\n' });
-    });
-    return { ops };
-  }
-
   useEffect(() => {
     if (!editorRef.current) return;
     if (!quillRef.current) {
@@ -67,7 +53,6 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
           ],
           keyboard: {
             bindings: {
-              // Prevent deleting event delimiter blot
               delDelimiter: {
                 key: 'Backspace',
                 format: ['eventDelimiter'],
@@ -92,26 +77,25 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
       });
     }
 
-    // Set content only on mount or chapter change
-    quillRef.current.setContents(getInitialDelta());
+    // Clear the editor
+    quillRef.current.setContents({ ops: [] });
 
-    // Insert HTML content for each event after the delimiters
+    // Insert each event's delimiter and content in sequence
     if (events.length && quillRef.current) {
-      let currentPosition = 0;
-      events.forEach((ev) => {
-        // Find the position after the delimiter
-        currentPosition = quillRef.current.getLength() - 1;
-
-        // Insert HTML content if available
+      let insertPos = 0;
+      events.forEach((ev, idx) => {
+        // Insert delimiter blot
+        quillRef.current.insertEmbed(insertPos, 'eventDelimiter', { title: ev.title || `Event ${idx + 1}` });
+        insertPos += 1;
+        quillRef.current.insertText(insertPos, '\n');
+        insertPos += 1;
+        // Insert event HTML content, if any
         if (ev.content) {
-          quillRef.current.clipboard.dangerouslyPasteHTML(
-            currentPosition,
-            ev.content,
-          );
+          quillRef.current.setSelection(insertPos, 0);
+          quillRef.current.clipboard.dangerouslyPasteHTML(insertPos, ev.content);
+          // Move insertPos to the end after pasting HTML
+          insertPos = quillRef.current.getLength();
         }
-
-        // Move to the next position
-        currentPosition = quillRef.current.getLength();
       });
     }
     // eslint-disable-next-line
