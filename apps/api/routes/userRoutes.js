@@ -1,9 +1,7 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const { isEmail } = require('validator');
 const router = express.Router();
-const User = require('../models/User');
 const userController = require('../controllers/userController');
+const { authMiddleware } = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
@@ -16,6 +14,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
  */
 
 router.post('/register', userController.registerUser);
+
+/**
+ * Update user profile endpoint
+ * PUT /api/users/profile
+ * Requires authentication
+ * 
+ * @param {Object} req.body - Contains name, bio
+ * @returns {Object} Updated user data
+ */
+router.put('/profile', authMiddleware, userController.updateProfile);
 
 /**
  * User login endpoint

@@ -9,6 +9,7 @@ import RegisterPage from './pages/Register';
 import Editor from './pages/Editor';
 import InviteResponsePage from './pages/InviteResponsePage';
 import Navbar from './components/Navbar';
+import ProfilePage from './pages/Profile';
 
 import axios from 'axios';
 import './index.css';
@@ -48,6 +49,7 @@ const App = () => (
           <Route path='/editor/:memoirId' element={<Editor />} />
           <Route path='/editor/:memoirId/:chapterId' element={<Editor />} />
           <Route path='/invite/:memoirId' element={<InviteResponsePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </LayoutWithNavbar>
     </BrowserRouter>

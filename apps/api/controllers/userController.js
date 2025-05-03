@@ -54,6 +54,44 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// PUT /api/users/profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, bio } = req.body;
+    const userId = req.user.id;
+
+    // Validate inputs
+    if (name && (typeof name !== 'string' || name.trim().length === 0)) {
+      return res.status(400).json({ message: 'Name must be a valid string.' });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update user fields if provided
+    if (name) user.name = name.trim();
+    if (bio !== undefined) user.bio = bio;
+
+    // Save the updated user
+    await user.save();
+
+    // Return the updated user without password
+    const userData = user.toObject();
+    delete userData.password;
+    
+    res.json({ message: 'Profile updated successfully', user: userData });
+  } catch (err) {
+    console.error('Profile Update Error:', err);
+    res.status(500).json({
+      message: 'Profile update failed due to an internal error.',
+      error: err.message,
+    });
+  }
+};
+
 // POST /api/users/login
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;

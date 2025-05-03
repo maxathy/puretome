@@ -53,6 +53,25 @@ export const register = createAsyncThunk(
   },
 );
 
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (userData, thunkAPI) => {
+    try {
+      const res = await axios.put('/api/users/profile', userData);
+      const { user } = res.data;
+      
+      // Update user in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      return { user };
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || 'Profile update failed.',
+      );
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -94,6 +113,19 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
