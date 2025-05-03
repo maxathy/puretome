@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Provider, useSelector } from 'react-redux';
 import store from './store';
+import { setHydrated } from './store/authSlice';
+// Hydrate the auth state once on app load
+store.dispatch(setHydrated());
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Editor from './pages/Editor';

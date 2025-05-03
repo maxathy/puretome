@@ -79,8 +79,13 @@ const authSlice = createSlice({
     token: tokenFromStorage || null,
     loading: false,
     error: null,
+    hydrated: false,
   },
-  reducers: {},
+  reducers: {
+    setHydrated(state) {
+      state.hydrated = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
@@ -132,4 +137,5 @@ const authSlice = createSlice({
   },
 });
 
+export const { setHydrated } = authSlice.actions;
 export default authSlice.reducer;

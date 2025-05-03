@@ -18,11 +18,19 @@ function InviteResponsePage() {
 
   const token = searchParams.get('token');
 
-  // Get auth status from Redux store
-  const { email: userEmail } = useSelector((state) => state.user);
+  // Get auth status from Redux store (wait for hydration)
+  const { user, hydrated } = useSelector((state) => state.auth) || {};
+  const userEmail = user?.email;
   const isLoggedIn = !!userEmail;
 
+
   useEffect(() => {
+    if (!hydrated) {
+      // Wait until hydration is complete
+      setStatus('loading');
+      setMessage('');
+      return;
+    }
     if (!token) {
       setStatus('error');
       setMessage('Invite token is missing.');
@@ -42,7 +50,7 @@ function InviteResponsePage() {
       setStatus('idle');
     }
     // Rerun effect if login status changes (e.g., after redirect and login)
-  }, [token, isLoggedIn, navigate, location]);
+  }, [token, isLoggedIn, hydrated, navigate, location]);
 
   const handleResponse = async (accepted) => {
     if (!token) return;
