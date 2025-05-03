@@ -10,6 +10,7 @@ const crypto = require('crypto');
  * @property {String} role - User role (author, agent, publisher, admin)
  * @property {String} resetPasswordToken - Token for password reset
  * @property {Date} resetPasswordExpires - Expiration for reset token
+ * @property {String} avatar - URL to user's avatar image
  */
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -19,6 +20,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['author', 'agent', 'publisher', 'admin'],
     default: 'author',
+  },
+  avatar: {
+    type: String,
+    default: null
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
