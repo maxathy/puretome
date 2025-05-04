@@ -2,6 +2,7 @@ import authReducer, { login, logout, register } from '../../store/authSlice';
 
 const initialState = {
   user: null,
+  hydrated: false,
   token: null,
   loading: false,
   error: null,
