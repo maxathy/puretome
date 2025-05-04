@@ -101,6 +101,42 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
     // eslint-disable-next-line
   }, [chapterId, currentMemoir?._id]);
 
+  // --- AUTOSAVE LOGIC ---
+  // Debounce timer for autosave
+  const autosaveTimeout = useRef(null);
+  const lastContent = useRef(null);
+
+  // Helper to trigger autosave
+  const triggerAutosave = () => {
+    if (autosaveTimeout.current) {
+      clearTimeout(autosaveTimeout.current);
+    }
+    autosaveTimeout.current = setTimeout(() => {
+      handleSave();
+    }, 1500); // 1.5s debounce
+  };
+
+  // Attach change handler for autosave
+  useEffect(() => {
+    if (!quillRef.current) return;
+    const quill = quillRef.current;
+    const onChange = () => {
+      // Only autosave if content actually changed
+      const curr = quill.getContents();
+      if (!lastContent.current || JSON.stringify(curr) !== JSON.stringify(lastContent.current)) {
+        triggerAutosave();
+        lastContent.current = curr;
+      }
+    };
+    quill.on('text-change', onChange);
+    return () => {
+      quill.off('text-change', onChange);
+      if (autosaveTimeout.current) {
+        clearTimeout(autosaveTimeout.current);
+      }
+    };
+  }, [chapterId, currentMemoir?._id]);
+
   const handleSave = async () => {
     if (!quillRef.current || !chapter) return;
     setSaving(true);
@@ -172,16 +208,11 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
   return (
     <div className='mt-8'>
       <div ref={editorRef} style={{ minHeight: 300, background: 'white' }} />
-      <button
-        className='mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60'
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? 'Saving...' : 'Save Events'}
-      </button>
+      {/* AUTOSAVE: Removed Save Events button */}
       <div className='text-xs text-gray-400 mt-2'>
         Each event is separated by a non-editable delimiter showing the event
-        title (including the first event).
+        title (including the first event).<br/>
+        <span className='text-blue-400'>All changes are autosaved.</span>
       </div>
       <style>{`.event-delimiter { user-select: none; pointer-events: none; margin: 1.5em 0 !important; }`}</style>
     </div>
