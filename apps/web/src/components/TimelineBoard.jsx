@@ -12,6 +12,7 @@ import EventEditor from './EventEditor';
 import ChapterEditor from './ChapterEditor';
 import Modal from './ui/modal';
 import MemoirForm from './MemoirForm';
+import AddCard from './AddCard'; // Import the new component
 
 export default function TimelineBoard({ memoirId }) {
   const dispatch = useDispatch();
@@ -365,6 +366,25 @@ export default function TimelineBoard({ memoirId }) {
   if (error) return <p>Error loading memoir: {error}</p>;
   if (!currentMemoir) return <p>No memoir found</p>;
 
+  // Custom icon for Add Chapter
+  const addChapterIcon = (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      className='h-8 w-8 text-gray-400 mx-auto' // Specific size for chapter card
+      fill='none'
+      viewBox='0 0 24 24'
+      stroke='currentColor'
+    >
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth={2}
+        d='M12 4v16m8-8H4' // Larger plus sign
+      />
+    </svg>
+  );
+
+
   return (
     <div>
       <h1
@@ -476,33 +496,13 @@ export default function TimelineBoard({ memoirId }) {
                                 </CardContent>
                               </Card>
                             )}
-                            {/* Add Event Card at the bottom */}
-                            <Card
-                              variant='muted'
-                              className='h-20 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-center mt-2'
+                            {/* Add Event Card using the reusable component */}
+                            <AddCard
+                              title="Add Event"
                               onClick={() => handleShowEventInput(chapter._id)}
-                              data-testid={`add-event-card-${chapter._id}`}
-                            >
-                              <CardContent className='flex flex-col items-center justify-center h-full'>
-                                <svg
-                                  xmlns='http://www.w3.org/2000/svg'
-                                  className='h-6 w-6 text-gray-400 mb-1'
-                                  fill='none'
-                                  viewBox='0 0 12 12'
-                                  stroke='currentColor'
-                                >
-                                  <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    strokeWidth={2}
-                                    d='M6 2v8m4-4H2'
-                                  />
-                                </svg>
-                                <span className='text-gray-500 text-sm'>
-                                  Add Event
-                                </span>
-                              </CardContent>
-                            </Card>
+                              testid={`add-event-card-${chapter._id}`}
+                              className="h-20 mt-2" // Specific height for event card
+                            />
                           </div>
                         )}
                       </Droppable>
@@ -548,32 +548,14 @@ export default function TimelineBoard({ memoirId }) {
                     </CardContent>
                   </Card>
                 ) : (
-                  <Card
-                    variant='muted'
-                    className='h-32 cursor-pointer hover:bg-gray-100 transition-colors w-full sm:w-64 mb-6'
+                  /* Add Chapter Card using the reusable component */
+                  <AddCard
+                    title="Add Chapter"
                     onClick={handleShowChapterInput}
-                    data-testid='add-chapter-button'
-                  >
-                    <CardContent className='flex justify-center items-center h-full'>
-                      <div className='text-center'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-8 w-8 text-gray-400 mx-auto'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M12 4v16m8-8H4'
-                          />
-                        </svg>
-                        <p className='text-gray-500 mt-2'>Add Chapter</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    testid="add-chapter-button"
+                    className="h-32 w-full sm:w-64 mb-6" // Specific height/width for chapter card
+                    icon={addChapterIcon} // Pass the custom larger icon
+                  />
                 )}
               </div>
             </div>
