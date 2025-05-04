@@ -74,7 +74,11 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
             },
           },
         },
+        readOnly: !(events.length > 0),
       });
+    } else {
+      // Set readOnly state dynamically if editor already exists
+      quillRef.current.enable(events.length > 0);
     }
 
     // Clear the editor
@@ -207,12 +211,14 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
 
   return (
     <div className='mt-8'>
-      <div ref={editorRef} style={{ minHeight: 300, background: 'white' }} />
+      <div ref={editorRef} style={{ minHeight: 300, background: 'white', opacity: events.length > 0 ? 1 : 0.6, pointerEvents: events.length > 0 ? 'auto' : 'none' }} />
       {/* AUTOSAVE: Removed Save Events button */}
       <div className='text-xs text-gray-400 mt-2'>
-        Each event is separated by a non-editable delimiter showing the event
-        title (including the first event).<br/>
-        <span className='text-blue-400'>All changes are autosaved.</span>
+  
+        <span className='text-blue-400'>All changes are autosaved.</span><br/>
+        {events.length === 0 && (
+          <span className='text-red-400'>Add an event to start editing this chapter.</span>
+        )}
       </div>
       <style>{`.event-delimiter { user-select: none; pointer-events: none; margin: 1.5em 0 !important; }`}</style>
     </div>
