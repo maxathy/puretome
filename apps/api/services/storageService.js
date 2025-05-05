@@ -13,7 +13,7 @@ if (storageConfig.storage === 'gcp') {
   const { Storage } = require('@google-cloud/storage');
   storage = new Storage({
     projectId: storageConfig.gcp.projectId,
-    keyFilename: storageConfig.gcp.keyFilename
+    keyFilename: storageConfig.gcp.keyFilename,
   });
   bucket = storage.bucket(storageConfig.gcp.bucketName);
 }
@@ -27,18 +27,18 @@ if (storageConfig.storage === 'gcp') {
 const uploadFile = async (file, folder = '') => {
   const fileExtension = path.extname(file.originalname);
   const fileName = `${folder ? folder + '/' : ''}${uuidv4()}${fileExtension}`;
-  
+
   if (storageConfig.storage === 'local') {
     // Ensure upload directory exists
     const uploadPath = path.join(storageConfig.local.uploadDir, folder);
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    
+
     // Save file to local filesystem
     const filePath = path.join(uploadPath, path.basename(fileName));
     fs.writeFileSync(filePath, file.buffer);
-    
+
     return storageConfig.local.getUrl(fileName);
   } else {
     // Upload to Google Cloud Storage
@@ -46,10 +46,10 @@ const uploadFile = async (file, folder = '') => {
     const blobStream = blob.createWriteStream({
       resumable: false,
       metadata: {
-        contentType: file.mimetype
-      }
+        contentType: file.mimetype,
+      },
     });
-    
+
     return new Promise((resolve, reject) => {
       blobStream.on('error', (err) => reject(err));
       blobStream.on('finish', () => {
@@ -71,10 +71,10 @@ const deleteFile = async (fileUrl) => {
       // Extract filename from URL
       const baseUrl = storageConfig.local.baseUrl + '/uploads/';
       if (!fileUrl.startsWith(baseUrl)) return false;
-      
+
       const relativePath = fileUrl.substring(baseUrl.length);
       const filePath = path.join(storageConfig.local.uploadDir, relativePath);
-      
+
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         return true;
@@ -84,7 +84,7 @@ const deleteFile = async (fileUrl) => {
       // Delete from Google Cloud Storage
       const baseUrl = `https://storage.googleapis.com/${storageConfig.gcp.bucketName}/`;
       if (!fileUrl.startsWith(baseUrl)) return false;
-      
+
       const fileName = fileUrl.substring(baseUrl.length);
       await bucket.file(fileName).delete();
       return true;
@@ -97,5 +97,5 @@ const deleteFile = async (fileUrl) => {
 
 module.exports = {
   uploadFile,
-  deleteFile
+  deleteFile,
 };

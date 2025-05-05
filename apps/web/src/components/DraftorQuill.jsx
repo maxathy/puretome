@@ -89,14 +89,19 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
       let insertPos = 0;
       events.forEach((ev, idx) => {
         // Insert delimiter blot
-        quillRef.current.insertEmbed(insertPos, 'eventDelimiter', { title: ev.title || `Event ${idx + 1}` });
+        quillRef.current.insertEmbed(insertPos, 'eventDelimiter', {
+          title: ev.title || `Event ${idx + 1}`,
+        });
         insertPos += 1;
         quillRef.current.insertText(insertPos, '\n');
         insertPos += 1;
         // Insert event HTML content, if any
         if (ev.content) {
           quillRef.current.setSelection(insertPos, 0);
-          quillRef.current.clipboard.dangerouslyPasteHTML(insertPos, ev.content);
+          quillRef.current.clipboard.dangerouslyPasteHTML(
+            insertPos,
+            ev.content,
+          );
           // Move insertPos to the end after pasting HTML
           insertPos = quillRef.current.getLength();
         }
@@ -127,7 +132,10 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
     const onChange = () => {
       // Only autosave if content actually changed
       const curr = quill.getContents();
-      if (!lastContent.current || JSON.stringify(curr) !== JSON.stringify(lastContent.current)) {
+      if (
+        !lastContent.current ||
+        JSON.stringify(curr) !== JSON.stringify(lastContent.current)
+      ) {
         triggerAutosave();
         lastContent.current = curr;
       }
@@ -248,9 +256,12 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
       `}</style>
       {/* AUTOSAVE: Removed Save Events button */}
       <div className='text-xs text-gray-400 mt-2'>
-        <span className='text-blue-400'>All changes are autosaved.</span><br/>
+        <span className='text-blue-400'>All changes are autosaved.</span>
+        <br />
         {events.length === 0 && (
-          <span className='text-red-400'>Add an event to start editing this chapter.</span>
+          <span className='text-red-400'>
+            Add an event to start editing this chapter.
+          </span>
         )}
       </div>
     </div>

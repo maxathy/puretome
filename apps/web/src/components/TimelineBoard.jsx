@@ -384,7 +384,6 @@ export default function TimelineBoard({ memoirId }) {
     </svg>
   );
 
-
   return (
     <div>
       <h1
@@ -498,10 +497,10 @@ export default function TimelineBoard({ memoirId }) {
                             )}
                             {/* Add Event Card using the reusable component */}
                             <AddCard
-                              title="Add Event"
+                              title='Add Event'
                               onClick={() => handleShowEventInput(chapter._id)}
                               testid={`add-event-card-${chapter._id}`}
-                              className="h-20 mt-2" // Specific height for event card
+                              className='h-20 mt-2' // Specific height for event card
                             />
                           </div>
                         )}
@@ -550,10 +549,10 @@ export default function TimelineBoard({ memoirId }) {
                 ) : (
                   /* Add Chapter Card using the reusable component */
                   <AddCard
-                    title="Add Chapter"
+                    title='Add Chapter'
                     onClick={handleShowChapterInput}
-                    testid="add-chapter-button"
-                    className="h-32 w-full sm:w-64 mb-6" // Specific height/width for chapter card
+                    testid='add-chapter-button'
+                    className='h-32 w-full sm:w-64 mb-6' // Specific height/width for chapter card
                     icon={addChapterIcon} // Pass the custom larger icon
                   />
                 )}

@@ -45,10 +45,10 @@ const Navbar = () => {
       <div className='flex items-center gap-4'>
         {user && (
           <>
-          <Link to="/profile" className="text-gray-600 text-sm">
-          {user.name || user.email}
-</Link>
-            
+            <Link to='/profile' className='text-gray-600 text-sm'>
+              {user.name || user.email}
+            </Link>
+
             <button
               onClick={handleLogout}
               className='bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition text-sm'

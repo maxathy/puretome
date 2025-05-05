@@ -20,19 +20,14 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 // Helper function to render with providers
-const renderWithProviders = (
-  ui,
-  { preloadedState = {} } = {},
-) => {
+const renderWithProviders = (ui, { preloadedState = {} } = {}) => {
   const store = configureStore({
     reducer: { auth: authReducer },
     preloadedState,
   });
   return render(
     <Provider store={store}>
-      <MemoryRouter>
-        {ui}
-      </MemoryRouter>
+      <MemoryRouter>{ui}</MemoryRouter>
     </Provider>,
   );
 };
@@ -49,12 +44,16 @@ describe('Profile Page', () => {
   });
 
   it('renders profile form with user data', () => {
-    const user = { name: 'Test User', email: 'test@example.com', bio: 'Test bio' };
-    
+    const user = {
+      name: 'Test User',
+      email: 'test@example.com',
+      bio: 'Test bio',
+    };
+
     renderWithProviders(<ProfilePage />, {
       preloadedState: {
-        auth: { user, token: 'fake-token', loading: false, error: null }
-      }
+        auth: { user, token: 'fake-token', loading: false, error: null },
+      },
     });
 
     expect(screen.getByLabelText(/full name/i)).toHaveValue('Test User');
@@ -63,53 +62,63 @@ describe('Profile Page', () => {
   });
 
   it('handles profile update successfully', async () => {
-    const user = { name: 'Test User', email: 'test@example.com', bio: 'Test bio' };
-    
+    const user = {
+      name: 'Test User',
+      email: 'test@example.com',
+      bio: 'Test bio',
+    };
+
     axios.put.mockResolvedValueOnce({
       data: {
-        user: { ...user, name: 'Updated Name', bio: 'Updated bio' }
-      }
+        user: { ...user, name: 'Updated Name', bio: 'Updated bio' },
+      },
     });
 
     renderWithProviders(<ProfilePage />, {
       preloadedState: {
-        auth: { user, token: 'fake-token', loading: false, error: null }
-      }
+        auth: { user, token: 'fake-token', loading: false, error: null },
+      },
     });
 
     fireEvent.change(screen.getByLabelText(/full name/i), {
-      target: { value: 'Updated Name' }
+      target: { value: 'Updated Name' },
     });
-    
+
     fireEvent.change(screen.getByLabelText(/bio/i), {
-      target: { value: 'Updated bio' }
+      target: { value: 'Updated bio' },
     });
-    
+
     fireEvent.click(screen.getByRole('button', { name: /update profile/i }));
 
     expect(axios.put).toHaveBeenCalledWith('/api/users/profile', {
       name: 'Updated Name',
       email: 'test@example.com',
-      bio: 'Updated bio'
+      bio: 'Updated bio',
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/profile updated successfully/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/profile updated successfully/i),
+      ).toBeInTheDocument();
     });
   });
 
   it('handles update failure and displays error message', async () => {
-    const user = { name: 'Test User', email: 'test@example.com', bio: 'Test bio' };
+    const user = {
+      name: 'Test User',
+      email: 'test@example.com',
+      bio: 'Test bio',
+    };
     const errorMessage = 'Profile update failed';
-    
+
     axios.put.mockRejectedValueOnce({
-      response: { data: { message: errorMessage } }
+      response: { data: { message: errorMessage } },
     });
 
     renderWithProviders(<ProfilePage />, {
       preloadedState: {
-        auth: { user, token: 'fake-token', loading: false, error: null }
-      }
+        auth: { user, token: 'fake-token', loading: false, error: null },
+      },
     });
 
     fireEvent.click(screen.getByRole('button', { name: /update profile/i }));

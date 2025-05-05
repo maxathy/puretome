@@ -52,7 +52,7 @@ const App = () => (
           <Route path='/editor/:memoirId' element={<Editor />} />
           <Route path='/editor/:memoirId/:chapterId' element={<Editor />} />
           <Route path='/invite/:memoirId' element={<InviteResponsePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path='/profile' element={<ProfilePage />} />
         </Routes>
       </LayoutWithNavbar>
     </BrowserRouter>

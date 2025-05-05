@@ -23,7 +23,6 @@ function InviteResponsePage() {
   const userEmail = user?.email;
   const isLoggedIn = !!userEmail;
 
-
   useEffect(() => {
     if (!hydrated) {
       // Wait until hydration is complete

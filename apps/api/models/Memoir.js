@@ -31,7 +31,7 @@ const MemoirSchema = new mongoose.Schema(
     content: String,
     coverImage: {
       type: String,
-      default: null
+      default: null,
     },
     author: { type: mongoose.Types.ObjectId, ref: 'User' },
     collaborators: [

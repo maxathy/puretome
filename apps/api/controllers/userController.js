@@ -81,7 +81,7 @@ exports.updateProfile = async (req, res) => {
     // Return the updated user without password
     const userData = user.toObject();
     delete userData.password;
-    
+
     res.json({ message: 'Profile updated successfully', user: userData });
   } catch (err) {
     console.error('Profile Update Error:', err);

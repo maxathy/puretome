@@ -59,17 +59,17 @@ export const updateProfile = createAsyncThunk(
     try {
       const res = await axios.put('/api/users/profile', userData);
       const { user } = res.data;
-      
+
       // Update user in localStorage
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       return { user };
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || 'Profile update failed.',
       );
     }
-  }
+  },
 );
 
 const authSlice = createSlice({

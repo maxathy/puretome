@@ -23,11 +23,11 @@ const UserSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: null
+    default: null,
   },
   bio: {
     type: String,
-    default: ''
+    default: '',
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,

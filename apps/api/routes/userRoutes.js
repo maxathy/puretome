@@ -19,7 +19,7 @@ router.post('/register', userController.registerUser);
  * Update user profile endpoint
  * PUT /api/users/profile
  * Requires authentication
- * 
+ *
  * @param {Object} req.body - Contains name, bio
  * @returns {Object} Updated user data
  */
