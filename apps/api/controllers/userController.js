@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { isEmail } = require('validator');
+const storageService = require('../services/storageService'); // Import storage service
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
@@ -59,11 +60,13 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, bio } = req.body;
     const userId = req.user.id;
+    const avatarFile = req.file; // Get the uploaded file from multer
 
     // Validate inputs
     if (name && (typeof name !== 'string' || name.trim().length === 0)) {
       return res.status(400).json({ message: 'Name must be a valid string.' });
     }
+    // Add validation for bio if needed
 
     // Find the user by ID
     const user = await User.findById(userId);
@@ -71,20 +74,58 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Update user fields if provided
+    let oldAvatarUrl = user.avatar; // Store old avatar URL before updating
+    let newAvatarUrl = user.avatar; // Initialize with current avatar
+
+    // Handle avatar upload if a file is provided
+    if (avatarFile) {
+      try {
+        // Define a folder for avatars (optional, but good practice)
+        const avatarFolder = `avatars/${userId}`;
+        newAvatarUrl = await storageService.uploadFile(avatarFile, avatarFolder);
+        user.avatar = newAvatarUrl; // Update user's avatar URL
+      } catch (uploadError) {
+        console.error('Avatar Upload Error:', uploadError);
+        // Decide if the profile update should fail entirely or just skip avatar update
+        return res.status(500).json({
+          message: 'Failed to upload avatar.',
+          error: uploadError.message,
+        });
+      }
+    }
+
+    // Update other user fields if provided
     if (name) user.name = name.trim();
-    if (bio !== undefined) user.bio = bio;
+    if (bio !== undefined) user.bio = bio; // Allow setting bio to empty string
 
     // Save the updated user
     await user.save();
 
+    // Delete the old avatar *after* successfully saving the new one
+    if (avatarFile && oldAvatarUrl && oldAvatarUrl !== newAvatarUrl) {
+      try {
+        await storageService.deleteFile(oldAvatarUrl);
+      } catch (deleteError) {
+        // Log the error but don't fail the request, as the profile is already updated
+        console.error('Failed to delete old avatar:', oldAvatarUrl, deleteError);
+      }
+    }
+
     // Return the updated user without password
     const userData = user.toObject();
-    delete userData.password;
+    delete userData.password; // Ensure password is not sent back
 
     res.json({ message: 'Profile updated successfully', user: userData });
   } catch (err) {
     console.error('Profile Update Error:', err);
+    // Handle potential validation errors during save
+    if (err.name === 'ValidationError') {
+         const messages = Object.values(err.errors).map((val) => val.message);
+         return res.status(400).json({
+           message: `Validation failed: ${messages.join('. ')}`,
+           errors: err.errors,
+         });
+    }
     res.status(500).json({
       message: 'Profile update failed due to an internal error.',
       error: err.message,
