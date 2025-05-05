@@ -211,16 +211,48 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
 
   return (
     <div className='mt-8'>
-      <div ref={editorRef} style={{ minHeight: 300, background: 'white', opacity: events.length > 0 ? 1 : 0.6, pointerEvents: events.length > 0 ? 'auto' : 'none' }} />
+      {/* Scrollable Quill editor with fixed height */}
+      <div
+        style={{
+          height: 400, // You can adjust this value as needed
+          background: 'white',
+          borderRadius: 8,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          ref={editorRef}
+          style={{
+            height: '100%',
+            overflowY: 'auto',
+            padding: 0,
+          }}
+        />
+      </div>
+      <style>{`
+        /* Make the Quill content area scrollable */
+        .ql-container {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-y: auto !important;
+          border: none !important;
+        }
+        .ql-editor {
+          min-height: 100%;
+          max-height: 100%;
+          overflow-y: auto;
+        }
+        .event-delimiter { user-select: none; pointer-events: none; margin: 1.5em 0 !important; }
+      `}</style>
       {/* AUTOSAVE: Removed Save Events button */}
       <div className='text-xs text-gray-400 mt-2'>
-  
         <span className='text-blue-400'>All changes are autosaved.</span><br/>
         {events.length === 0 && (
           <span className='text-red-400'>Add an event to start editing this chapter.</span>
         )}
       </div>
-      <style>{`.event-delimiter { user-select: none; pointer-events: none; margin: 1.5em 0 !important; }`}</style>
     </div>
   );
 };

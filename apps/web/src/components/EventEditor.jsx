@@ -125,7 +125,39 @@ const EventEditor = ({ event, isOpen, onClose, onSave, onDelete }) => {
       </div>
       {/* Quill Editor */}
       <div className='mb-4'>
-        <div ref={editorRef} style={{ minHeight: 200, background: 'white' }} />
+        <div
+          style={{
+            height: 250, // You can adjust this value as needed
+            background: 'white',
+            borderRadius: 8,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            border: '1px solid #e5e7eb',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            ref={editorRef}
+            style={{
+              height: '100%',
+              overflowY: 'auto',
+              padding: 0,
+            }}
+          />
+        </div>
+        <style>{`
+          /* Make the Quill content area scrollable */
+          .ql-container {
+            height: 100% !important;
+            max-height: 100% !important;
+            overflow-y: auto !important;
+            border: none !important;
+          }
+          .ql-editor {
+            min-height: 100%;
+            max-height: 100%;
+            overflow-y: auto;
+          }
+        `}</style>
       </div>
       <div className='flex justify-between items-center mt-4'>
         <button
