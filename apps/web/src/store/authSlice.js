@@ -55,9 +55,27 @@ export const register = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
-  async (userData, thunkAPI) => {
+  // The payload might now include { name, bio, avatarFile }
+  async (profileData, thunkAPI) => {
     try {
-      const res = await axios.put('/api/users/profile', userData);
+      // Create FormData to handle file upload
+      const formData = new FormData();
+
+      // Append text fields if they exist
+      if (profileData.name !== undefined) {
+        formData.append('name', profileData.name);
+      }
+      if (profileData.bio !== undefined) {
+        formData.append('bio', profileData.bio);
+      }
+
+      // Append the file if it exists
+      if (profileData.avatarFile) {
+        formData.append('avatar', profileData.avatarFile); // 'avatar' must match the field name in multer middleware
+      }
+
+      // Send FormData. Axios will set the correct Content-Type header.
+      const res = await axios.put('/api/users/profile', formData);
       const { user } = res.data;
 
       // Update user in localStorage
@@ -127,7 +145,14 @@ const authSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
+        // Make sure to update the user state correctly
+        if (state.user && action.payload.user) {
+           // Merge new user data into existing state user data
+           // This preserves other potential fields in the user object
+           state.user = { ...state.user, ...action.payload.user };
+        } else {
+           state.user = action.payload.user;
+        }
         state.error = null;
       })
       .addCase(updateProfile.rejected, (state, action) => {
