@@ -90,11 +90,16 @@ describe('Profile Page', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /update profile/i }));
 
-    expect(axios.put).toHaveBeenCalledWith('/api/users/profile', {
-      name: 'Updated Name',
-      email: 'test@example.com',
-      bio: 'Updated bio',
-    });
+    const [url, data] = axios.put.mock.calls[0];
+    expect(url).toBe('/api/users/profile');
+    expect(data instanceof FormData).toBe(true);
+    const entries = Array.from(data.entries());
+    expect(entries).toEqual(
+      expect.arrayContaining([
+        ['name', 'Updated Name'],
+        ['bio', 'Updated bio'],
+      ])
+    );
 
     await waitFor(() => {
       expect(
