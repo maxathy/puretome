@@ -37,9 +37,9 @@ const Draftor = ({ memoirId, chapterId }) => {
 
   return (
     <div className='flex h-full min-h-[400px]'>
-      <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} />
+      {/* <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} /> */}
       {/* Main Content */}
-      <div className='flex-1 pl-8'>
+      <div className='flex-1 pl-1'>
         <div className='mb-4 flex items-center gap-3'>
           <div className='relative w-7/8'>
             <select
