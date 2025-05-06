@@ -48,8 +48,9 @@ const ActivityPane = ({ isOpen, onClose }) => {
       <div className="p-4 space-y-6 overflow-y-auto h-[calc(100%-57px)]"> {/* 57px is approx header height */}
         {/* Filter Pills */}
         <div>
-          <span className="text-sm font-medium text-gray-600 mr-2 block mb-2">Filter by:</span>
+        <span className="text-sm font-medium text-gray-600 mr-4 inline-block mb-2">Filter by:</span>
           <div className="inline-flex rounded-md shadow-sm" role="group">
+            
             {filters.map((filter, index) => (
               <button
                 key={filter}

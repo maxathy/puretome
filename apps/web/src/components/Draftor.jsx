@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Menu as MenuIcon } from 'lucide-react'; // Import Menu icon
 import DraftorNav from './DraftorNav';
 import DraftorQuill from './DraftorQuill'; // Import the new component
+import ActivityPane from './ActivityPane'; // Import ActivityPane
 
 const Draftor = ({ memoirId, chapterId }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isActivityPaneOpen, setIsActivityPaneOpen] = useState(false); // State for ActivityPane
   const navigate = useNavigate();
   const currentMemoir = useSelector((state) => state.memoir.currentMemoir);
 
@@ -19,6 +22,10 @@ const Draftor = ({ memoirId, chapterId }) => {
     const newChapterId = e.target.value;
     // Update the URL to switch context (preserve memoirId)
     navigate(`/editor/${memoirId}/${newChapterId}`);
+  };
+
+  const toggleActivityPane = () => {
+    setIsActivityPaneOpen(!isActivityPaneOpen);
   };
 
   return (
@@ -56,11 +63,26 @@ const Draftor = ({ memoirId, chapterId }) => {
               </svg>
             </span>
           </div>
+          {/* Hamburger Icon to open Activity Pane */}
+          <button
+            onClick={toggleActivityPane}
+            className="p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+            aria-label="Open activity pane"
+            aria-expanded={isActivityPaneOpen}
+          >
+            <MenuIcon size={28} /> {/* Increased size slightly to match dropdown text size */}
+          </button>
         </div>
 
         {/* Draftor content goes here */}
         <DraftorQuill memoirId={memoirId} chapterId={selectedChapterId} />
       </div>
+
+      {/* Activity Pane */}
+      <ActivityPane
+        isOpen={isActivityPaneOpen}
+        onClose={() => setIsActivityPaneOpen(false)}
+      />
     </div>
   );
 };
