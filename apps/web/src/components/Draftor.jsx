@@ -28,6 +28,11 @@ const Draftor = ({ memoirId, chapterId }) => {
     setIsActivityPaneOpen(!isActivityPaneOpen);
   };
 
+  // Find the current chapter based on selectedChapterId
+  const currentChapter = chapters.find(ch => ch._id === selectedChapterId);
+  // Get events for the current chapter, default to an empty array if not found
+  const eventsForPane = currentChapter?.events || [];
+
   return (
     <div className='flex h-full min-h-[400px]'>
       <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -82,6 +87,7 @@ const Draftor = ({ memoirId, chapterId }) => {
       <ActivityPane
         isOpen={isActivityPaneOpen}
         onClose={() => setIsActivityPaneOpen(false)}
+        chapterEvents={eventsForPane} // Pass the events for the current chapter
       />
     </div>
   );

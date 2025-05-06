@@ -9,11 +9,13 @@ import { X } from 'lucide-react';
  * @component
  * @param {boolean} isOpen - Controls pane visibility.
  * @param {function} onClose - Function to call when closing the pane.
+ * @param {Array} [chapterEvents=[]] - Array of event objects for the current chapter.
  * @returns {JSX.Element|null} The ActivityPane component.
  */
-const ActivityPane = ({ isOpen, onClose }) => {
+const ActivityPane = ({ isOpen, onClose, chapterEvents = [] }) => {
   const [activeFilter, setActiveFilter] = useState(null); // 'event', 'collaborator'
   const [activeTab, setActiveTab] = useState('comments'); // 'comments', 'validations', 'requests'
+  const [selectedEventId, setSelectedEventId] = useState(''); // To store the selected event ID
 
   const filters = ['event', 'collaborator'];
   const tabs = ['comments', 'validations', 'requests'];
@@ -47,15 +49,21 @@ const ActivityPane = ({ isOpen, onClose }) => {
       {/* Content Area */}
       <div className="p-4 space-y-6 overflow-y-auto h-[calc(100%-57px)]"> {/* 57px is approx header height */}
         {/* Filter Pills */}
-        <div>
-        <span className="text-sm font-medium text-gray-600 mr-4 inline-block mb-2">Filter by:</span>
+        <div className='center'>
+    
           <div className="inline-flex rounded-md shadow-sm" role="group">
             
             {filters.map((filter, index) => (
               <button
                 key={filter}
                 type="button"
-                onClick={() => setActiveFilter(activeFilter === filter ? null : filter)}
+                onClick={() => {
+                  const newFilter = activeFilter === filter ? null : filter;
+                  setActiveFilter(newFilter);
+                  if (newFilter !== 'event') {
+                    setSelectedEventId(''); // Reset selected event if filter changes from 'event'
+                  }
+                }}
                 className={`px-4 py-2 text-sm font-medium border border-gray-200
                             ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-600 z-10 ring-2 ring-blue-300' : 'bg-white text-gray-700 hover:bg-gray-50'}
                             ${index === 0 ? 'rounded-l-md' : ''}
@@ -67,6 +75,31 @@ const ActivityPane = ({ isOpen, onClose }) => {
             ))}
           </div>
         </div>
+
+        {/* Event Dropdown - Conditionally rendered */}
+        {activeFilter === 'event' && (
+          <div className="mt-1">
+
+            <select
+              id="event-select"
+              name="event"
+              value={selectedEventId}
+              onChange={(e) => setSelectedEventId(e.target.value)}
+              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm"
+            >
+              <option value="">All Events</option>
+              {chapterEvents && chapterEvents.length > 0 ? (
+                chapterEvents.map((event) => (
+                  <option key={event._id} value={event._id}>
+                    {event.title || event.name || `Event ID: ${event._id}`} {/* Adjust based on your event object structure */}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No events available for this chapter</option>
+              )}
+            </select>
+          </div>
+        )}
 
         {/* Tabs */}
         <div>
