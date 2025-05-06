@@ -32,6 +32,8 @@ const Draftor = ({ memoirId, chapterId }) => {
   const currentChapter = chapters.find(ch => ch._id === selectedChapterId);
   // Get events for the current chapter, default to an empty array if not found
   const eventsForPane = currentChapter?.events || [];
+  // Get collaborators for the current memoir
+  const collaboratorsForPane = currentMemoir?.collaborators || [];
 
   return (
     <div className='flex h-full min-h-[400px]'>
@@ -88,6 +90,7 @@ const Draftor = ({ memoirId, chapterId }) => {
         isOpen={isActivityPaneOpen}
         onClose={() => setIsActivityPaneOpen(false)}
         chapterEvents={eventsForPane} // Pass the events for the current chapter
+        collaborators={collaboratorsForPane} // Pass the collaborators for the current memoir
       />
     </div>
   );

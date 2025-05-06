@@ -10,12 +10,14 @@ import { X } from 'lucide-react';
  * @param {boolean} isOpen - Controls pane visibility.
  * @param {function} onClose - Function to call when closing the pane.
  * @param {Array} [chapterEvents=[]] - Array of event objects for the current chapter.
+ * @param {Array} [collaborators=[]] - Array of collaborator objects for the current memoir.
  * @returns {JSX.Element|null} The ActivityPane component.
  */
-const ActivityPane = ({ isOpen, onClose, chapterEvents = [] }) => {
+const ActivityPane = ({ isOpen, onClose, chapterEvents = [], collaborators = [] }) => {
   const [activeFilter, setActiveFilter] = useState(null); // 'event', 'collaborator'
   const [activeTab, setActiveTab] = useState('comments'); // 'comments', 'validations', 'requests'
   const [selectedEventId, setSelectedEventId] = useState(''); // To store the selected event ID
+  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState(''); // To store the selected collaborator ID
 
   const filters = ['event', 'collaborator'];
   const tabs = ['comments', 'validations', 'requests'];
@@ -63,6 +65,9 @@ const ActivityPane = ({ isOpen, onClose, chapterEvents = [] }) => {
                   if (newFilter !== 'event') {
                     setSelectedEventId(''); // Reset selected event if filter changes from 'event'
                   }
+                  if (newFilter !== 'collaborator') {
+                    setSelectedCollaboratorId(''); // Reset selected collaborator if filter changes from 'collaborator'
+                  }
                 }}
                 className={`px-4 py-2 text-sm font-medium border border-gray-200
                             ${activeFilter === filter ? 'bg-blue-600 text-white border-blue-600 z-10 ring-2 ring-blue-300' : 'bg-white text-gray-700 hover:bg-gray-50'}
@@ -96,6 +101,30 @@ const ActivityPane = ({ isOpen, onClose, chapterEvents = [] }) => {
                 ))
               ) : (
                 <option value="" disabled>No events available for this chapter</option>
+              )}
+            </select>
+          </div>
+        )}
+
+        {/* Collaborator Dropdown - Conditionally rendered */}
+        {activeFilter === 'collaborator' && (
+          <div className="mt-1">
+            <select
+              id="collaborator-select"
+              name="collaborator"
+              value={selectedCollaboratorId}
+              onChange={(e) => setSelectedCollaboratorId(e.target.value)}
+              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm"
+            >
+              <option value="">All Collaborators</option>
+              {collaborators && collaborators.length > 0 ? (
+                collaborators.map((collab) => (
+                  <option key={collab._id} value={collab._id}>
+                    {collab.user?.email || collab.inviteEmail || `Collaborator ID: ${collab._id}`}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No collaborators available</option>
               )}
             </select>
           </div>
