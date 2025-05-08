@@ -54,7 +54,7 @@ const Editor = () => {
         className="h-full"
       />
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative h-full min-h-0 overflow-y-auto`}>
+      <div className={`flex-1 transition-all duration-200 ml-2 pt-8 pl-4 pr-6 relative h-full min-h-0 overflow-y-auto`}>
         {/* Toggle removed, now handled in DraftorNav */}
         {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
         {view === 'draftor' && (

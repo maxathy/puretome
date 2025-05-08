@@ -218,11 +218,11 @@ const DraftorQuill = ({ memoirId, chapterId }) => {
   };
 
   return (
-    <div className='mt-8'>
-      {/* Scrollable Quill editor with fixed height */}
+    <div className='flex flex-col flex-1 min-h-0 h-full'>
+      {/* Responsive Quill editor stretches to fill parent */}
       <div
+        className='h-[90%] min-h-0'
         style={{
-          height: 400, // You can adjust this value as needed
           background: 'white',
           borderRadius: 8,
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)',

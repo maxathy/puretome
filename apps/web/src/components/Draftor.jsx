@@ -36,7 +36,7 @@ const Draftor = ({ memoirId, chapterId }) => {
   const collaboratorsForPane = currentMemoir?.collaborators || [];
 
   return (
-    <div className='flex h-full min-h-[400px]'>
+    <div className='flex  min-h-[400px]'>
       {/* <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} /> */}
       {/* Main Content */}
       <div className='flex-1 pl-1'>
