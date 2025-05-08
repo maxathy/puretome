@@ -40,7 +40,7 @@ const Draftor = ({ memoirId, chapterId }) => {
       {/* <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} /> */}
       {/* Main Content */}
       <div className='flex-1 pl-1'>
-        <div className='mb-4 flex items-center gap-3'>
+        <div className='mb-4 flex items-center justify-between gap-3'>
           <div className='relative w-7/8'>
             <select
               className='appearance-none w-full bg-white border border-gray-300 rounded px-4 py-2 pr-8 text-2xl font-semibold shadow focus:outline-none focus:ring-2 focus:ring-blue-200'
@@ -77,7 +77,7 @@ const Draftor = ({ memoirId, chapterId }) => {
             aria-label="Open activity pane"
             aria-expanded={isActivityPaneOpen}
           >
-            <MenuIcon size={28} /> {/* Increased size slightly to match dropdown text size */}
+            <MenuIcon size={28} />
           </button>
         </div>
 
