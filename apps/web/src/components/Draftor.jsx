@@ -89,6 +89,8 @@ const Draftor = ({ memoirId, chapterId }) => {
       <ActivityPane
         isOpen={isActivityPaneOpen}
         onClose={() => setIsActivityPaneOpen(false)}
+        memoirId={memoirId}
+        chapterId={selectedChapterId}
         chapterEvents={eventsForPane} // Pass the events for the current chapter
         collaborators={collaboratorsForPane} // Pass the collaborators for the current memoir
       />

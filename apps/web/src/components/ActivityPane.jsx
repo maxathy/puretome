@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import CommentSection from './CommentSection';
 
 /**
  * ActivityPane Component
@@ -9,11 +10,13 @@ import { X } from 'lucide-react';
  * @component
  * @param {boolean} isOpen - Controls pane visibility.
  * @param {function} onClose - Function to call when closing the pane.
+ * @param {string} memoirId - ID of the current memoir.
+ * @param {string} chapterId - ID of the current chapter.
  * @param {Array} [chapterEvents=[]] - Array of event objects for the current chapter.
  * @param {Array} [collaborators=[]] - Array of collaborator objects for the current memoir.
  * @returns {JSX.Element|null} The ActivityPane component.
  */
-const ActivityPane = ({ isOpen, onClose, chapterEvents = [], collaborators = [] }) => {
+const ActivityPane = ({ isOpen, onClose, memoirId, chapterId, chapterEvents = [], collaborators = [] }) => {
   const [activeFilter, setActiveFilter] = useState(null); // 'event', 'collaborator'
   const [activeTab, setActiveTab] = useState('comments'); // 'comments', 'validations', 'requests'
   const [selectedEventId, setSelectedEventId] = useState(''); // To store the selected event ID
@@ -154,10 +157,15 @@ const ActivityPane = ({ isOpen, onClose, chapterEvents = [], collaborators = [] 
 
           {/* Tab Content */}
           <div className="mt-4 py-2">
-            {activeTab === 'comments' && <div className="text-gray-700">Content for Comments will appear here.</div>}
+            {activeTab === 'comments' && (
+              <CommentSection 
+                memoirId={memoirId} 
+                chapterId={chapterId} 
+                eventId={selectedEventId || undefined} 
+              />
+            )}
             {activeTab === 'validations' && <div className="text-gray-700">Content for Validations will appear here.</div>}
             {activeTab === 'requests' && <div className="text-gray-700">Content for Requests will appear here.</div>}
-            {/* You can replace these divs with actual components or content later */}
           </div>
         </div>
       </div>
