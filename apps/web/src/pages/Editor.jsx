@@ -4,10 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import TimelineBoard from '../components/TimelineBoard';
 import MemoirPicker from '../components/MemoirPicker';
 import Draftor from '../components/Draftor';
+import DraftorNav from '../components/DraftorNav';
 
 const Editor = () => {
   const [role, setRole] = useState(null);
   const [view, setView] = useState('timeline');
+  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const { memoirId, chapterId } = useParams();
 
@@ -33,30 +35,35 @@ const Editor = () => {
   }
 
   return (
-    <div className='p-6 relative'>
-      <div className='absolute top-4 right-8 z-10'>
-        {view === 'draftor' && (
-          <button
-            className={`px-4 py-2 mr-2 rounded ${view === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-            onClick={() => setView('timeline')}
-          >
-            Board
-          </button>
-        )}
+    <div className='flex h-full min-h-[400px]'>
+      {/* Sidebar Navigation */}
+      <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} />
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative`}>
+        <div className='absolute top-4 right-8 z-10'>
+          {view === 'draftor' && (
+            <button
+              className={`px-4 py-2 mr-2 rounded ${view === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              onClick={() => setView('timeline')}
+            >
+              Board
+            </button>
+          )}
 
-        {view === 'timeline' && (
-          <button
-            className={`px-4 py-2  mr-2 rounded ${view === 'draftor' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-            onClick={() => setView('draftor')}
-          >
-            Draft
-          </button>
+          {view === 'timeline' && (
+            <button
+              className={`px-4 py-2  mr-2 rounded ${view === 'draftor' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              onClick={() => setView('draftor')}
+            >
+              Draft
+            </button>
+          )}
+        </div>
+        {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
+        {view === 'draftor' && (
+          <Draftor memoirId={memoirId} chapterId={chapterId} />
         )}
       </div>
-      {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
-      {view === 'draftor' && (
-        <Draftor memoirId={memoirId} chapterId={chapterId} />
-      )}
     </div>
   );
 };

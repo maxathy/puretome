@@ -16,7 +16,7 @@ const navLinks = [
 
 const DraftorNav = ({ collapsed, setCollapsed }) => (
   <nav
-    className={`transition-all duration-200 bg-gray-800 text-white flex flex-col ${collapsed ? 'w-16' : 'w-48'} min-h-full py-4`}
+    className={`transition-all duration-200 bg-gray-800 text-white flex flex-col w-8 min-h-full py-4`}
     style={{ minWidth: collapsed ? '4rem' : '12rem' }}
   >
     <button
