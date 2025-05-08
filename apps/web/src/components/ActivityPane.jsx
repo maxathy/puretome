@@ -31,7 +31,7 @@ const ActivityPane = ({ isOpen, onClose, memoirId, chapterId, chapterEvents = []
   return (
     <div
       className={`fixed top-0 right-0 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out z-50
-                  ${paneTransitionClasses} w-full sm:w-96 md:w-1/3 lg:w-1/4 max-w-md`} // Responsive width
+                  ${paneTransitionClasses} w-full sm:w-[32rem] md:w-[40rem] lg:w-[48rem] max-w-[48rem]`} // Responsive width
       style={{ borderLeft: '1px solid #e5e7eb' }}
       role="dialog"
       aria-modal="true"

@@ -50,8 +50,8 @@ const CommentSection = ({ memoirId, chapterId, eventId }) => {
   };
 
   return (
-    <div className='border rounded-lg p-4 my-4'>
-      <h3 className='text-lg font-semibold mb-4'>Comments</h3>
+    <div>
+    
 
       {/* New comment input */}
       <div className='mb-4'>
