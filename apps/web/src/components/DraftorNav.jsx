@@ -4,10 +4,9 @@ import {
   Home,
   Pencil,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   PenTool,
   LayoutDashboard,
+  Pin,
 } from 'lucide-react';
 
 const navLinks = [
@@ -21,21 +20,20 @@ const DraftorNav = ({ collapsed, setCollapsed, view, setView, className = '' }) 
     className={`transition-all duration-200 bg-gray-800 text-white flex flex-col w-8 h-full min-h-0 py-4 ${className}`}
     style={{ minWidth: collapsed ? '4rem' : '12rem' }}
   >
-    <button
-      className='mb-6 p-2 flex items-center justify-center hover:bg-gray-700 rounded'
-      onClick={() => setCollapsed((c) => !c)}
-      aria-label='Toggle navigation'
-    >
-      {collapsed ? (
-        <ChevronRight className='h-6 w-6' />
-      ) : (
-        <ChevronLeft className='h-6 w-6' />
-      )}
-    </button>
+    <div className={`mb-6 flex ${collapsed ? 'justify-center' : 'justify-end'} items-center`}>
+      <button
+        className={`flex items-center mr-4 justify-center rounded w-10 h-10 transition-colors ${!collapsed ? 'bg-gray-700 text-gray-200' : 'hover:bg-gray-700 text-gray-400'}`}
+        onClick={() => setCollapsed((c) => !c)}
+        aria-label='Toggle navigation'
+        style={{ minWidth: '2.5rem', minHeight: '2.5rem' }}
+      >
+        <Pin className='h-6 w-6' />
+      </button>
+    </div>
     {/* Board/Draft Toggle */}
     <div className={`flex flex-col ${collapsed ? 'items-center' : 'items-stretch'} mb-6`}>
       <button
-        className={`flex items-center gap-2 px-3 py-2 mb-2 rounded hover:bg-gray-700 transition-colors ${view === 'draftor' ? 'bg-blue-600 text-white' : ''} ${collapsed ? 'justify-center' : ''}`}
+        className={`flex items-center gap-2 px-3 py-2 mb-2  hover:bg-gray-700 transition-colors ${view === 'draftor' ? 'bg-gray-700 text-gray-200' : ''} ${collapsed ? 'justify-center' : ''}`}
         onClick={() => setView('draftor')}
         aria-label='Draft View'
       >
@@ -43,7 +41,7 @@ const DraftorNav = ({ collapsed, setCollapsed, view, setView, className = '' }) 
         {!collapsed && <span>Draft</span>}
       </button>
       <button
-        className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700 transition-colors ${view === 'timeline' ? 'bg-blue-600 text-white' : ''} ${collapsed ? 'justify-center' : ''}`}
+        className={`flex items-center gap-2 px-3 py-2  hover:bg-gray-700 transition-colors ${view === 'timeline' ? 'bg-gray-700 text-gray-200' : ''} ${collapsed ? 'justify-center' : ''}`}
         onClick={() => setView('timeline')}
         aria-label='Board View'
       >

@@ -80,7 +80,7 @@ const MemoirPicker = () => {
   }
 
   return (
-    <div className='p-6'>
+    <div className='p-6 pt-12'>
       <h2 className='text-xl font-semibold mb-4'>Select a Memoir</h2>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {userMemoirs.map((memoir) => (
