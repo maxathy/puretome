@@ -37,28 +37,10 @@ const Editor = () => {
   return (
     <div className='flex h-full min-h-[400px]'>
       {/* Sidebar Navigation */}
-      <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} />
+      <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} view={view} setView={setView} />
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative`}>
-        <div className='absolute top-4 right-8 z-10'>
-          {view === 'draftor' && (
-            <button
-              className={`px-4 py-2 mr-2 rounded ${view === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-              onClick={() => setView('timeline')}
-            >
-              Board
-            </button>
-          )}
-
-          {view === 'timeline' && (
-            <button
-              className={`px-4 py-2  mr-2 rounded ${view === 'draftor' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-              onClick={() => setView('draftor')}
-            >
-              Draft
-            </button>
-          )}
-        </div>
+        {/* Toggle removed, now handled in DraftorNav */}
         {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
         {view === 'draftor' && (
           <Draftor memoirId={memoirId} chapterId={chapterId} />
