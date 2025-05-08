@@ -50,6 +50,9 @@ exports.updateMemoir = async (req, res) => {
     }
 
     delete updateData.author; // Prevent changing the author
+    delete updateData.collaborators; // Prevent changing collaborators
+    
+
 
     const updatedMemoir = await Memoir.findByIdAndUpdate(memoirId, updateData, {
       new: true,
