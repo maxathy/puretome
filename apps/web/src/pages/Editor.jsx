@@ -9,7 +9,10 @@ import DraftorNav from '../components/DraftorNav';
 const Editor = () => {
   const [role, setRole] = useState(null);
   const [view, setView] = useState('timeline');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const stored = localStorage.getItem('draftorNavCollapsed');
+    return stored === null ? false : stored === 'true';
+  });
   const navigate = useNavigate();
   const { memoirId, chapterId } = useParams();
 
@@ -37,7 +40,18 @@ const Editor = () => {
   return (
     <div className='flex h-full min-h-[400px]'>
       {/* Sidebar Navigation */}
-      <DraftorNav collapsed={collapsed} setCollapsed={setCollapsed} view={view} setView={setView} />
+      <DraftorNav
+        collapsed={collapsed}
+        setCollapsed={(fnOrVal) => {
+          setCollapsed((prev) => {
+            const next = typeof fnOrVal === 'function' ? fnOrVal(prev) : fnOrVal;
+            localStorage.setItem('draftorNavCollapsed', next);
+            return next;
+          });
+        }}
+        view={view}
+        setView={setView}
+      />
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative`}>
         {/* Toggle removed, now handled in DraftorNav */}
