@@ -16,9 +16,9 @@ const navLinks = [
   // { label: 'Settings', icon: <Settings className='h-6 w-6' /> },
 ];
 
-const DraftorNav = ({ collapsed, setCollapsed, view, setView }) => (
+const DraftorNav = ({ collapsed, setCollapsed, view, setView, className = '' }) => (
   <nav
-    className={`transition-all duration-200 bg-gray-800 text-white flex flex-col w-8 min-h-full py-4`}
+    className={`transition-all duration-200 bg-gray-800 text-white flex flex-col w-8 h-full min-h-0 py-4 ${className}`}
     style={{ minWidth: collapsed ? '4rem' : '12rem' }}
   >
     <button
@@ -72,6 +72,7 @@ DraftorNav.propTypes = {
   setCollapsed: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
   setView: PropTypes.func.isRequired,
+  className: PropTypes.string,
 };
 
 export default DraftorNav;

@@ -38,7 +38,7 @@ const Editor = () => {
   }
 
   return (
-    <div className='flex h-full min-h-[400px]'>
+    <div className='flex h-screen min-h-0 pt-12'>
       {/* Sidebar Navigation */}
       <DraftorNav
         collapsed={collapsed}
@@ -51,9 +51,10 @@ const Editor = () => {
         }}
         view={view}
         setView={setView}
+        className="h-full"
       />
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative`}>
+      <div className={`flex-1 transition-all duration-200 ml-2 p-6 relative h-full min-h-0 overflow-y-auto`}>
         {/* Toggle removed, now handled in DraftorNav */}
         {view === 'timeline' && <TimelineBoard memoirId={memoirId} />}
         {view === 'draftor' && (
